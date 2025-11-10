@@ -41,3 +41,9 @@ Here is an outline of the problems under impulse purchases our app will address:
     - Browsing online shopping sites that often trigger impulsive purchases
     - Regret after purchase, and frequently returning impulse purchases
 
+8. This [Reddit](https://www.reddit.com/r/ADHD/comments/1f6l1tk/what_impulse_purchases_have_you_made_that_you/) thread record the impulsive purchases people have made. It's clear than many of these purchases could have been prevented if someone else can give them can advise or guide them to second-think again.
+    > For me it's typically games that I just buy and maybe play once. Worst part is I know this is probably going to happen before I buy it but I do it anyway.
+    > I spent $4000 on a PC, $500 on a monitor, and another $250 on speakers for it. All that to play it once a week, maybe.
+    > Oh, and a $800 43" TV. It technically is worth it since it's 4k 120Hz and Sony. But I don't really watch TV and clearly I'm not using it to play my video games.
+    > Just spent £800 on a MacBook to start music production as a new hobby. All I’ve done is used it for Reddit.
+
