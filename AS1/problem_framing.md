@@ -88,3 +88,73 @@ Another possible feature is Community Swipe Preferences, a social layer that int
 ## WalletWhisper: Personal Cost Tracking of Items Bought
 A third feature is Personal Cost Tracking. Once an item is bought by the user, it’s added to a personal dashboard that tracks spending patterns and displays insights such as, “You purchased something that 40% of users predicted you might regret.” After receiving the item, users can log their thoughts or feedback: whether they’re satisfied, neutral, or regret the purchase. Over time, the system learns from these reflections, identifying trends in impulsive behavior and flagging similar future items as potential impulse buys. This feedback loop encourages mindful shopping habits by combining personal data, community insight, and behavioral learning.
 
+# Ethical Analysis
+
+## Stakeholders
+
+### Direct Stakeholders
+- **Primary users:** Online shoppers who want to curb impulse purchases  
+- **E-commerce platforms:** May see reduced conversion rates; could view app as adversarial  
+- **Browser extension stores/app platforms:** Where your tool would be distributed  
+
+### Indirect Stakeholders
+- **Retailers and small businesses:** Reduced impulse purchases could hurt businesses that rely on these sales, particularly small merchants  
+- **Families/households:** Financial decisions affect household budgets and relationships  
+- **Credit card companies/payment processors:** Fewer transactions could impact their revenue  
+- **Marketing/advertising industry:** Tool could reduce effectiveness of targeted ads  
+- **Manufacturing/supply chain workers:** If consumption decreases significantly, could affect employment  
+- **Environmental advocates:** Reduced consumption aligns with sustainability goals  
+
+## Time
+
+### Short-Term
+- Users excited by novelty; actively engage with voting  
+- May feel empowered by financial awareness  
+- Some frustration if not receiving enough votes from others  
+
+### Medium-Term
+- Users might learn to quickly vote without thinking  
+- Could become seen as “guilt-tripping” rather than helpful  
+- Users build a larger history of purchases/reflections  
+
+### Long-Term
+- Could contribute to broader shift in consumption attitudes (positive)  
+- E-commerce sites might implement countermeasures, making checkout interception harder  
+- If widely adopted, could meaningfully impact retail economics  
+- Users might become dependent on external validation  
+- Younger users growing up with such tools might develop different relationships with consumption  
+
+## Pervasiveness
+
+### Economic Systems
+- Retail industry could restructure away from impulse-purchase models  
+- Could accelerate shift toward subscription or membership models over transactional sales  
+- Advertising industry might pivot strategies if impulse purchases decline  
+
+### Social Dynamics
+- Shopping culture could become more intentional and less spontaneous  
+- Gift-giving norms might change (fewer spontaneous purchases)  
+
+### Environmental Impact
+- Reduced consumption → less production → environmental benefits  
+
+### Digital Infrastructure
+- Arms race between e-commerce optimization and consumer protection tools  
+- Could prompt regulation around “dark patterns” in online shopping  
+
+### Class & Access Issues
+- Tool primarily benefits those with disposable income to lose through impulse purchases  
+- Might not address root causes of financial stress for lower-income individuals  
+
+## Values
+
+### Potential Values Supported
+- **Intentionality:** Helps users make conscious, reflective decisions  
+- **Financial wellbeing:** Promotes awareness and responsible spending  
+- **Environmental sustainability:** Reduces overconsumption  
+
+### Potential Values Opposed
+- **Economic freedom:** Could be seen as restricting people’s right to spend as they wish  
+- **Trust:** May imply users can’t trust themselves to make good decisions  
+- **Small business support:** Could disproportionately harm small retailers who lack brand recognition  
+- **Social connection:** Could reduce spontaneous gift-giving or participation in shared shopping trends  
