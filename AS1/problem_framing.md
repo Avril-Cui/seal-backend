@@ -47,3 +47,16 @@ Here is an outline of the problems under impulse purchases our app will address:
     > Oh, and a $800 43" TV. It technically is worth it since it's 4k 120Hz and Sony. But I don't really watch TV and clearly I'm not using it to play my video games.
     > Just spent £800 on a MacBook to start music production as a new hobby. All I’ve done is used it for Reddit.
 
+
+# Features
+We can up with some possible features to address the problem.
+
+## PauseCart: Reflective shopping cart
+One possible feature is a reflective shopping cart, where users can paste links to items they’re considering purchasing or import their existing carts from platforms like Amazon and other major e-commerce sites. Users also log the reason why they hope to purchase this item.
+
+## SwipeSense: Community Swipe Preference
+Another possible feature is Community Swipe Preferences, a social layer that introduces accountability and shared feedback into the shopping process. Users can upload or import items they’re considering buying and have them appear in an A/B comparison format for other users to swipe on, indicating which item other users think is more worthwhile or necessary. Alternatively, they can swipe to decide whether they think the purchase is worth it. In turn, users must complete their own daily swiping queue before their items become eligible for community feedback, ensuring balanced participation. This creates a fun, peer-based system that helps shoppers gain perspective on their decisions, see how others evaluate similar purchases, and develop more intentional buying habits through collective reflection.
+
+## WalletWhisper: Personal Cost Tracking of Items Bought
+A third feature is Personal Cost Tracking. Once an item is bought by the user, it’s added to a personal dashboard that tracks spending patterns and displays insights such as, “You purchased something that 40% of users predicted you might regret.” After receiving the item, users can log their thoughts or feedback: whether they’re satisfied, neutral, or regret the purchase. Over time, the system learns from these reflections, identifying trends in impulsive behavior and flagging similar future items as potential impulse buys. This feedback loop encourages mindful shopping habits by combining personal data, community insight, and behavioral learning.
+
