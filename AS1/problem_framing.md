@@ -1,3 +1,5 @@
+Team SEAL: Fuqi Cui, Lauren Yoo, Elaine Jiang, Stanley Zhao
+
 # Domain
 Online shopping: Online shopping is a daily habit for many people, offering convenience and excitement. Many people shop online and suffer from consumer retail therapy. While it is enjoyable to browse for cool products and compare deals, it's also easy to get caught in the moment and make impulse purchases that will later be regretted. This domain interests us because it allows us to boost the experience of something that a lot of people like ourselves do almost daily. This also helps fight against broader environmental problems involving overconsumption and overproduction. 
 
@@ -46,6 +48,32 @@ Here is an outline of the problems under impulse purchases our app will address:
     > I spent $4000 on a PC, $500 on a monitor, and another $250 on speakers for it. All that to play it once a week, maybe.
     > Oh, and a $800 43" TV. It technically is worth it since it's 4k 120Hz and Sony. But I don't really watch TV and clearly I'm not using it to play my video games.
     > Just spent £800 on a MacBook to start music production as a new hobby. All I’ve done is used it for Reddit.
+
+## Comparables  
+**Notes about existing solutions to the problem or related problems**
+
+**Argument:** While there exist many popular solutions that solve tangential problems and some smaller apps that seek to solve some of these issues, no app exists today that comprehensively solves the concerns of our stakeholders.
+
+### Related Problems  
+It’s difficult to make decisions on what item to buy given so many different options online, and with many shopping experiences, there lacks feedback, comments, or opinions from other people in order to make more grounded decisions.
+
+### Existing Solutions  
+[Amazon](https://amazon.com) has reviews for each product to help make better decisions; however, while Amazon as a platform excels at convenience and personalization, it is at its core a platform deliberately optimized to increase consumption, e.g. through “Frequently Bought Together,” “Recommended for You,” and flash-sale banners. While Amazon and its review system makes purchasing seamless and more grounded in reasoning, it still amplifies impulsive behavior rather than help shoppers reflect on it.
+
+While [Pinterest](https://pinterest.com) visually displays many items at once that are suited to users’ personal/aesthetic preferences and interests, there is a lack of feedback from other people on the quality of the items, as well as a lack of information on the credibility of the seller. With endless options, scrolling feeds, and even short-form videos, it’s easy to get lost in the platform for hours on end, again fueling impulsive behavior rather than helping to curb it.
+
+### Similar Software Solutions Solving Our Problem  
+Subreddit communities: [r/ShouldIBuyThis]() (98 members) and [r/ShouldIbuythisgame/](https://www.reddit.com/r/ShouldIbuythisgame/) (1.5+ million members), [r/whatcarshouldIbuy](https://www.reddit.com/r/whatcarshouldIbuy/) (687K+ members)  
+While these communities are tailored to fight impulse buying and induce more informed decision-making, it can take hours or even days to get meaningful responses. There is also no incentive for others to provide responses. Even then, these responses can be highly unstructured. There is also high friction to creating posts i.e., posting information about the item and specific considerations. There is also only high traffic on the more niche subreddits.
+
+[Stop Impulse Buying](https://www.stopimpulse.com/)  
+This app offers a no-spending challenge tracker and savings challenges designed to reduce impulse purchases. However, it functions largely as a static platform that delivers educational and motivational content. Its biggest limitation is the heavy reliance on manual user engagement — something many impulsive shoppers may find difficult to sustain.
+
+[SpendWise](https://apps.apple.com/us/app/spendwise-mindful-spending/id6496203443)  
+This app tracks shopping carts and spending while motivating users to avoid impulse purchases by highlighting the money they’ve saved. However, it does not actively assist users in deciding whether an item is a “need” or a “want,” which is crucial to understand in order to address impulse purchases. Shoppers must still spend time reflecting on these decisions themselves, limiting the app’s effectiveness at the moment of purchase.
+
+Google Sheets or [Notion](https://www.notion.com/templates/category/personal-finance)  
+The limitation is that it costs time and effort to organize and update these templates every time a purchase is made, and it lacks a community aspect, only allowing us to make decisions based on past purchases and preferences.
 
 
 # Features
