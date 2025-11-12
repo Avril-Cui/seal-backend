@@ -147,24 +147,24 @@ Potential breakdowns:
 	3.	Data overload — too many community judgments could create noise rather than clarity. We mitigate this by keeping the statistics simple: xx% thinks this is not worth buying.
 
 ### Economic Systems
-- Retail industry could restructure away from impulse-purchase models.
-- Could accelerate shift toward subscription or membership models over transactional sales.
-- Advertising industry might pivot strategies if impulse purchases decline  
+The retail industry may shift away from impulse-driven profit models, prompting companies to rethink how they create consumer demand. This could accelerate the transition toward subscription, rental, or membership-based models that emphasize sustained relationships rather than one-time purchases. The advertising industry may pivot toward long-term brand trust and authenticity, as manipulative “fear of missing out” tactics lose effectiveness among reflective consumers.
 
 ### Social Dynamics
 - Shopping culture could become more intentional and less spontaneous  
 - Gift-giving norms might change (fewer spontaneous purchases)  
+- New forms of collective restraint or “mindful consumer” communities could emerge, turning conscious consumption into a shared cultural identity.
 
 ### Environmental Impact
-- Reduced consumption → less production → environmental benefits  
+- Reduced consumption would directly lower production, waste, and carbon emissions, contributing to measurable environmental benefits. If adopted widely, the app could influence supply-chain demand forecasting (as companies now know more about consumer's preferences), encouraging companies to produce fewer, higher-quality goods rather than mass overstocking.
 
 ### Digital Infrastructure
-- Arms race between e-commerce optimization and consumer protection tools  
-- Could prompt regulation around “dark patterns” in online shopping  
+- Could trigger an arms race between e-commerce optimization and consumer protection tools, as platforms attempt to reclaim lost engagement time. We believe our features are effective in combating over-consumption.
+- May motivate regulatory frameworks around deceptive “dark patterns,” personalized ads, and manipulative UI designs. Might inspire the development of ethical design standards or browser-level reflection APIs, embedding mindful shopping tools across platforms.
 
 ### Class & Access Issues
-- Tool primarily benefits those with disposable income to lose through impulse purchases  
-- Might not address root causes of financial stress for lower-income individuals  
+- The tool primarily benefits middle- and upper-income users with disposable income to lose through impulsive purchases, potentially overlooking populations facing structural financial constraints.
+- For lower-income users, the app may not address deeper causes of financial stress (e.g., wage stagnation, predatory pricing) and could risk implying moral responsibility for systemic issues. However, we can add different leaderboard of items, like the most recommended, the most practical, etc. Lower-income users can make practical purchasing based on these leaderboards. The cost tracker will also enable them to understand their financial situation better.
+    - We can also embed an AI agent for the cost tracker to give users financial advice.
 
 ## Values
 Our app is designed to promote reflection, restraint, and intentionality in consumer behavior.
