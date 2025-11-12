@@ -118,7 +118,7 @@ We discuss time in short, medium, and long-term lens.
 
 ### Medium-Term
 - Users might learn to quickly vote without thinking. To mitigate this, we can possibly add a timer, and a vote is only counted if it takes users more than 15 seconds to vote.
-- Could become seen as “guilt-tripping” rather than helpful. We should make it clear that we are encouraging rational purchases instead of impulse purchases. Having a rank of "Most Recommended Items" can clarify this.
+- Could become seen as “guilt-tripping” rather than helpful. We should make it clear that we are encouraging rational purchases instead of impulse purchases. Having a rank of "Most Recommended Items" can clarify this. We can also add more rankings for different categories, like the Most Recommended Video Game, etc.
 - Users build a larger history of purchases/reflections. This is good because this means the user learns from our platform.
 - Different cultural groups may use the app in distinct ways to align with their values around consumption, frugality, and sustainability. For instance, minimalist or Buddhist communities might appropriate the app to reinforce mindful living and conscious consumption, while environmentalist groups could use it to promote low-waste or secondhand shopping habits. In ten years, such groups might integrate PauseCart or SwipeSense into community education or collective challenges (“No-Buy Month” campaigns, shared mindful shopping boards). 
 
@@ -142,17 +142,15 @@ Synergistic benefits:
 	3.	Brands could collaborate transparently with users to design products that minimize regret or waste.
 
 Potential breakdowns:
-	1.	Over-commercialization — brands might exploit the platform for marketing disguised as feedback.
-	2.	“Virtue signaling” — users might post reflectively only for appearances rather than genuine restraint. We can ask each user once in a while why they recommend a buy or not (through some pop-up survey).
-	3.	Data overload — too many community judgments could create noise rather than clarity. We mitigate this by keeping the statistics simple: xx% thinks this is not worth buying.
+	1.	Over-commercialization — brands might exploit the platform for marketing disguised as feedback. However, since our users learns how to made educational decisions on purchases from using our app, they will not be affect by much. Also, our cost tracker will constantly remind users how much they are spending on purchases.
+	2.	“Virtue signaling” — users might post reflectively only for appearances rather than genuine restraint. We can ask each user once in a while why they recommend a buy or not (through some pop-up survey). This forces them to reflect on the actual reasons.
+	3.	Data overload — too many community judgments could create noise rather than clarity. We mitigate this by keeping the statistics simple: xx% thinks this is not worth buying. We want to make the UI minimalistic, simple, and intuitive. The UI should also work well on mobile. We only display the most important components.
 
 ### Economic Systems
 The retail industry may shift away from impulse-driven profit models, prompting companies to rethink how they create consumer demand. This could accelerate the transition toward subscription, rental, or membership-based models that emphasize sustained relationships rather than one-time purchases. The advertising industry may pivot toward long-term brand trust and authenticity, as manipulative “fear of missing out” tactics lose effectiveness among reflective consumers.
 
 ### Social Dynamics
-- Shopping culture could become more intentional and less spontaneous  
-- Gift-giving norms might change (fewer spontaneous purchases)  
-- New forms of collective restraint or “mindful consumer” communities could emerge, turning conscious consumption into a shared cultural identity.
+Shopping culture could become more intentional and less spontaneous. Gift-giving norms might change (fewer spontaneous purchases). New forms of collective restraint or “mindful consumer” communities could emerge, turning conscious consumption into a shared cultural identity. We can also allow users to share their shopping carts, so their friends know their preferences, and can purchase them gifts they like.
 
 ### Environmental Impact
 - Reduced consumption would directly lower production, waste, and carbon emissions, contributing to measurable environmental benefits. If adopted widely, the app could influence supply-chain demand forecasting (as companies now know more about consumer's preferences), encouraging companies to produce fewer, higher-quality goods rather than mass overstocking.
