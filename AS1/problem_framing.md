@@ -92,43 +92,63 @@ A third feature is Personal Cost Tracking. Once an item is bought by the user, i
 
 ## Stakeholders
 
-### Direct Stakeholders
-- **Primary users:** Online shoppers who want to curb impulse purchases  
-- **E-commerce platforms:** May see reduced conversion rates; could view app as adversarial  
-- **Browser extension stores/app platforms:** Where your tool would be distributed  
+### Main stakeholders
+1. Shopper (direct user): They are people like us who make impulse purchases online. They are impacted because they feel regret or stress about overspending, and a lack of transparent access to spending records makes the problem even worse for them, because they are unaware of the amount they have spent on impulse purchases. They suffer under the problem framing and will benefit from our product.
 
-### Indirect Stakeholders
-- **Retailers and small businesses:** Reduced impulse purchases could hurt businesses that rely on these sales, particularly small merchants  
-- **Families/households:** Financial decisions affect household budgets and relationships  
-- **Credit card companies/payment processors:** Fewer transactions could impact their revenue  
-- **Marketing/advertising industry:** Tool could reduce effectiveness of targeted ads  
-- **Manufacturing/supply chain workers:** If consumption decreases significantly, could affect employment  
-- **Environmental advocates:** Reduced consumption aligns with sustainability goals  
+2. Families (non/indirect-users): People who share the Shopper’s finances or living expenses. They may also be affected when Shopper's overspending leads to tighter budgets or financial conflicts. For instance, parents cut the living expenses they give to their children if their children overspend frequently. They suffer under the problem framing and will benefit from our product.
+
+3. Retail platforms (non/indirect-users): Online platforms like Amazon and eBay. They benefit from impulse purchases. Any solution that encourages reflection before buying could negatively impact their sales.
+
+### Other Indirect Stakeholders
+- **Retailers and small businesses:** Reduced impulse purchases could hurt businesses that rely on these sales, particularly small merchants. One way to mitigate this downside effect is to introduce a leaderboard called: Most User's Recommended Items, which are the items with a lot of upvote swipes.  
+- **Credit card companies/payment processors:** Fewer transactions could impact their revenue. We don't need to address this issue because we are aiming at helping the consumers. 
+- **Marketing/advertising industry:** Tool could reduce effectiveness of targeted ads. We don't need to address this issue because we are aiming at helping the consumers. 
+- **Manufacturing/supply chain workers:** If consumption decreases significantly, could affect employment. Like above, one way to mitigate this downside effect is to introduce a leaderboard called: Most User's Recommended Items, which are the items with a lot of upvote swipes. In this way, we are not completely discouraging all online consumption. We are guiding the users to make the right choices and spend money on the right things.
+- **Environmental advocates:** Reduced consumption aligns with sustainability goals. Our problem-framing and features already achieves this.
 
 ## Time
 
 ### Short-Term
 - Users excited by novelty; actively engage with voting  
 - May feel empowered by financial awareness  
-- Some frustration if not receiving enough votes from others  
+- Some frustration if not receiving enough votes from others
+    - We solve this with a "daily queue" that the users need to complete to receive feedbacks from other users for their own shopping cart.
+    
+    > Users must complete their own daily swiping queue before their items become eligible for community feedback, ensuring balanced participation. This creates a fun, peer-based system that helps shoppers gain perspective on their decisions, see how others evaluate similar purchases, and develop more intentional buying habits through collective reflection.
 
 ### Medium-Term
-- Users might learn to quickly vote without thinking  
-- Could become seen as “guilt-tripping” rather than helpful  
-- Users build a larger history of purchases/reflections  
+- Users might learn to quickly vote without thinking. To mitigate this, we can possibly add a timer, and a vote is only counted if it takes users more than 15 seconds to vote.
+- Could become seen as “guilt-tripping” rather than helpful. We should make it clear that we are encouraging rational purchases instead of impulse purchases. Having a rank of "Most Recommended Items" can clarify this.
+- Users build a larger history of purchases/reflections. This is good because this means the user learns from our platform.
+- Different cultural groups may use the app in distinct ways to align with their values around consumption, frugality, and sustainability. For instance, minimalist or Buddhist communities might appropriate the app to reinforce mindful living and conscious consumption, while environmentalist groups could use it to promote low-waste or secondhand shopping habits. In ten years, such groups might integrate PauseCart or SwipeSense into community education or collective challenges (“No-Buy Month” campaigns, shared mindful shopping boards). 
 
 ### Long-Term
-- Could contribute to broader shift in consumption attitudes (positive)  
-- E-commerce sites might implement countermeasures, making checkout interception harder  
-- If widely adopted, could meaningfully impact retail economics  
-- Users might become dependent on external validation  
+- Could contribute to broader shift in consumption attitudes (positive). We should continue doing this.
+- E-commerce sites might implement countermeasures, making checkout interception harder. We will make adaptations in our features to confront these new challenges when they emerge.
+- If widely adopted, could meaningfully impact retail economics. As said before, one way to mitigate this downside effect is to introduce a leaderboard called: Most User's Recommended Items, which are the items with a lot of upvote swipes.  
 - Younger users growing up with such tools might develop different relationships with consumption  
+- Over decades, generations will grow up with varying relationships to consumption and digital shopping. A 50-year-old who has used the app since youth might treat it as a digital “shopping conscience,” recording a lifelong journey of shifting tastes and values. Over time, “mindful shopping” might become as normalized as fitness tracking, shaping how future consumers, families, and even corporations define responsible consumption.
 
 ## Pervasiveness
 
+### Diverse geographies
+- Shopping cultures vary widely across geographies. In the United States, where individualism and fast consumption dominate, the app might emphasize personal accountability and self-reflection, helping users combat the culture of instant gratification. In Japan, where minimalism and group harmony are valued, features like SwipeSense could be adapted to prioritize community reflection and group-based decision-making, fitting the existing “less-is-more” ethos. In India, where e-commerce growth is tied to emerging middle-class aspirations, the app could include financial-awareness modules or family-shared dashboards to balance consumer optimism with long-term saving. In general, our current features adapt well to most geographies, because sustainability and fight over-consumption are important to most countries.
+
+### Widespread use
+If the app gains millions of users, the shopping reflection process could evolve from an individual mindfulness practice into a collective culture shift.
+Synergistic benefits:
+	1.	Global data could reveal large-scale insights into consumer psychology, inspiring ethical commerce and sustainable product design.
+	2.	Community swiping could make mindful shopping socially engaging and rewarding, shifting trends toward “reflective consumption.” The more users we have, the more effective the swiping system is.
+	3.	Brands could collaborate transparently with users to design products that minimize regret or waste.
+
+Potential breakdowns:
+	1.	Over-commercialization — brands might exploit the platform for marketing disguised as feedback.
+	2.	“Virtue signaling” — users might post reflectively only for appearances rather than genuine restraint. We can ask each user once in a while why they recommend a buy or not (through some pop-up survey).
+	3.	Data overload — too many community judgments could create noise rather than clarity. We mitigate this by keeping the statistics simple: xx% thinks this is not worth buying.
+
 ### Economic Systems
-- Retail industry could restructure away from impulse-purchase models  
-- Could accelerate shift toward subscription or membership models over transactional sales  
+- Retail industry could restructure away from impulse-purchase models.
+- Could accelerate shift toward subscription or membership models over transactional sales.
 - Advertising industry might pivot strategies if impulse purchases decline  
 
 ### Social Dynamics
@@ -147,14 +167,26 @@ A third feature is Personal Cost Tracking. Once an item is bought by the user, i
 - Might not address root causes of financial stress for lower-income individuals  
 
 ## Values
+Our app is designed to promote reflection, restraint, and intentionality in consumer behavior.
 
 ### Potential Values Supported
-- **Intentionality:** Helps users make conscious, reflective decisions  
-- **Financial wellbeing:** Promotes awareness and responsible spending  
-- **Environmental sustainability:** Reduces overconsumption  
+Our app supports three primary values that guide its design and social purpose:
+- Intentionality: Encourages users to slow down and reflect before purchasing, fostering more conscious and deliberate consumer behavior.
+- Financial Well-Being: Promotes awareness of spending patterns and long-term money management through personalized insights and reflection loops.
+- Environmental Sustainability: Aims to reduce overconsumption and unnecessary production by helping users distinguish between needs and wants.
+
+These values together position the app as both a personal accountability tool and a cultural intervention that redefines what “smart shopping” means.
 
 ### Potential Values Opposed
+While the app advances reflection and responsibility, it inevitably creates tensions with other cultural and economic values:
+
 - **Economic freedom:** Could be seen as restricting people’s right to spend as they wish  
-- **Trust:** May imply users can’t trust themselves to make good decisions  
-- **Small business support:** Could disproportionately harm small retailers who lack brand recognition  
-- **Social connection:** Could reduce spontaneous gift-giving or participation in shared shopping trends  
+- **Trust:** May imply users can’t trust themselves to make good decisions. To align better with user values, the app’s tone and UX design will emphasize autonomy (“You’re in control of your choices”) rather than discipline (“You should spend less”). We give users the final right to make decision on their purchase. After receiving the item, users can log their thoughts or feedback: whether they’re satisfied, neutral, or regret the purchase. This feedback loop encourages mindful shopping habits and encourages users to develop their own standard of judgment for impulse purchase. They also practice identifying impulsive purchase through swiping other users' shopping carts.
+- **Small business support:** Could disproportionately harm small retailers who lack brand recognition. Like before, one way to mitigate this downside effect is to introduce a leaderboard called: Most User's Recommended Items, which are the items with a lot of upvote swipes.  
+- **Social connection:** Could reduce spontaneous gift-giving or participation in shared shopping trends. We think the Most User's Recommended Items leaderboard would actual give more ideas for what would be a great gift.
+
+### User Experience of Values
+
+Users may experience these values in divergent ways. Some might feel empowered and financially secure when pausing before purchases; others may interpret the app as distrustful or even judgmental. PauseCart can be seen as a supportive nudge or as friction in the shopping experience, depending on user mindset.
+
+Again, to align better with user values, the app’s tone and UX design will emphasize autonomy (“You’re in control of your choices”) rather than discipline (“You should spend less”). Positive experiences emerge when reflection feels optional, personalized, and affirming, rather than prescriptive.
