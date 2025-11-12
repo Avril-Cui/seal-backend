@@ -107,7 +107,7 @@ A third feature is Personal Cost Tracking. Once an item is bought by the user, i
 - **Environmental advocates:** Reduced consumption aligns with sustainability goals. Our problem-framing and features already achieves this.
 
 ## Time
-
+We discuss time in short, medium, and long-term lens.
 ### Short-Term
 - Users excited by novelty; actively engage with voting  
 - May feel empowered by financial awareness  
