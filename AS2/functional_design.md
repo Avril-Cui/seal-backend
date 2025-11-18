@@ -230,19 +230,6 @@ action
             update this swipe's decision to newDecision
             update this swipe's comment to newComment;
 
-
-recordSwipe(user: User, item: Item, decision: Flag, comment: String)
-        requires
-            // this user has not already swiped this item
-            there is no swipe s in Swipes with
-                s.owner = user and s.item = item;
-        effect
-            create a new swipe s with
-                s.owner := user;
-                s.item := item;
-                s.decision := decision;
-                s.comment : comment
-            add s to Swipes;
 ```
 
 ### Note
