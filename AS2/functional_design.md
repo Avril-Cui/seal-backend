@@ -616,8 +616,8 @@ By the end of the journey, Bez feels more in control of his online shopping habi
 
 ## Visual Design Study
 
-![Colors](./as2-images/byebye_vsd_colors.png)
-![Typography](./as2-images/byebuy_vsd_typography.png)
+![Colors](./as2-images/vsd_colors.png)
+![Typography](./as2-images/vsd_typ.png)
 
 ## Design Summary
 
