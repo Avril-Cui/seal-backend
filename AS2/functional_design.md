@@ -47,7 +47,7 @@ a set of Items with
     a isNeed String  // user's reflection on is this a "need" or "want"
     a isFutureApprove String  // user's reflection on whether their future-self will like this purchase
     an wasPurchased Flag
-    an PurchasedTime Number  (optional)
+    an PurchasedTime Number  [Optional]
 
 a set of Users with
 	a name String
@@ -94,7 +94,7 @@ actions:
     addItem (owner: User, url: String, reason: String, isNeed: String, isFutureApprove: String): (item: Item)
         effect
             fetch item's itemName, description, photo, and price with amazonAPI;
-            create a new item with (itemName, description, photo, price, reason, isNeed, isFutureAprove, wasPurchased=False);
+            create a new item with (itemName, description, photo, price, reason, isNeed, isFutureApprove, wasPurchased=False);
             add item to the itemSet under the wishlist with owner matching this user;
             return the added item;
         
@@ -126,6 +126,7 @@ actions:
         effect
             set $i$.wasPurchased as True;
             set $i$.PurchasedTime as the current time of this action;
+    
 ```
 ### Note
 - We abstract AmazonAPI because its implementation (scraping, affiliate API, or proxy) is outside this concept's scope.
@@ -199,22 +200,23 @@ state:
         an owner User
         an item Item
         a decision Flag [Optional]  // user's swipe decision (i.e., worth buying or not)
-    
+        a comment String [Optional] // user's short reason or remark (e.g., "this is a great/bad product, super useful/less!" )
 action
-    recordSwipe (owner: User, item: Item, decision: Flag)
+    recordSwipe (owner: User, item: Item, decision: Flag, comment: String)
         requires
             no swipe exists with matching (owner, item)
         effect
-            create a new swipe with (owner, item, decision)
+            create a new swipe with (owner, item, decision, comment)
     
-    updateDecision (owner: User, item: Item, newDecision: Flag)
+    updateDecision (owner: User, item: Item, newDecision: Flag, newComment: String)
         requires
             swipe exists with matching (owner, item)
         effect
             update this swipe's decision to newDecision
+            update this swipe's comment to newComment;
 
 
-recordSwipe(user: User, item: Item, decision: Flag)
+recordSwipe(user: User, item: Item, decision: Flag, comment: String)
         requires
             // this user has not already swiped this item
             there is no swipe s in Swipes with
@@ -224,6 +226,7 @@ recordSwipe(user: User, item: Item, decision: Flag)
                 s.owner := user;
                 s.item := item;
                 s.decision := decision;
+                s.comment : comment
             add s to Swipes;
 ```
 
@@ -431,15 +434,14 @@ then
 
 ### sync SwipeFromQueue
 ```
+sync SwipeFromQueue
 when
-    Requesting.request (path: "/swipes/record", session, item, decision) : (request)
-
+    Requesting.request (path: "/swipes/record", session, item, decision, comment) : (request)
 where
     in Sessioning: user of session is owner
     in QueueSystem: item is in current queue for owner
-
 then
-    SwipeSystem.recordSwipe (owner, item, decision)
+    SwipeSystem.recordSwipe (owner, item, decision, comment)
     QueueSystem.incrementCompletedQueue (owner, item)
     Requesting.respond (request, status: "recorded")
 ```
@@ -453,7 +455,6 @@ These expose aggregated SwipeSense data only after the user has participated eno
 ```
 when
     Requesting.request (path: "/items/communityStats", session, item) : (request)
-
 where
     in Sessioning: user of session is owner
     in ItemCollection: item belongs to wishlist of owner
@@ -463,12 +464,13 @@ where
         "total": count of swipes,
         "approvals": count of swipes with decision = True
     }
-
+    comments is set of all c where
+        there exists s in swipes with s.comment = c
 then
-    Requesting.respond (request, stats)
+    Requesting.respond (request, { stats, swipes })
 ```
 
-
+Note: we treat a swipe as an object with { decision, comment }
 
 # User Journey
 
