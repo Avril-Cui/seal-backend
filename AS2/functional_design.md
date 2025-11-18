@@ -1,3 +1,15 @@
+# Table of Contents
+
+- [Problem Framing](#problem-framing)
+- [Features](#features)
+- [Concept Design](#concept-design)
+- [Syncs](#syncs)
+- [User Journey](#user-journey)
+- [UI Sketches](#ui-sketches)
+- [Visual Design Study](#visual-design-study)
+- [Design Summary](#design-summary)
+- [Development Plan](#development-plan)
+
 # Problem Framing
 Buybye aims at solving issue related to online shopping from three angles:
 
