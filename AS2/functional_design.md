@@ -41,7 +41,7 @@ a set of Users with
 	a name String
 	an email String
 	a password String
-	a profile picture String
+	a profilePicture String
     a reward Number
     a set of FieldsOfInterests
 
@@ -213,8 +213,86 @@ recordSwipe(user: User, item: Item, decision: Flag)
                 s.item := item;
                 s.decision := decision;
             add s to Swipes;
-
 ```
+
 ### Note
 - We model one decision per (user, item) to keep aggregation simple and avoid vote manipulation.
 - The decision flag should be a binary Flag. It represents the user's insight on whether an item is worth buying or not.
+
+## UserAuth
+```
+concept: UserAuth [User, FieldsOfInterests]
+
+purpose:
+    Manages users that are registered under BuyBye.
+
+principle:
+    (1) Each user account is uniquely identified by an email address.
+    (2) Users can create an account by signing up with basic information.
+    (3) Users can log in with valid credentials.
+    (4) Logged-in users can edit their own profile information.
+
+state:
+    a set of RegisteredUsers with
+        a user User
+
+    a set of LoggedInUsers with
+        a user User
+    
+    signup (name: String, email: String, password: String, profilePicture: String, fieldsOfInterests: FieldsOfInterests): (user: User)
+        requires
+            no registered user exists with matching email
+        effect
+            create a new user $u$ with (name, email, password, profilePicture, reward = 0, fieldsOfInterests);
+            add user $u$ to RegisteredUsers;
+            return user $u$;
+    
+    login (email: String, password: String): (user: User)
+        requires
+            exists a user in RegisteredUsers with matching (email, password)
+        effect
+            add this user to LoggedInUsers;
+            return this user;
+    
+    logout (user: User)
+        requires
+            user exists in LoggedInUsers;
+        effect
+            remove this user from LoggedInUsers;
+    
+    updateProfileName (user: User, newName: String)
+    updateProfilePicture (user: User, newProfilePicture: String)
+    updatePassword (user: User, newPassword: String)
+        requires
+            exists user in LoggedInUsers
+            exists user in RegisteredUsers
+        effect
+            update the corresponding attribute of this user
+
+    updateInterests (user: User, newFieldsOfInterests: FieldsOfInterests)
+        requires
+            exists user in LoggedInUsers
+            exists user in RegisteredUsers
+        effect
+            update this user's set of FieldsOfInterests to newFieldsOfInterests;
+```
+
+### Note
+1. RegisteredUsers vs LoggedInUsers:
+    - RegisteredUsers represents all accounts in the system.
+    - LoggedInUsers represents the subset of users who have an active session.
+This separation keeps authentication concerns (who is logged in) distinct from account existence.
+
+2. Email as Unique Identifier: We enforce uniqueness of email in the `signup` action, since email is a natural key for accounts.
+
+3. Editing Profiles Requires Being Logged In: All profile updates require the user to be in LoggedInUsers. This matches real-world expectations and avoids unauthorized modifications.
+
+4. Password Handling: We treat password as a simple String here because this is a concept-level specification, not an implementation. In a real system, this would be a hashed value, but that detail is intentionally abstracted away for this assignment.
+
+5. FieldsOfInterests Integration: Allowing users to enter and update their fieldsOfInterests is important because other concepts (like QueueSystem) depend on up-to-date FieldsOfInterests to give users relevant items in their daily queues. Keeping this in UserAuth makes it clear where the user can manage their preferences. FieldsOfInterests is another generic type we defined in the very beginning.
+
+
+
+
+
+# Syncs
