@@ -455,3 +455,107 @@ where
 then
     Requesting.respond (request, stats)
 ```
+
+
+
+# User Journey
+
+## "Bez Jeffos and the Midnight Cart"
+
+Under stress, Bez Jeffos shops with the same energy some corporations bring to mass layoffs: sudden, sweeping decisions powered by the belief that whatever happens next… well, that's tomorrow's problem. The night before a major exam, he's sitting in his dorm room, mentally tired and looking for distraction. As he scrolls through Amazon "just for a minute," his cart quietly fills with a 24-pack of Sugar-Free Red Bull, a CASABREWS espresso machine, a tortilla baby burrito swaddle blanket, and an inflatable roast turkey costume. He recognizes the pattern: stress leading to increasingly questionable items, and knows that by morning he'll be wondering why he ever thought he needed any of this.
+
+### Step 1 - PauseCart Interrupts the Spiral
+
+Instead of checking out, Bez remembers he installed ByeBuy.
+
+He switches tabs. He already has an account on the app, so he just logins. On the wishlist page of the app, he copies the first Amazon link and pastes it into the "Add Item" field. This triggers:
+```
+→ AddItemToWishlist → ItemCollection.addItem
+```
+
+ByeBuy automatically pulls the item's photo, price, and details, then prompts him with three short reflection questions before it can be added to his PauseCart:
+
+- "Why do you want this item?"
+- "Is this a need or a want?"
+- "Would Future-You approve?"
+
+He answers each as he goes:
+
+**Red Bull 24-pack**
+- Why? "I need energy and this is cheaper in bulk."
+- Need or want? "Want."
+- Future approval? "Probably not."
+
+Satisfied (but already questioning himself), Bez pastes the link for the next item:
+
+**Espresso machine**
+- Why? "Could save money long-term (hopefully)."
+- Need or want? "Want."
+- Future approval? "Maybe."
+
+Then the third link:
+
+**Tortilla baby burrito blanket**
+- Why? "It's funny."
+- Need or want? "Want."
+- Future approval? "No :("
+
+Finally, he pastes the link for the inflatable turkey costume. He starts typing an explanation, stops halfway through, realizes there is no explanation that would make sense, and silently adds it anyway.
+
+One link at a time, the reflection prompts him to slow down, interrupting the late-night emotional momentum that led him here. After adding the last item, he closes the app and decides his future self—hopefully more awake—will deal with everything in the morning.
+
+### Step 2 - SwipeSense Adds Community Perspective
+
+The next day, Bez opens ByeBuy again. The app generates his daily swipe queue, created via:
+```
+→ GenerateQueueRequest → QueueSystem.generateDailyQueue
+```
+
+This time he's shown items that other students are debating:
+
+- A gallon-sized cold brew dispenser someone claims is "cheaper than therapy."
+- A portable mini projector captioned, "for movie nights I will definitely host."
+- A set of color-coded cable organizers from someone trying to "finally get my life together."
+- A cat-shaped mug warmer posted by a user who admits, "I don't own a cat. I just like the vibe."
+
+As he swipes through the queue, Bez notices he evaluates other people's picks far more critically than he does his own. Apparently it's easier to be objective when the impulse belongs to someone else. BuyBye records each choice using:
+```
+→ SwipeFromQueue → SwipeSystem.recordSwipe + QueueSystem.addCompletedQueue
+```
+
+Seeing such a wide range of equally impulsive items makes his own late-night picks feel far less embarrassing and reminds him that he's not the only one who shops under stress.
+
+### Step 3 - Reviewing Community Insight
+
+Once he completes his queue, ByeBuy unlocks community feedback on his own PauseCart.
+
+- The Red Bull 24-pack gets cautious disapproval, with most users suggesting sleep might be a better strategy.
+- The espresso machine receives mixed feedback in the comments: split between "practical investment" and "wishful thinking."
+- The tortilla blanket gets low approval but earns remarks about its comedic value.
+- The turkey costume receives near-unanimous rejection, politely urging him to reconsider.
+
+The feedback feels gentle rather than judgmental, giving Bez a fresh perspective he didn't have the night before.
+
+### Step 4 - A More Intentional, Informed Decision
+
+Bez removes the items that no longer make sense in daylight:
+```
+→ ItemCollection.removeItem
+```
+
+He ends up keeping just one—the tortilla blanket—because even now, it still brings him joy and isn't a risky purchase.
+
+He marks it as purchased:
+```
+→ ItemCollection.setPurchased
+```
+
+Two weeks later, ByeBuy's mascot Pig bounces onto his stats page with a celebratory squeal:
+
+> "You avoided $257 of impulsive spending this month! That's serious willpower, Bez."
+
+The message surprises him; he hadn't realized how often late-night stress had been guiding his decisions.
+
+### Outcome
+
+By the end of the journey, Bez feels more in control of his online shopping habits. ByeBuy doesn't stop him from buying things he enjoys. Instead, it gives him space to reflect, gather perspective, and make decisions he won't regret. Through PauseCart, SwipeSense, and simple follow-up insights, Bez learns to navigate stress-driven shopping with more clarity and far fewer turkey costumes.
