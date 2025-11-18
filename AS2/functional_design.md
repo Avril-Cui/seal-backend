@@ -146,7 +146,7 @@ actions:
             select a set of items that are not owned by this user;
             create a queue with (owner, set of items, and completedQueue = 0);
     
-    addCompletedQueue (owner: User, item: Item)
+    incrementCompletedQueue (owner: User, item: Item)
         requires
             exists a queue $q$ under this user;
             item exists in $q$.itemSet;
@@ -293,6 +293,5 @@ This separation keeps authentication concerns (who is logged in) distinct from a
 
 
 
-
-
 # Syncs
+
