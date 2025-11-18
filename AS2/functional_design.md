@@ -295,3 +295,163 @@ This separation keeps authentication concerns (who is logged in) distinct from a
 
 # Syncs
 
+## 1. Authentication + session syncs
+These connect HTTP auth endpoints to UserAuth and Sessioning.
+
+### sync Signup
+```
+when
+    Requesting.request (
+        path: "/auth/signup",
+        name,
+        email,
+        password,
+        profilePicture,
+        fieldsOfInterests
+    ) : (request)
+
+then
+    UserAuth.signup (name, email, password, profilePicture, fieldsOfInterests) : (user)
+    Sessioning.createSession (user) : (session)
+    Requesting.respond (request, session, user)
+```
+
+### sync Login
+```
+when
+    Requesting.request (path: "/auth/login", email, password) : (request)
+
+then
+    UserAuth.login (email, password) : (user)
+    Sessioning.createSession (user) : (session)
+    Requesting.respond (request, session, user)
+```
+
+### sync Logout
+```
+when
+    Requesting.request (path: "/auth/logout", session) : (request)
+
+where
+    in Sessioning: user of session is user
+
+then
+    Sessioning.deleteSession (session)
+    UserAuth.logout (user)
+    Requesting.respond (request, status: "logged_out")
+```
+
+## 2. PauseCart / ItemCollection syncs
+These syncs ensure that only the authenticated user can manage items in their own wishlist (PauseCart).
+
+### sync AddItemToWishlist
+```
+when
+    Requesting.request (path: "/items/add", session, url, reason, isNeed, isFutureApprove) : (request)
+
+where
+    in Sessioning: user of session is owner
+
+then
+    ItemCollection.addItem (owner, url, reason, isNeed, isFutureApprove) : (item)
+    Requesting.respond (request, item)
+```
+
+### sync UpdateItemReflection
+```
+when
+    Requesting.request (path: "/items/updateReflection", session, item, reason, isNeed, isFutureApprove) : (request)
+
+where
+    in Sessioning: user of session is owner
+    in ItemCollection: item belongs to wishlist of owner
+
+then
+    ItemCollection.updateReason (owner, item, reason)
+    ItemCollection.updateIsNeed (owner, item, isNeed)
+    ItemCollection.updateIsFutureApprove (owner, item, isFutureApprove)
+    Requesting.respond (request, status: "updated")
+```
+
+### sync RemoveItemFromWishlist
+```
+when
+    Requesting.request (path: "/items/remove", session, item) : (request)
+
+where
+    in Sessioning: user of session is owner
+    in ItemCollection: item belongs to wishlist of owner
+
+then
+    ItemCollection.removeItem (owner, item)
+    Requesting.respond (request, status: "removed")
+```
+
+### sync MarkItemPurchased
+```
+when
+    Requesting.request (path: "/items/setPurchased", session, item) : (request)
+
+where
+    in Sessioning: user of session is owner
+    in ItemCollection: item belongs to wishlist of owner
+
+then
+    ItemCollection.setPurchased (owner, item)
+    Requesting.respond (request, status: "purchased")
+```
+
+## 3. QueueSystem syncs (generate & progress)
+These implement the SwipeSense daily queue and tie it to the logged-in user.
+
+### sync GenerateDailyQueueRequest
+```
+when
+    Requesting.request (path: "/queue/generate", session) : (request)
+
+where
+    in Sessioning: user of session is owner
+
+then
+    QueueSystem.generateDailyQueue (owner) : (queue)
+    Requesting.respond (request, queue)
+```
+
+### sync SwipeFromQueue
+```
+when
+    Requesting.request (path: "/swipes/record", session, item, decision) : (request)
+
+where
+    in Sessioning: user of session is owner
+    in QueueSystem: item is in current queue for owner
+
+then
+    SwipeSystem.recordSwipe (owner, item, decision)
+    QueueSystem.incrementCompletedQueue (owner, item)
+    Requesting.respond (request, status: "recorded")
+```
+
+**Note:** For SwipeFromQueue, when a user swipes on an item that comes from their current queue, we want to both record the swipe and bump the completedQueue counter in QueueSystem.
+
+## 4. SwipeSystem syncs (viewing community feedback)
+These expose aggregated SwipeSense data only after the user has participated enough in other people's queues.
+
+### sync GetItemCommunityStats
+```
+when
+    Requesting.request (path: "/items/communityStats", session, item) : (request)
+
+where
+    in Sessioning: user of session is owner
+    in ItemCollection: item belongs to wishlist of owner
+    in QueueSystem: queue for owner has completedQueue >= 10
+    in SwipeSystem: swipes is set of all swipes s where s.item = item
+    stats is {
+        "total": count of swipes,
+        "approvals": count of swipes with decision = True
+    }
+
+then
+    Requesting.respond (request, stats)
+```
