@@ -230,6 +230,12 @@ action
             let positive := number of swipes with matching (owner, item) and decision equals "Buy"
             let negative := number of swipes with matching (owner, item) and decision equals "Don't Buy"
             return total = positive + negative and approval = positive
+    
+    _getSwipeComments (owner: User, item: Item): (comments: set of String)
+        requires
+            exists at least one swipe with matching (owner, item) and comment is not None
+        effect
+            return all comments under swipes that has matching (owner, item) and comment is not None
 
     recordSwipe (owner: User, item: Item, decision: Flag, comment: String)
         requires
@@ -500,26 +506,24 @@ These expose aggregated SwipeSense data only after the user has participated eno
 ### sync GetItemCommunityStats
 
 ```
+sync GetItemCommunityStats
+
 when
     Requesting.request (path: "/items/communityStats", session, item) : (request)
 where
     in Sessioning: user of session is owner
+    QueueSystem._getCompletedQueue(owner: user) is >= 10
+    
     in ItemCollection: item belongs to wishlist of owner
     in QueueSystem: queue for owner has completedQueue >= 10
-    in SwipeSystem: swipes is set of all swipes s where s.item = item
-        _getSwipeStats (owner: User, item: Item): (total: Number, approval: Number)
 
-    stats is {
-        "total": count of swipes,
-        "approvals": count of swipes with decision = True
-    }
     comments is set of all c where
         there exists s in swipes with s.comment = c
 then
-    Requesting.respond (request, { stats, swipes })
+    SwipeSystem._getSwipeStats(owner: user, item): (total, approval)
+    SwipeSystem._getSwipeComments (owner: user, item): (comments)
+    Requesting.respond (request, { total, approval, comments })
 ```
-
-Note: we treat a swipe as an object with { decision, comment }
 
 # User Journey
 
