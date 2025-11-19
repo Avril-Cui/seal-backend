@@ -166,6 +166,12 @@ state:
         a completedQueue Number
 
 actions:
+    _getCompletedQueue (owner: User): (completedQueue: Number)
+        requires
+            queue $q$ exists with matching owner
+        effect
+            return $q$.completedQueue
+
     generateDailyQueue (owner: User): (queue: Queue)
         requires
             no queue exists with owner matching this user
