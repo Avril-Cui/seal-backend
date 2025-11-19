@@ -667,3 +667,33 @@ By the end of the journey, Bez feels more in control of his online shopping habi
 - Gamification system: The reward field on User exists, but we haven’t yet settled on the exact implementation details of the rewards system. We need to avoid reward mechanics that create pressure or addictive behavior.
 
 - Dependence on self-reported reflections: Users may provide low-effort answers to the reflection prompts; we haven’t yet detailed mechanisms that will help users meaningfully engage without feeling too policed.
+
+## Development Plan
+
+### Checkpoint Alpha: Nov 25
+
+Group check-ins
+
+1. Sunday, Nov 23rd (backend complete + integrated properly)
+2. Tuesday, Nov 25th (scrappy frontend MVP complete)
+
+| Person   | Responsibilities                                                                                                                                                                  |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Elaine   | - ItemCollection concept implementation (add/remove/update/setPurchased) <br> - PauseCart-related syncs <br> - AmazonAPI mock + integration in addItem                            |
+| Person 2 | - QueueSystem concept implementation <br> - Queue generation logic (basic version) <br> - Queue progress syncs (generateDailyQueue, SwipeFromQueue portion affecting QueueSystem) |
+| Lauren   | - SwipeSystem concept implementation <br> - Swipe recording/update logic <br> - Community stats sync (GetItemCommunityStats)                                                      |
+| Person 4 | - UserAuth concept implementation <br> - Authentication syncs (signup/login/logout) <br> - Session + User profile update actions <br> - Backend wiring / endpoint scaffolding     |
+
+### Checkpoint Beta: Dec 2
+
+Group check-ins
+
+1. Monday, Dec 1st (look at revised frontend together and work on finding any remaining bugs)
+2. Tuesday, Dec 2nd (final review)
+
+| Person   | Responsibilities                                                                                                                                                                                                                                |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Elaine   | PauseCart <br> - Build the PauseCart main view displaying wishlist items <br> - Implement the “Add Item” flow (URL input + reflection prompts) <br> - Create the item detail/edit interface (update reflections, remove items, mark purchased)  |
+| Lauren   | Daily Queue <br> - Build the Daily Queue screen showing items one-by-one <br> - Implement swiping interactions and queue progress <br> - Add post-swipe transitions and UI feedback                                                             |
+| Person 3 | Community Feedback & Insights <br> - Build the Community Stats page after queue completion <br> - Implement “locked vs unlocked” UI state for stats <br> - Create the insights/history section (past swipes, trends, spending info)             |
+| Person 4 | Authentication, Navigation, and Settings <br> - Build signup, login, and logout screens <br> - Implement global navigation + routing between pages <br> - Create the user profile/settings page (edit name, profile picture, FieldsOfInterests) |
