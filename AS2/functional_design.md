@@ -508,7 +508,7 @@ then
 
 **Note:** For SwipeFromQueue, when a user swipes on an item that comes from their current queue, we want to both record the swipe and bump the completedQueue counter in QueueSystem.
 
-## 4. SwipeSystem syncs (viewing community feedback)
+## 4. SwipeSystem and ItemCollection syncs (viewing insights and feedback)
 
 These expose aggregated SwipeSense data only after the user has participated enough in other people's queues.
 
@@ -540,10 +540,14 @@ then
 sync GetAIFeedback
 
 when
-    Requesting.request (path: "/items/getAI", session, item) : (request)
+    Requesting.request (path: "/items/AIFeedback", session, item) : (request)
 
-    async getAIInsight (owner: User, item: Item): (llm_response: String)
+where
+    in Sessioning: user of session is owner
 
+then
+    ItemCollection.getAIInsight (owner: user, item): (llm_response)
+    Requesting.respond (request, llm_response)
 
 ```
 
