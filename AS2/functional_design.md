@@ -1,6 +1,6 @@
 # Table of Contents
 
-- [Problem Framing](#problem-framing)
+- [Updated Problem Framing](./revised_problem_framing.md)
 - [Concept Design](#concept-design)
 - [Syncs](#syncs)
 - [User Journey](#user-journey)
@@ -11,30 +11,8 @@
 
 # Problem Framing (Updated)
 
-BuyBye aims to address problems related to online shopping from three angles:
-1. Impulsive Buying: When shopping online, people often make impulsive purchases on small accessories, limited-time deals, or “recommended for you” items—products they never intended to buy if they had paused to think carefully. Although these items may bring brief satisfaction, they are often unnecessary. Modern e-commerce interfaces are optimized for speed and emotion (one-click checkout, flash banners, personalized recommendations), leaving users with no built-in mechanism to slow down. Distinguishing between what we genuinely need and what we merely want is difficult in the moment, especially without prompts to reflect.
+[Link to Updated Problem Framing Doc](./revised_problem_framing.md)
 
-2. Uninformed Decision-Making at the Moment of Purchase: At the decision point, shoppers rarely evaluate whether an item meaningfully fits their priorities, budget, or long-term satisfaction. Choices are driven by impulse, mood, or fear of missing out, rather than explicit reasoning. Existing platforms do not encourage users to articulate why they want an item, whether it is a “need” or a “want,” or whether their future self would approve. Nor do they provide structured, timely feedback from others. Community spaces like subreddits exist, but responses are slow, unstructured, and require high effort to participate in. As a result, shoppers lack awareness and accountability at the exact moment when it would matter most.
-
-3. Lack of Lightweight Cost-Tracking and Feedback Loops: Existing expense-tracking tools (spreadsheets, budgeting apps, Notion templates) are powerful but too manual and detached from the shopping moment. Users must remember to log purchases after the fact, which many simply do not do. Consequently, people lose track of how much of their money goes toward unplanned or impulsive buys, and they rarely connect feelings of regret back to patterns in their behavior (e.g., late-night purchases, discount-driven buys). There is also little integration between personal reflections, community judgments, and any kind of automated insight (e.g., AI) that could help users recognize and adjust impulsive patterns over time.
-
-We chose the impulsive buying problem because impulse shopping is a common and relatable behavior that affects nearly everyone who shops online. Modern e-commerce platforms are intentionally designed to encourage instant decisions through flash sales, one-click checkout, and personalized recommendations, leaving little space for reflection. Addressing this problem offers both practical impact and technical feasibility. It can be tackled without requiring large-scale work from the users or complex infrastructure, while still providing meaningful value to everyday consumers.
-
-## Features
-
-We can up with some possible features to address the problem.
-
-### PauseCart: Reflective shopping cart
-
-One possible feature is a reflective shopping cart, where users can paste links to items they’re considering purchasing or import their existing carts from platforms like Amazon and other major e-commerce sites. Users also log the reason why they hope to purchase this item.
-
-### SwipeSense: Community Swipe Preference
-
-Another possible feature is Community Swipe Preferences, a social layer that introduces accountability and shared feedback into the shopping process. Users can upload or import items they’re considering buying and have them appear in an A/B comparison format for other users to swipe on, indicating which item other users think is more worthwhile or necessary. Alternatively, they can swipe to decide whether they think the purchase is worth it. In turn, users must complete their own daily swiping queue before their items become eligible for community feedback, ensuring balanced participation. This creates a fun, peer-based system that helps shoppers gain perspective on their decisions, see how others evaluate similar purchases, and develop more intentional buying habits through collective reflection.
-
-### WalletWhisper: Personal Cost Tracking of Items Bought
-
-A third feature is Personal Cost Tracking. Once an item is bought by the user, it’s added to a personal dashboard that tracks spending patterns and displays insights such as, “You purchased something that 40% of users predicted you might regret.” After receiving the item, users can log their thoughts or feedback: whether they’re satisfied, neutral, or regret the purchase. Over time, the system learns from these reflections, identifying trends in impulsive behavior and flagging similar future items as potential impulse buys. This feedback loop encourages mindful shopping habits by combining personal data, community insight, and behavioral learning.
 
 # Concept design
 
