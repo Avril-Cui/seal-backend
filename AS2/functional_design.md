@@ -1,7 +1,6 @@
 # Table of Contents
 
 - [Problem Framing](#problem-framing)
-- [Features](#features)
 - [Concept Design](#concept-design)
 - [Syncs](#syncs)
 - [User Journey](#user-journey)
@@ -22,19 +21,19 @@ Buybye aims at solving issue related to online shopping from three angles:
 
 We chose the impulsive buying problem because impulse shopping is a common and relatable behavior that affects nearly everyone who shops online. Modern e-commerce platforms are intentionally designed to encourage instant decisions through flash sales, one-click checkout, and personalized recommendations, leaving little space for reflection. Addressing this problem offers both practical impact and technical feasibility. It can be tackled without requiring large-scale work from the users or complex infrastructure, while still providing meaningful value to everyday consumers.
 
-# Features
+## Features
 
 We can up with some possible features to address the problem.
 
-## PauseCart: Reflective shopping cart
+### PauseCart: Reflective shopping cart
 
 One possible feature is a reflective shopping cart, where users can paste links to items they’re considering purchasing or import their existing carts from platforms like Amazon and other major e-commerce sites. Users also log the reason why they hope to purchase this item.
 
-## SwipeSense: Community Swipe Preference
+### SwipeSense: Community Swipe Preference
 
 Another possible feature is Community Swipe Preferences, a social layer that introduces accountability and shared feedback into the shopping process. Users can upload or import items they’re considering buying and have them appear in an A/B comparison format for other users to swipe on, indicating which item other users think is more worthwhile or necessary. Alternatively, they can swipe to decide whether they think the purchase is worth it. In turn, users must complete their own daily swiping queue before their items become eligible for community feedback, ensuring balanced participation. This creates a fun, peer-based system that helps shoppers gain perspective on their decisions, see how others evaluate similar purchases, and develop more intentional buying habits through collective reflection.
 
-## WalletWhisper: Personal Cost Tracking of Items Bought
+### WalletWhisper: Personal Cost Tracking of Items Bought
 
 A third feature is Personal Cost Tracking. Once an item is bought by the user, it’s added to a personal dashboard that tracks spending patterns and displays insights such as, “You purchased something that 40% of users predicted you might regret.” After receiving the item, users can log their thoughts or feedback: whether they’re satisfied, neutral, or regret the purchase. Over time, the system learns from these reflections, identifying trends in impulsive behavior and flagging similar future items as potential impulse buys. This feedback loop encourages mindful shopping habits by combining personal data, community insight, and behavioral learning.
 
@@ -699,8 +698,8 @@ We have three full features (PauseCart, SwipeSense, WalletWhisper). Queue logic 
 - Use mocked Amazon metadata during early development, replacing it only if time allows.
 
 **Fallback:**  
-- Ship **PauseCart + basic swiping** without daily queue requirements.  
-- Skip **WalletWhisper** entirely if time becomes limited.
+- Ship PauseCart + basic swiping without daily queue requirements.  
+- Skip WalletWhisper entirely if time becomes limited.
 
 ---
 
@@ -710,7 +709,7 @@ We have three full features (PauseCart, SwipeSense, WalletWhisper). Queue logic 
 Amazon’s official API is restricted, rate-limited, or requires approval. Scraping is fragile and may be blocked.
 
 **Mitigation Plan:**  
-- Use a **mocked AmazonAPI** concept that returns sample data.  
+- Use a mocked AmazonAPI concept that returns sample data.  
 - Allow users to manually type name/price if metadata loading fails.
 
 **Fallback:**  
@@ -725,12 +724,12 @@ Amazon’s official API is restricted, rate-limited, or requires approval. Scrap
 Daily queue regeneration, interest matching, uniqueness constraints, and progress tracking can be tricky to implement reliably.
 
 **Mitigation Plan:**  
-- Begin with a minimal viable version: **random 10 items not owned by the user**.  
+- Begin with a minimal viable version: random 10 items not owned by the user.  
 - Add interest-based filtering only in later polish stages.
 
 **Fallback:**  
 - Replace QueueSystem with a simple screen:  
-  **“Swipe on 10 random items”** (no daily regeneration or complex logic).
+  “Swipe on 10 random items” (no daily regeneration or complex logic).
 
 ---
 
@@ -745,5 +744,5 @@ Impulse-buying is a behavioral issue; reflection might feel annoying and swiping
 - Run early informal user tests and adjust flow accordingly.
 
 **Fallback:**  
-- Pivot emphasis to **PauseCart** as the core product.  
-- Remove queuing entirely and focus on **personal reflection + insights**, minimizing social/community dependency.
+- Pivot emphasis to PauseCart as the core product.  
+- Remove queuing entirely and focus on personal reflection + insights, minimizing social/community dependency.
