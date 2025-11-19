@@ -682,3 +682,96 @@ By the end of the journey, Bez feels more in control of his online shopping habi
 - Gamification system: The reward field on User exists, but we haven’t yet settled on the exact implementation details of the rewards system. We need to avoid reward mechanics that create pressure or addictive behavior.
 
 - Dependence on self-reported reflections: Users may provide low-effort answers to the reflection prompts; we haven’t yet detailed mechanisms that will help users meaningfully engage without feeling too policed.
+
+## Development Plan
+
+### Checkpoint Alpha: Nov 25
+
+Group check-ins
+
+1. Sunday, Nov 23rd (backend complete + integrated properly)
+2. Tuesday, Nov 25th (scrappy frontend MVP complete)
+
+| Person   | Responsibilities                                                                                                                                                                  |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Elaine   | - ItemCollection concept implementation (add/remove/update/setPurchased) <br> - PauseCart-related syncs <br> - AmazonAPI mock + integration in addItem                            |
+| Person 2 | - QueueSystem concept implementation <br> - Queue generation logic (basic version) <br> - Queue progress syncs (generateDailyQueue, SwipeFromQueue portion affecting QueueSystem) |
+| Lauren   | - SwipeSystem concept implementation <br> - Swipe recording/update logic <br> - Community stats sync (GetItemCommunityStats)                                                      |
+| Person 4 | - UserAuth concept implementation <br> - Authentication syncs (signup/login/logout) <br> - Session + User profile update actions <br> - Backend wiring / endpoint scaffolding     |
+
+### Checkpoint Beta: Dec 2
+
+Group check-ins
+
+1. Monday, Dec 1st (look at revised frontend together and work on finding any remaining bugs)
+2. Tuesday, Dec 2nd (final review)
+
+| Person   | Responsibilities                                                                                                                                                                                                                                |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Elaine   | PauseCart <br> - Build the PauseCart main view displaying wishlist items <br> - Implement the “Add Item” flow (URL input + reflection prompts) <br> - Create the item detail/edit interface (update reflections, remove items, mark purchased)  |
+| Lauren   | Daily Queue <br> - Build the Daily Queue screen showing items one-by-one <br> - Implement swiping interactions and queue progress <br> - Add post-swipe transitions and UI feedback                                                             |
+| Person 3 | Community Feedback & Insights <br> - Build the Community Stats page after queue completion <br> - Implement “locked vs unlocked” UI state for stats <br> - Create the insights/history section (past swipes, trends, spending info)             |
+| Person 4 | Authentication, Navigation, and Settings <br> - Build signup, login, and logout screens <br> - Implement global navigation + routing between pages <br> - Create the user profile/settings page (edit name, profile picture, FieldsOfInterests) |
+
+
+### Key Risks
+
+#### **Risk 1: Too Many Features / Overambition**
+
+**Why it’s risky:**  
+We have three full features (PauseCart, SwipeSense, WalletWhisper). Queue logic and community statistics add complexity quickly.
+
+**Mitigation Plan:**  
+- Prioritize features strictly in this order: **PauseCart → SwipeSense → WalletWhisper**.  
+- Keep V1 implementation simple (no complex reward algorithms, no long-term analytics).  
+- Use mocked Amazon metadata during early development, replacing it only if time allows.
+
+**Fallback:**  
+- Ship **PauseCart + basic swiping** without daily queue requirements.  
+- Skip **WalletWhisper** entirely if time becomes limited.
+
+---
+
+#### **Risk 2: Amazon API Doesn’t Work / Scraping Isn’t Permitted**
+
+**Why it’s risky:**  
+Amazon’s official API is restricted, rate-limited, or requires approval. Scraping is fragile and may be blocked.
+
+**Mitigation Plan:**  
+- Use a **mocked AmazonAPI** concept that returns sample data.  
+- Allow users to manually type name/price if metadata loading fails.
+
+**Fallback:**  
+- Remove automatic metadata fetching entirely.  
+- Have users paste a link and manually enter item name + price.
+
+---
+
+#### **Risk 3: Complex Queueing or Reward Algorithm Logic**
+
+**Why it’s risky:**  
+Daily queue regeneration, interest matching, uniqueness constraints, and progress tracking can be tricky to implement reliably.
+
+**Mitigation Plan:**  
+- Begin with a minimal viable version: **random 10 items not owned by the user**.  
+- Add interest-based filtering only in later polish stages.
+
+**Fallback:**  
+- Replace QueueSystem with a simple screen:  
+  **“Swipe on 10 random items”** (no daily regeneration or complex logic).
+
+---
+
+#### **Risk 4: Negative User Feedback / Idea Doesn’t Fully Solve the Problem**
+
+**Why it’s risky:**  
+Impulse-buying is a behavioral issue; reflection might feel annoying and swiping could feel like extra work.
+
+**Mitigation Plan:**  
+- Keep reflection very short (3 quick questions).  
+- Add playful/incentivizing UI (Pig mascot, small reward system).  
+- Run early informal user tests and adjust flow accordingly.
+
+**Fallback:**  
+- Pivot emphasis to **PauseCart** as the core product.  
+- Remove queuing entirely and focus on **personal reflection + insights**, minimizing social/community dependency.
