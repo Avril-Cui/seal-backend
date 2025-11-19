@@ -322,8 +322,8 @@ state:
 These connect HTTP auth endpoints to UserAuth and Sessioning. Sessioning represents the system’s notion of active login sessions. While UserAuth manages user accounts (who exists, who is allowed to log in), Sessioning handles the temporary authentication state, like, who is currently logged in during an interaction with the system. 
 
 We intentionally separate UserAuth and Sessioning because they solve two distinct problems:
-- UserAuth: user creation, credential validation, profile editing
-- Sessioning: transient login state, session lifecycle, request authentication. We reference this Sessioning in the 6.1040_backend_concept.
+- UserAuth: user creation, credential validation, profile editing. This is the concept we defined above.
+- Sessioning: transient login state, session lifecycle, request authentication. We reference this Sessioning from the 6.1040_backend_concept that we had for the personal project, so we assume Sessioning concept is already designed and specified the same way as before.
 
 ### sync Signup
 
