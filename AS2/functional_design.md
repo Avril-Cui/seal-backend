@@ -731,9 +731,9 @@ Group check-ins
 | Person   | Responsibilities                                                                                                                                                                  |
 | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Elaine   | - ItemCollection concept implementation (add/remove/update/setPurchased) <br> - PauseCart-related syncs <br> - AmazonAPI mock + integration in addItem                            |
-| Person 2 | - QueueSystem concept implementation <br> - Queue generation logic (basic version) <br> - Queue progress syncs (generateDailyQueue, SwipeFromQueue portion affecting QueueSystem) |
+| Fuqi | - QueueSystem concept implementation <br> - Queue generation logic (basic version) <br> - Queue progress syncs (generateDailyQueue, SwipeFromQueue portion affecting QueueSystem) |
 | Lauren   | - SwipeSystem concept implementation <br> - Swipe recording/update logic <br> - Community stats sync (GetItemCommunityStats)                                                      |
-| Person 4 | - UserAuth concept implementation <br> - Authentication syncs (signup/login/logout) <br> - Session + User profile update actions <br> - Backend wiring / endpoint scaffolding     |
+| Stanley | - UserAuth concept implementation <br> - Authentication syncs (signup/login/logout) <br> - Session + User profile update actions <br> - Backend wiring / endpoint scaffolding     |
 
 ### Checkpoint Beta: Dec 2
 
@@ -746,8 +746,8 @@ Group check-ins
 | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Elaine   | PauseCart <br> - Build the PauseCart main view displaying wishlist items <br> - Implement the “Add Item” flow (URL input + reflection prompts) <br> - Create the item detail/edit interface (update reflections, remove items, mark purchased)  |
 | Lauren   | Daily Queue <br> - Build the Daily Queue screen showing items one-by-one <br> - Implement swiping interactions and queue progress <br> - Add post-swipe transitions and UI feedback                                                             |
-| Person 3 | Community Feedback & Insights <br> - Build the Community Stats page after queue completion <br> - Implement “locked vs unlocked” UI state for stats <br> - Create the insights/history section (past swipes, trends, spending info)             |
-| Person 4 | Authentication, Navigation, and Settings <br> - Build signup, login, and logout screens <br> - Implement global navigation + routing between pages <br> - Create the user profile/settings page (edit name, profile picture, FieldsOfInterests) |
+| Fuqi | Community Feedback & Insights <br> - Build the Community Stats page after queue completion <br> - Implement “locked vs unlocked” UI state for stats <br> - Create the insights/history section (past swipes, trends, spending info)             |
+| Stanley | Authentication, Navigation, and Settings <br> - Build signup, login, and logout screens <br> - Implement global navigation + routing between pages <br> - Create the user profile/settings page (edit name, profile picture, FieldsOfInterests) |
 
 
 ### Key Risks
