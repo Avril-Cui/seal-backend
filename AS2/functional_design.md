@@ -166,7 +166,7 @@ state:
         a completedQueue Number
 
 actions:
-    generateDailyQueue (owner: User)
+    generateDailyQueue (owner: User): (queue: Queue)
         requires
             no queue exists with owner matching this user
         effect
@@ -217,6 +217,14 @@ state:
         a decision Flag [Optional]  // user's swipe decision (i.e., worth buying or not)
         a comment String [Optional] // user's short reason or remark (e.g., "this is a great/bad product, super useful/less!" )
 action
+    _getSwipeStats (owner: User, item: Item): (total: Number, approval: Number)
+        requires
+            exists at least one swipe with matching (owner, item)
+        effect
+            let positive := number of swipes with matching (owner, item) and decision equals "Buy"
+            let negative := number of swipes with matching (owner, item) and decision equals "Don't Buy"
+            return total = positive + negative and approval = positive
+
     recordSwipe (owner: User, item: Item, decision: Flag, comment: String)
         requires
             no swipe exists with matching (owner, item)
@@ -313,11 +321,17 @@ state:
 
 ## 1. Authentication + session syncs
 
-These connect HTTP auth endpoints to UserAuth and Sessioning.
+These connect HTTP auth endpoints to UserAuth and Sessioning. Sessioning represents the system’s notion of active login sessions. While UserAuth manages user accounts (who exists, who is allowed to log in), Sessioning handles the temporary authentication state, like, who is currently logged in during an interaction with the system. 
+
+We intentionally separate UserAuth and Sessioning because they solve two distinct problems:
+- UserAuth: user creation, credential validation, profile editing
+- Sessioning: transient login state, session lifecycle, request authentication. We reference this Sessioning in the 6.1040_backend_concept.
 
 ### sync Signup
 
 ```
+sync Signup
+
 when
     Requesting.request (
         path: "/auth/signup",
@@ -337,6 +351,8 @@ then
 ### sync Login
 
 ```
+sync Login
+
 when
     Requesting.request (path: "/auth/login", email, password) : (request)
 
@@ -349,6 +365,8 @@ then
 ### sync Logout
 
 ```
+sync Logout
+
 when
     Requesting.request (path: "/auth/logout", session) : (request)
 
@@ -368,6 +386,8 @@ These syncs ensure that only the authenticated user can manage items in their ow
 ### sync AddItemToWishlist
 
 ```
+sync AddItemToWishlist
+
 when
     Requesting.request (path: "/items/add", session, url, reason, isNeed, isFutureApprove) : (request)
 
@@ -382,12 +402,13 @@ then
 ### sync UpdateItemReflection
 
 ```
+sync UpdateItemReflection
+
 when
     Requesting.request (path: "/items/updateReflection", session, item, reason, isNeed, isFutureApprove) : (request)
 
 where
     in Sessioning: user of session is owner
-    in ItemCollection: item belongs to wishlist of owner
 
 then
     ItemCollection.updateReason (owner, item, reason)
@@ -399,12 +420,13 @@ then
 ### sync RemoveItemFromWishlist
 
 ```
+sync RemoveItemFromWishlist
+
 when
     Requesting.request (path: "/items/remove", session, item) : (request)
 
 where
     in Sessioning: user of session is owner
-    in ItemCollection: item belongs to wishlist of owner
 
 then
     ItemCollection.removeItem (owner, item)
@@ -414,12 +436,13 @@ then
 ### sync MarkItemPurchased
 
 ```
+sync MarkItemPurchased
+
 when
     Requesting.request (path: "/items/setPurchased", session, item) : (request)
 
 where
     in Sessioning: user of session is owner
-    in ItemCollection: item belongs to wishlist of owner
 
 then
     ItemCollection.setPurchased (owner, item)
@@ -433,6 +456,8 @@ These implement the SwipeSense daily queue and tie it to the logged-in user.
 ### sync GenerateDailyQueueRequest
 
 ```
+sync GenerateDailyQueueRequest
+
 when
     Requesting.request (path: "/queue/generate", session) : (request)
 
@@ -448,6 +473,7 @@ then
 
 ```
 sync SwipeFromQueue
+
 when
     Requesting.request (path: "/swipes/record", session, item, decision, comment) : (request)
 where
@@ -475,6 +501,8 @@ where
     in ItemCollection: item belongs to wishlist of owner
     in QueueSystem: queue for owner has completedQueue >= 10
     in SwipeSystem: swipes is set of all swipes s where s.item = item
+        _getSwipeStats (owner: User, item: Item): (total: Number, approval: Number)
+
     stats is {
         "total": count of swipes,
         "approvals": count of swipes with decision = True
