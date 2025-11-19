@@ -81,7 +81,7 @@ Here we define the generic types for our systems that are used across different 
 ## ItemCollection
 
 ```
-concept: ItemCollection [User, Item, AmazonAPI]
+concept: ItemCollection [User, Item, AmazonAPI, GeminiLLM]
 
 purpose:
     Tracks and manage items that users are considering for purchase.
@@ -99,6 +99,7 @@ state:
         an itemSet set of Items
 
     an amazonAPI AmazonAPI
+    a geminiLLM GeminiLLM
 
 actions:
     addItem (owner: User, url: String, reason: String, isNeed: String, isFutureApprove: String): (item: Item)
@@ -136,6 +137,14 @@ actions:
         effect
             set $i$.wasPurchased as True;
             set $i$.PurchasedTime as the current time of this action;
+    
+    async getAIInsight (owner: User, item: Item): (llm_response: String)
+        requires
+            exists a wishlist $w$ with this user;
+            item exists in $w$'s itemSet;
+        effect
+            send item to geminiLLM (including all the attributes under item, like description, price, reason, isNeed, isFutureApprove) and ask for insights on whether geminiLLM thinks this purchase is impulsive;
+            return the llm_response;
 
 ```
 
@@ -144,6 +153,7 @@ actions:
 - We abstract AmazonAPI because its implementation (scraping, affiliate API, or proxy) is outside this concept's scope.
 - We assume metadata is fetched at the moment of adding the item for accuracy and simplicity.
 - We use three generic types here: User, Item, and AmazonAPI. User and Item are defined in the section above.
+- getAIInsight is an async, AI-augmented action that we designed to address the lack of critical mass issue. When we don't have enough users to provide swipe states, users can gather some insights on whether the AI thinks a purchase is impulsive or not.
 
 ## QueueSystem
 
@@ -522,6 +532,19 @@ then
     SwipeSystem._getSwipeStats(owner: user, item): (total, approval)
     SwipeSystem._getSwipeComments (owner: user, item): (comments)
     Requesting.respond (request, { total, approval, comments })
+```
+
+### sync GetAIFeedback
+
+```
+sync GetAIFeedback
+
+when
+    Requesting.request (path: "/items/getAI", session, item) : (request)
+
+    async getAIInsight (owner: User, item: Item): (llm_response: String)
+
+
 ```
 
 # User Journey
