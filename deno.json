@@ -4,6 +4,7 @@
         "@concepts": "./src/concepts/concepts.ts",
         "@test-concepts": "./src/concepts/test_concepts.ts",
         "@utils/": "./src/utils/",
+        "@services/": "./src/services/",
         "@engine": "./src/engine/mod.ts",
         "@syncs": "./src/syncs/syncs.ts"
     },
