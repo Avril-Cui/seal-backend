@@ -2,7 +2,7 @@
 import { assertEquals, assertExists, assertNotEquals } from "jsr:@std/assert";
 import { testDb } from "@utils/database.ts";
 import { ID } from "@utils/types.ts";
-import PasswordAuthConcept from "./PasswordAuth.ts";
+import PasswordAuthConcept from "./PasswordAuthConcept.ts";
 
 const partyA = "party:Alice" as ID;
 const emailA = "alice@example.com";
