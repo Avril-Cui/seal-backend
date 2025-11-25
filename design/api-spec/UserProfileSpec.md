@@ -1,5 +1,4 @@
-# UserAuthSpec
-
+# UserProfile
 [@concept-specifications](../background/concept-specifications.md)
 
 
@@ -29,9 +28,9 @@ Adhere to the following rules for the API structure and the documentation format
 Generate the output in Markdown using the following template. For each action and query in the specification, create a dedicated endpoint section.
 
 ~~~markdown
-# API Specification: {Concept Name}
+# API Specification: UserProfile
 
-**Purpose:** {The concept's purpose.}
+**Purpose:** Manages user profiles that are registered under BuyBye.
 
 ---
 
@@ -87,14 +86,14 @@ Generate the output in Markdown using the following template. For each action an
 
 Now, analyze the following Concept Specification and generate the API documentation based on these instructions. Your API documentation should be generated to based exactly on how I defined my concepts:
 
-[@UserAuth](../concepts/UserAuth/UserAuth.md)
+[@UserProfile](../concepts/UserProfile/UserProfile.md)
 # response:
 
 # response:
 
 # API Specification: 
 
-**Purpose:**  Manages users that are registered under BuyBye.
+**Purpose:**     Manages user profiles that are registered under BuyBye.
 
 ---
 
@@ -102,42 +101,48 @@ Now, analyze the following Concept Specification and generate the API documentat
 
 # response:
 
+
 # response:
 
-# API Specification: UserAuth
+# API Specification: UserProfile
 
-**Purpose:** Manages users that are registered under BuyBye.
+**Purpose:** Manages user profiles that are registered under BuyBye.
 
 ---
 
 ## API Endpoints
 
-### POST /api/UserAuth/signup
+### POST /api/UserProfile/createUser
 
-**Description:** Creates a new registered user account with the provided email and password.
+**Description:** Creates a new user profile with the provided details upon signing up for BuyBye.
 
 **Requirements:**
-- No registered user exists with matching email.
+- no user exists with matching uid;
 
 **Effects:**
-- Create a new registered user `$u$` with (email, password).
-- Add user `$u$` to RegisteredUsers.
-- Return user `$u$`.
+- create a new user with (uid, name, email, password, profilePicture, reward = 0, fieldOfInterests);
+- return user;
 
 **Request Body:**
 ```json
 {
+  "uid": "string",
+  "name": "string",
   "email": "string",
-  "password": "string"
+  "password": "string",
+  "profilePicture": "string",
+  "fieldOfInterests": [
+    {
+      "field": "string"
+    }
+  ]
 }
 ```
 
 **Success Response Body (Action):**
 ```json
 {
-  "user": {
-    "uid": "string"
-  }
+  "user": "string"
 }
 ```
 
@@ -150,31 +155,27 @@ Now, analyze the following Concept Specification and generate the API documentat
 
 ---
 
-### POST /api/UserAuth/login
+### POST /api/UserProfile/updateProfileName
 
-**Description:** Authenticates a user with the provided email and password.
+**Description:** Updates the name associated with an existing user profile.
 
 **Requirements:**
-- A user exists in RegisteredUsers with matching (email, password).
+- user exists;
 
 **Effects:**
-- Return this user.
+- update the corresponding attribute (name) of this user
 
 **Request Body:**
 ```json
 {
-  "email": "string",
-  "password": "string"
+  "user": "string",
+  "newName": "string"
 }
 ```
 
 **Success Response Body (Action):**
 ```json
-{
-  "user": {
-    "uid": "string"
-  }
-}
+{}
 ```
 
 **Error Response Body:**
@@ -185,3 +186,101 @@ Now, analyze the following Concept Specification and generate the API documentat
 ```
 
 ---
+
+### POST /api/UserProfile/updateProfilePicture
+
+**Description:** Updates the profile picture URL for an existing user.
+
+**Requirements:**
+- user exists;
+
+**Effects:**
+- update the corresponding attribute (profilePicture) of this user
+
+**Request Body:**
+```json
+{
+  "user": "string",
+  "newProfilePicture": "string"
+}
+```
+
+**Success Response Body (Action):**
+```json
+{}
+```
+
+**Error Response Body:**
+```json
+{
+  "error": "string"
+}
+```
+
+---
+
+### POST /api/UserProfile/updatePassword
+
+**Description:** Changes the password for an existing user profile.
+
+**Requirements:**
+- user exists;
+
+**Effects:**
+- update the corresponding attribute (password) of this user
+
+**Request Body:**
+```json
+{
+  "user": "string",
+  "newPassword": "string"
+}
+```
+
+**Success Response Body (Action):**
+```json
+{}
+```
+
+**Error Response Body:**
+```json
+{
+  "error": "string"
+}
+```
+
+---
+
+### POST /api/UserProfile/updateInterests
+
+**Description:** Replaces the entire set of field of interests for an existing user.
+
+**Requirements:**
+- user exists;
+
+**Effects:**
+- update this user's set of FieldsOfInterests to newFieldsOfInterests;
+
+**Request Body:**
+```json
+{
+  "user": "string",
+  "newFieldsOfInterests": [
+    {
+      "field": "string"
+    }
+  ]
+}
+```
+
+**Success Response Body (Action):**
+```json
+{}
+```
+
+**Error Response Body:**
+```json
+{
+  "error": "string"
+}
+```
