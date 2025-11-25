@@ -1,4 +1,3 @@
-
 I Like
 I really like the overall problem framing of your project. The scenarios you described resonate strongly with my own experiences, especially the idea of stumbling upon old photos months or years later and wanting to reshare them with the people who were part of that memory (I experience this all the time). I think you identified a very real pain point: there’s currently no easy or intuitive way to search across old memories, resurface them, or combine different media types (audio, text, images) into a single, coherent moment. I also appreciate the thought you put into the proposed features, like the timeline and profile pages. They feel well-aligned with how people naturally recall memories over time. Overall, I think your project addresses a meaningful need that I feel very related, and as someone who could imagine myself as a target user, the concept feels both relevant and compelling.
 

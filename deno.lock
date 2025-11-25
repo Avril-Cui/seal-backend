@@ -615,5 +615,10 @@
     "dependencies": [
       "npm:@google/generative-ai@~0.24.1"
     ]
+    "packageJson": {
+      "dependencies": [
+        "npm:mongodb@7"
+      ]
+    }
   }
 }

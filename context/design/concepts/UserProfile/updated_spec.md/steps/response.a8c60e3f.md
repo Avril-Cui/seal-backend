@@ -1,0 +1,301 @@
+---
+timestamp: 'Tue Nov 25 2025 12:37:55 GMT-0500 (Eastern Standard Time)'
+parent: '[[../20251125_123755.8a995a6f.md]]'
+content_id: a8c60e3f962e9a6af339f1f41be08505188adeaa465b41e0ded6c8d5815fce87
+---
+
+# response:
+
+To update the `UserProfileConcept` implementation based on your new specification, we need to make several key changes, particularly around the structure of the state and the actions.
+
+The new specification introduces:
+
+1. **Detailed `User` entity**: The `UserProfile` concept now manages full user details including `uid`, `email`, `password`, `reward`, and `fieldOfInterests` directly within a `User` entity.
+2. **`FieldsOfInterests` as a separate entity**: The `fieldOfInterests` is now a `set of FieldsOfInterests`, implying `FieldsOfInterests` is its own entity type with a `field` string. This means we'll likely have two collections: one for `Users` and one for `FieldsOfInterests`.
+3. **New Actions**: `createUser`, `updateProfileName`, `updateProfilePicture`, `updatePassword`, `updateInterests`.
+
+Here's the updated implementation:
+
+```typescript
+import { Collection, Db } from "npm:mongodb";
+import { Empty, ID } from "@utils/types.ts";
+import { freshID } from "@utils/database.ts";
+
+// Declare collection prefix, using the concept name
+const PREFIX = "UserProfile" + ".";
+
+// Define the User entity structure based on the new state
+/**
+ * a set of Users with
+ *   a uid String  // this is an unique id
+ *   a name String
+ *   an email String
+ *   a password String
+ *   a profilePicture String
+ *   a reward Number
+ *   a fieldOfInterests set of FieldsOfInterests (stored as IDs)
+ */
+interface UserDocument {
+  _id: ID; // The MongoDB document ID for the User entity
+  uid: string; // The user's unique identifier (as specified in the concept)
+  name: string;
+  email: string;
+  password: string; // Note: In a real application, passwords should be hashed and never stored in plain text.
+  profilePicture: string;
+  reward: number;
+  fieldOfInterests: ID[]; // Stores IDs of FieldsOfInterestsDocument
+}
+
+// Define the FieldsOfInterests entity structure
+/**
+ * a set of FieldsOfInterests
+ *   a field String
+ */
+interface FieldsOfInterestsDocument {
+  _id: ID;
+  field: string; // The actual string name of the interest
+}
+
+/**
+ * concept: UserProfile
+ *
+ * purpose:
+ *     Manages user profiles that are registered under BuyBye.
+ *
+ * principle:
+ *     (1) Users customize their profile when they are signing up for BuyBye.
+ *     (2) Users can edit their own profile information.
+ */
+export default class UserProfileConcept {
+  users: Collection<UserDocument>;
+  fieldsOfInterests: Collection<FieldsOfInterestsDocument>;
+
+  constructor(private readonly db: Db) {
+    // Initialize the MongoDB collections for users and their interests
+    this.users = this.db.collection(PREFIX + "users");
+    this.fieldsOfInterests = this.db.collection(PREFIX + "fieldsOfInterests");
+  }
+
+  /**
+   * Helper method to ensure that FieldsOfInterests entities exist for a given
+   * list of interest names (strings). If an interest name doesn't have a
+   * corresponding entity, a new one is created. Returns the IDs of all
+   * resolved or created interest entities.
+   */
+  private async ensureFieldsOfInterestsExist(
+    interestNames: string[],
+  ): Promise<ID[]> {
+    const interestIDs: ID[] = [];
+    for (const name of interestNames) {
+      // Find an existing FieldsOfInterestsDocument by its 'field' name
+      let fieldDoc = await this.fieldsOfInterests.findOne({ field: name });
+      if (!fieldDoc) {
+        // If no document exists, create a new one
+        fieldDoc = { _id: freshID(), field: name };
+        await this.fieldsOfInterests.insertOne(fieldDoc);
+      }
+      interestIDs.push(fieldDoc._id);
+    }
+    return interestIDs;
+  }
+
+  /**
+   * createUser (uid: String, name: String, email: String, password: String,
+   *             profilePicture: String, fieldOfInterests: set of FieldsOfInterests): (user: User)
+   *
+   * **requires**
+   *     no user exists with matching uid;
+   *
+   * **effects**
+   *     create a new user with (uid, name, email, password, profilePicture, reward = 0, fieldOfInterests);
+   *     return user;
+   */
+  async createUser(
+    { uid, name, email, password, profilePicture, fieldOfInterests }: {
+      uid: string;
+      name: string;
+      email: string;
+      password: string;
+      profilePicture: string;
+      fieldOfInterests: string[]; // Expecting an array of interest NAMES (strings)
+    },
+  ): Promise<{ user: ID } | { error: string }> {
+    // Check 'requires' condition: ensure no user with the given uid already exists
+    const existingUser = await this.users.findOne({ uid: uid });
+    if (existingUser) {
+      return { error: `User with UID '${uid}' already exists.` };
+    }
+
+    // Resolve or create FieldsOfInterests entities and get their IDs
+    const interestIDs = await this.ensureFieldsOfInterestsExist(
+      fieldOfInterests,
+    );
+
+    // 'effects': Create and insert a new UserDocument
+    const newUser: UserDocument = {
+      _id: freshID(), // Generate a unique ID for the user document
+      uid: uid,
+      name: name,
+      email: email,
+      password: password,
+      profilePicture: profilePicture,
+      reward: 0, // Default value as per specification
+      fieldOfInterests: interestIDs,
+    };
+    await this.users.insertOne(newUser);
+
+    return { user: newUser._id }; // Return the ID of the newly created User entity
+  }
+
+  /**
+   * updateProfileName (user: User, newName: String): Empty | {error: String}
+   *
+   * **requires**
+   *     user exists;
+   *
+   * **effects**
+   *     update the name attribute of this user
+   */
+  async updateProfileName(
+    { user, newName }: { user: ID; newName: string },
+  ): Promise<Empty | { error: string }> {
+    // Check 'requires' condition implicitly by checking if update was successful
+    const result = await this.users.updateOne(
+      { _id: user },
+      { $set: { name: newName } },
+    );
+
+    if (result.matchedCount === 0) {
+      return { error: `User with ID '${user}' not found.` };
+    }
+    return {};
+  }
+
+  /**
+   * updateProfilePicture (user: User, newProfilePicture: String): Empty | {error: String}
+   *
+   * **requires**
+   *     user exists;
+   *
+   * **effects**
+   *     update the profilePicture attribute of this user
+   */
+  async updateProfilePicture(
+    { user, newProfilePicture }: { user: ID; newProfilePicture: string },
+  ): Promise<Empty | { error: string }> {
+    // Check 'requires' condition implicitly
+    const result = await this.users.updateOne(
+      { _id: user },
+      { $set: { profilePicture: newProfilePicture } },
+    );
+
+    if (result.matchedCount === 0) {
+      return { error: `User with ID '${user}' not found.` };
+    }
+    return {};
+  }
+
+  /**
+   * updatePassword (user: User, newPassword: String): Empty | {error: String}
+   *
+   * **requires**
+   *     user exists;
+   *
+   * **effects**
+   *     update the password attribute of this user
+   */
+  async updatePassword(
+    { user, newPassword }: { user: ID; newPassword: string },
+  ): Promise<Empty | { error: string }> {
+    // Check 'requires' condition implicitly
+    const result = await this.users.updateOne(
+      { _id: user },
+      { $set: { password: newPassword } }, // Reminder: Hash passwords in a real application!
+    );
+
+    if (result.matchedCount === 0) {
+      return { error: `User with ID '${user}' not found.` };
+    }
+    return {};
+  }
+
+  /**
+   * updateInterests (user: User, newFieldsOfInterests: set of FieldsOfInterests): Empty | {error: String}
+   *
+   * **requires**
+   *     user exists;
+   *
+   * **effects**
+   *     update this user's set of FieldsOfInterests to newFieldsOfInterests;
+   */
+  async updateInterests(
+    { user, newFieldsOfInterests }: { user: ID; newFieldsOfInterests: string[] }, // Expecting array of interest NAMES
+  ): Promise<Empty | { error: string }> {
+    // Check 'requires' condition: ensure user exists
+    const existingUser = await this.users.findOne({ _id: user });
+    if (!existingUser) {
+      return { error: `User with ID '${user}' not found.` };
+    }
+
+    // Resolve or create FieldsOfInterests entities and get their IDs
+    const interestIDs = await this.ensureFieldsOfInterestsExist(
+      newFieldsOfInterests,
+    );
+
+    // 'effects': Update the 'fieldOfInterests' array for the specified user
+    await this.users.updateOne(
+      { _id: user },
+      { $set: { fieldOfInterests: interestIDs } },
+    );
+    return {};
+  }
+
+  /**
+   * _getProfile (user: User): (profile: {uid: String, name: String, email: String,
+   *             profilePicture: String, reward: Number, fieldOfInterests: set of String})[] | {error: String}
+   *
+   * **requires**
+   *     user exists;
+   *
+   * **effects**
+   *     returns the profile information for the user, with interest names resolved.
+   */
+  async _getProfile(
+    { user }: { user: ID },
+  ): Promise<
+    {
+      profile: {
+        uid: string;
+        name: string;
+        email: string;
+        profilePicture: string;
+        reward: number;
+        fieldOfInterests: string[]; // Returns actual interest names for display
+      };
+    }[] | { error: string }
+  > {
+    const userDoc = await this.users.findOne({ _id: user });
+    if (!userDoc) {
+      return { error: `User with ID '${user}' not found.` };
+    }
+
+    // Fetch the actual names for the fieldOfInterests IDs
+    const interestDocs = await this.fieldsOfInterests.find({
+      _id: { $in: userDoc.fieldOfInterests },
+    }).toArray();
+    const interestNames = interestDocs.map((doc) => doc.field);
+
+    // Return an array of dictionaries, as per query specification guidelines
+    return [{
+      profile: {
+        uid: userDoc.uid,
+        name: userDoc.name,
+        email: userDoc.email,
+        profilePicture: userDoc.profilePicture,
+        reward: userDoc.reward,
+        fieldOfInterests: interestNames,
+      },
+    }];
+  }
+}
+```
