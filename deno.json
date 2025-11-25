@@ -1,4 +1,6 @@
 {
+    "nodeModulesDir": "auto",
+    "unstable": ["detect-cjs"],
     "imports": {
         "@concepts/": "./src/concepts/",
         "@concepts": "./src/concepts/concepts.ts",

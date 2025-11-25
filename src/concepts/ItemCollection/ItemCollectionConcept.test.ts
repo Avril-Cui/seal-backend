@@ -1043,7 +1043,11 @@ Deno.test("Action: update* methods - requirements and effects", async (t) => {
       assertNotEquals(
         "error" in updateResult,
         true,
-        "updateIsNeed should succeed.",
+        `updateIsNeed should succeed, but got error: ${
+          "error" in updateResult
+            ? (updateResult as { error: string }).error
+            : "N/A"
+        }`,
       );
       const itemDetails = await itemCollectionConcept._getItemDetails({
         itemId,
@@ -1069,7 +1073,11 @@ Deno.test("Action: update* methods - requirements and effects", async (t) => {
       assertNotEquals(
         "error" in updateResult,
         true,
-        "updateIsFutureApprove should succeed.",
+        `updateIsFutureApprove should succeed, but got error: ${
+          "error" in updateResult
+            ? (updateResult as { error: string }).error
+            : "N/A"
+        }`,
       );
       const itemDetails = await itemCollectionConcept._getItemDetails({
         itemId,

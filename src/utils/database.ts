@@ -68,7 +68,10 @@ export async function getDb() {
  */
 export async function testDb() {
   const [client, DB_NAME] = await init();
-  const test_DB_NAME = `test-${DB_NAME}`;
+  // Use a unique database name for each test to avoid interference
+  // MongoDB has a 38-byte database name limit, so use a short random suffix
+  const uniqueId = Math.random().toString(36).substring(2, 10);
+  const test_DB_NAME = `test-${uniqueId}`;
   const test_Db = client.db(test_DB_NAME);
   await dropAllCollections(test_Db);
   return [test_Db, client] as [Db, MongoClient];

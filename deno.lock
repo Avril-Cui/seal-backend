@@ -7,6 +7,7 @@
     "jsr:@std/uuid@*": "1.0.9",
     "npm:@google/generative-ai@~0.24.1": "0.24.1",
     "npm:@types/node@*": "24.2.0",
+    "npm:mongodb@*": "7.0.0",
     "npm:mongodb@7": "7.0.0"
   },
   "jsr": {
