@@ -1,3 +1,14 @@
+---
+timestamp: 'Tue Nov 25 2025 12:46:13 GMT-0500 (Eastern Standard Time)'
+parent: '[[../20251125_124613.7326c4dc.md]]'
+content_id: 6d80dab59b6d402466153ca77467ffcb495ec66c5fb76814095accabbcf3d9c8
+---
+
+# concept: UserProfile
+
+This is how I implemented my UserProfile concept:
+
+```
 import { Collection, Db } from "npm:mongodb";
 import { Empty, ID } from "@utils/types.ts";
 import { freshID } from "@utils/database.ts";
@@ -282,3 +293,5 @@ export default class UserProfileConcept {
     }];
   }
 }
+
+```

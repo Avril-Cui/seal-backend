@@ -1,3 +1,22 @@
+---
+timestamp: 'Tue Nov 25 2025 12:37:55 GMT-0500 (Eastern Standard Time)'
+parent: '[[../20251125_123755.8a995a6f.md]]'
+content_id: a8c60e3f962e9a6af339f1f41be08505188adeaa465b41e0ded6c8d5815fce87
+---
+
+# response:
+
+To update the `UserProfileConcept` implementation based on your new specification, we need to make several key changes, particularly around the structure of the state and the actions.
+
+The new specification introduces:
+
+1. **Detailed `User` entity**: The `UserProfile` concept now manages full user details including `uid`, `email`, `password`, `reward`, and `fieldOfInterests` directly within a `User` entity.
+2. **`FieldsOfInterests` as a separate entity**: The `fieldOfInterests` is now a `set of FieldsOfInterests`, implying `FieldsOfInterests` is its own entity type with a `field` string. This means we'll likely have two collections: one for `Users` and one for `FieldsOfInterests`.
+3. **New Actions**: `createUser`, `updateProfileName`, `updateProfilePicture`, `updatePassword`, `updateInterests`.
+
+Here's the updated implementation:
+
+```typescript
 import { Collection, Db } from "npm:mongodb";
 import { Empty, ID } from "@utils/types.ts";
 import { freshID } from "@utils/database.ts";
@@ -210,10 +229,7 @@ export default class UserProfileConcept {
    *     update this user's set of FieldsOfInterests to newFieldsOfInterests;
    */
   async updateInterests(
-    { user, newFieldsOfInterests }: {
-      user: ID;
-      newFieldsOfInterests: string[];
-    }, // Expecting array of interest NAMES
+    { user, newFieldsOfInterests }: { user: ID; newFieldsOfInterests: string[] }, // Expecting array of interest NAMES
   ): Promise<Empty | { error: string }> {
     // Check 'requires' condition: ensure user exists
     const existingUser = await this.users.findOne({ _id: user });
@@ -282,3 +298,4 @@ export default class UserProfileConcept {
     }];
   }
 }
+```

@@ -1,3 +1,14 @@
+---
+timestamp: 'Tue Nov 25 2025 12:47:11 GMT-0500 (Eastern Standard Time)'
+parent: '[[../20251125_124711.d4d6c2f4.md]]'
+content_id: 014007a97e3f52e0db5d33e07e201a81b3f9c91bee32c803e949ed642cdba3ef
+---
+
+# response:
+
+```typescript
+// file: src/concepts/UserProfile/UserProfileConcept.test.ts
+
 import { assertEquals, assertExists, assertNotEquals } from "jsr:@std/assert";
 import { testDb } from "@utils/database.ts";
 import { ID } from "@utils/types.ts";
@@ -50,9 +61,7 @@ Deno.test("Principle: User customizes profile on signup, then edits it", async (
     );
 
     // # trace: (1) User signs up and customizes their profile
-    console.log(
-      "\nTrace Step 1: User Alice signs up for BuyBye with initial profile details.",
-    );
+    console.log("\nTrace Step 1: User Alice signs up for BuyBye with initial profile details.");
     const initialInterests = ["Technology", "Gaming"];
     const createUserResult = await userProfileConcept.createUser({
       uid: testUserA_UID,
@@ -69,13 +78,8 @@ Deno.test("Principle: User customizes profile on signup, then edits it", async (
       "createUser should succeed for a new user.",
     );
     const { user: aliceId } = createUserResult as { user: ID };
-    assertExists(
-      aliceId,
-      "A user ID should be returned upon successful creation.",
-    );
-    console.log(
-      `  User Alice (ID: ${aliceId}) created with UID: '${testUserA_UID}'.`,
-    );
+    assertExists(aliceId, "A user ID should be returned upon successful creation.");
+    console.log(`  User Alice (ID: ${aliceId}) created with UID: '${testUserA_UID}'.`);
 
     // Verify initial profile state using _getProfile
     const aliceProfile = await getProfileOrThrow(userProfileConcept, aliceId);
@@ -110,9 +114,7 @@ Deno.test("Principle: User customizes profile on signup, then edits it", async (
       initialInterests.sort(),
       "Alice's initial interests in profile should match input.",
     );
-    console.log(
-      "  Initial profile for Alice verified via _getProfile: `createUser` effects confirmed.",
-    );
+    console.log("  Initial profile for Alice verified via _getProfile: `createUser` effects confirmed.");
 
     // # trace: (2) User Alice edits their profile information (name, picture, password, interests)
     console.log("\nTrace Step 2: User Alice updates her profile name.");
@@ -138,9 +140,7 @@ Deno.test("Principle: User customizes profile on signup, then edits it", async (
       newName,
       "Alice's name should be updated in her profile.",
     );
-    console.log(
-      "  Name update verified via _getProfile: `updateProfileName` effects confirmed.",
-    );
+    console.log("  Name update verified via _getProfile: `updateProfileName` effects confirmed.");
 
     console.log("\nTrace Step 3: User Alice updates her profile picture.");
     const newPicture = "alicia_new_avatar.png";
@@ -153,9 +153,7 @@ Deno.test("Principle: User customizes profile on signup, then edits it", async (
       false,
       "updateProfilePicture should succeed for an existing user.",
     );
-    console.log(
-      `  Alice's profile picture successfully updated to '${newPicture}'.`,
-    );
+    console.log(`  Alice's profile picture successfully updated to '${newPicture}'.`);
 
     // Verify picture update
     const aliceProfileAfterPictureUpdate = await getProfileOrThrow(
@@ -167,9 +165,7 @@ Deno.test("Principle: User customizes profile on signup, then edits it", async (
       newPicture,
       "Alice's profile picture should be updated in her profile.",
     );
-    console.log(
-      "  Profile picture update verified via _getProfile: `updateProfilePicture` effects confirmed.",
-    );
+    console.log("  Profile picture update verified via _getProfile: `updateProfilePicture` effects confirmed.");
 
     console.log("\nTrace Step 4: User Alice updates her password.");
     const newPassword = "superstrongpassword789";
@@ -198,11 +194,7 @@ Deno.test("Principle: User customizes profile on signup, then edits it", async (
       false,
       "updateInterests should succeed for an existing user.",
     );
-    console.log(
-      `  Alice's interests successfully updated to: ${
-        updatedInterests.join(", ")
-      }.`,
-    );
+    console.log(`  Alice's interests successfully updated to: ${updatedInterests.join(", ")}.`);
 
     // Verify interests update
     const aliceProfileAfterInterestsUpdate = await getProfileOrThrow(
@@ -214,9 +206,7 @@ Deno.test("Principle: User customizes profile on signup, then edits it", async (
       updatedInterests.sort(),
       "Alice's interests should be updated in her profile.",
     );
-    console.log(
-      "  Interests update verified via _getProfile: `updateInterests` effects confirmed.",
-    );
+    console.log("  Interests update verified via _getProfile: `updateInterests` effects confirmed.");
 
     console.log(
       "\nPrinciple Fulfilled: The series of actions demonstrate that a user can successfully customize their profile on signup and then modify various aspects of their profile, aligning with the UserProfile concept's principle.",
@@ -236,9 +226,7 @@ Deno.test("Action: createUser requires no existing user with matching UID", asyn
     );
 
     // Initial creation of user Bob (should succeed)
-    console.log(
-      `Testing requirement satisfaction: Initial creation of user '${testUserB_UID}'.`,
-    );
+    console.log(`Testing requirement satisfaction: Initial creation of user '${testUserB_UID}'.`);
     const initialCreateResult = await userProfileConcept.createUser({
       uid: testUserB_UID,
       name: "Bob Johnson",
@@ -278,9 +266,7 @@ Deno.test("Action: createUser requires no existing user with matching UID", asyn
       `User with UID '${testUserB_UID}' already exists.`,
       "Error message should clearly indicate duplicate UID.",
     );
-    console.log(
-      "  Attempt to create user with duplicate UID correctly failed, requirement satisfied.",
-    );
+    console.log("  Attempt to create user with duplicate UID correctly failed, requirement satisfied.");
 
     // Verify that the original Bob's profile is unchanged (no new user was created)
     const bobProfile = await getProfileOrThrow(userProfileConcept, bobId);
@@ -294,9 +280,7 @@ Deno.test("Action: createUser requires no existing user with matching UID", asyn
       "bob@example.com",
       "Original user's email should remain 'bob@example.com'.",
     );
-    console.log(
-      "  Original user's profile verified to be unchanged, confirming `effects` for failed action.",
-    );
+    console.log("  Original user's profile verified to be unchanged, confirming `effects` for failed action.");
   } finally {
     await client.close();
   }
@@ -307,9 +291,7 @@ Deno.test("Action: updateProfileName requires user exists", async () => {
   const userProfileConcept = new UserProfileConcept(db);
 
   try {
-    console.log(
-      "\n--- Action Test: updateProfileName requires user exists ---",
-    );
+    console.log("\n--- Action Test: updateProfileName requires user exists ---");
 
     // Setup: Create a user for successful update scenario
     const createResult = await userProfileConcept.createUser({
@@ -321,9 +303,7 @@ Deno.test("Action: updateProfileName requires user exists", async () => {
       fieldOfInterests: [],
     });
     const { user: charlieId } = createResult as { user: ID };
-    console.log(
-      `  Existing user (ID: ${charlieId}) created for positive test case.`,
-    );
+    console.log(`  Existing user (ID: ${charlieId}) created for positive test case.`);
 
     // Test successful update for an existing user
     console.log("Testing: Successful update of an existing user's name.");
@@ -365,9 +345,7 @@ Deno.test("Action: updateProfileName requires user exists", async () => {
       `User with ID '${nonExistentUserId}' not found.`,
       "Error message should indicate user not found.",
     );
-    console.log(
-      "  Updating name for non-existent user correctly failed, requirement satisfied.",
-    );
+    console.log("  Updating name for non-existent user correctly failed, requirement satisfied.");
   } finally {
     await client.close();
   }
@@ -392,14 +370,10 @@ Deno.test("Action: updateProfilePicture requires user exists", async () => {
       fieldOfInterests: [],
     });
     const { user: dianaId } = createResult as { user: ID };
-    console.log(
-      `  Existing user (ID: ${dianaId}) created for positive test case.`,
-    );
+    console.log(`  Existing user (ID: ${dianaId}) created for positive test case.`);
 
     // Test successful update for an existing user
-    console.log(
-      "Testing: Successful update of an existing user's profile picture.",
-    );
+    console.log("Testing: Successful update of an existing user's profile picture.");
     const newPicture = "diana_new.png";
     const successResult = await userProfileConcept.updateProfilePicture({
       user: dianaId,
@@ -419,9 +393,7 @@ Deno.test("Action: updateProfilePicture requires user exists", async () => {
       newPicture,
       "User's profile picture should be updated after successful call.",
     );
-    console.log(
-      `  Profile picture successfully updated to '${newPicture}' and verified.`,
-    );
+    console.log(`  Profile picture successfully updated to '${newPicture}' and verified.`);
 
     // Test failure for a non-existent user
     console.log(
@@ -467,9 +439,7 @@ Deno.test("Action: updatePassword requires user exists", async () => {
       fieldOfInterests: [],
     });
     const { user: ethanId } = createResult as { user: ID };
-    console.log(
-      `  Existing user (ID: ${ethanId}) created for positive test case.`,
-    );
+    console.log(`  Existing user (ID: ${ethanId}) created for positive test case.`);
 
     // Test successful update for an existing user
     console.log("Testing: Successful update of an existing user's password.");
@@ -505,9 +475,7 @@ Deno.test("Action: updatePassword requires user exists", async () => {
       `User with ID '${nonExistentUserId}' not found.`,
       "Error message should indicate user not found.",
     );
-    console.log(
-      "  Updating password for non-existent user correctly failed, requirement satisfied.",
-    );
+    console.log("  Updating password for non-existent user correctly failed, requirement satisfied.");
   } finally {
     await client.close();
   }
@@ -532,9 +500,7 @@ Deno.test("Action: updateInterests requires user exists", async () => {
     });
     const { user: fionaId } = createResult as { user: ID };
     console.log(
-      `  Existing user (ID: ${fionaId}) created with initial interests: ${
-        initialInterests.join(", ")
-      }.`,
+      `  Existing user (ID: ${fionaId}) created with initial interests: ${initialInterests.join(", ")}.`,
     );
 
     // Test successful update for an existing user
@@ -558,16 +524,10 @@ Deno.test("Action: updateInterests requires user exists", async () => {
       newInterests.sort(),
       "User's interests should be updated after successful call.",
     );
-    console.log(
-      `  Interests successfully updated to: ${
-        newInterests.join(", ")
-      } and verified.`,
-    );
+    console.log(`  Interests successfully updated to: ${newInterests.join(", ")} and verified.`);
 
     // Test failure for a non-existent user
-    console.log(
-      "Testing: Attempt to update interests for a non-existent user.",
-    );
+    console.log("Testing: Attempt to update interests for a non-existent user.");
     const nonExistentUserId = "user:nonexistent_g" as ID;
     const failResult = await userProfileConcept.updateInterests({
       user: nonExistentUserId,
@@ -583,9 +543,7 @@ Deno.test("Action: updateInterests requires user exists", async () => {
       `User with ID '${nonExistentUserId}' not found.`,
       "Error message should indicate user not found.",
     );
-    console.log(
-      "  Updating interests for non-existent user correctly failed, requirement satisfied.",
-    );
+    console.log("  Updating interests for non-existent user correctly failed, requirement satisfied.");
   } finally {
     await client.close();
   }
@@ -608,9 +566,7 @@ Deno.test("Query: _getProfile requires user exists", async () => {
       fieldOfInterests: ["Science"],
     });
     const { user: georgeId } = createResult as { user: ID };
-    console.log(
-      `  Existing user (ID: ${georgeId}) created for positive test case.`,
-    );
+    console.log(`  Existing user (ID: ${georgeId}) created for positive test case.`);
 
     // Test successful retrieval for an existing user
     console.log("Testing: Successful retrieval of an existing user's profile.");
@@ -636,14 +592,10 @@ Deno.test("Query: _getProfile requires user exists", async () => {
       ["Science"].sort(),
       "Retrieved profile interests should match the created user.",
     );
-    console.log(
-      "  Existing user's profile successfully retrieved and verified, `effects` confirmed.",
-    );
+    console.log("  Existing user's profile successfully retrieved and verified, `effects` confirmed.");
 
     // Test failure for a non-existent user
-    console.log(
-      "Testing: Attempt to retrieve profile for a non-existent user.",
-    );
+    console.log("Testing: Attempt to retrieve profile for a non-existent user.");
     const nonExistentUserId = "user:nonexistent_h" as ID;
     const failResult = await userProfileConcept._getProfile({
       user: nonExistentUserId,
@@ -658,10 +610,9 @@ Deno.test("Query: _getProfile requires user exists", async () => {
       `User with ID '${nonExistentUserId}' not found.`,
       "Error message should indicate user not found.",
     );
-    console.log(
-      "  Retrieving profile for non-existent user correctly failed, requirement satisfied.",
-    );
+    console.log("  Retrieving profile for non-existent user correctly failed, requirement satisfied.");
   } finally {
     await client.close();
   }
 });
+```

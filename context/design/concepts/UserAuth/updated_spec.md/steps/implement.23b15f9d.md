@@ -1,3 +1,14 @@
+---
+timestamp: 'Tue Nov 25 2025 12:51:56 GMT-0500 (Eastern Standard Time)'
+parent: '[[../20251125_125156.1003e7d7.md]]'
+content_id: 23b15f9d836ba813c8033b09a2e557f92a6e8321d6dcc2c253d7f15296669ec8
+---
+
+# implement: UserAuth
+
+I want to update the UserAuth implementation I have now based on my new spec. This is my current implementation:
+
+```
 import { Collection, Db } from "npm:mongodb";
 import { Empty, ID } from "@utils/types.ts";
 
@@ -158,3 +169,37 @@ export default class PasswordAuthConcept {
     return { success: true };
   }
 }
+```
+
+This is my updated concept spec:
+
+```
+concept: UserAuth
+
+purpose:
+    Manages users that are registered under BuyBye.
+
+principles:
+    (1) Each user account is uniquely identified by an email address.
+    (2) Users can log in with valid credentials.
+
+state:
+    a set of RegisteredUsers with
+      a uid String  // unique id
+      an email String
+      a password String
+
+    signup (email: String, password: String): (user: RegisteredUsers)
+        requires
+            no registered user exists with matching email
+        effect
+            create a new registered user $u$ with (email, password);
+            add user $u$ to RegisteredUsers;
+            return user $u$;
+
+    login (email: String, password: String): (user: RegisteredUsers)
+        requires
+            exists a user in RegisteredUsers with matching (email, password)
+        effect
+            return this user;
+```
