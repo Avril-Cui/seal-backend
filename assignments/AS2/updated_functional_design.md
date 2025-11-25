@@ -100,7 +100,7 @@ actions:
     async getAIInsight (owner: User, item: Item): (llm_response: String)
         requires
             exists a wishlist $w$ with this user;
-            item's id exists in $w$'s itemIdSet;
+            item.itemId exists in $w$'s itemIdSet;
         effect
             send item to geminiLLM (including all the attributes under item, like description, price, reason, isNeed, isFutureApprove) and ask for insights on whether geminiLLM thinks this purchase is impulsive;
             return the llm_response;
@@ -133,7 +133,7 @@ principle:
 state:
     a set of Queues with
         an owner User
-        an itemSet set of Strings  // contains unique ids identifying items
+        an itemIdSet set of Strings  // contains unique ids identifying items
         a completedQueue Number
         a creationDate Date
 
@@ -148,15 +148,15 @@ actions:
         requires
             no queue exists with owner matching this user
         effect
-            create a queue with (owner, itemSet = itemIds, completedQueue = 0, and creationDate = current date);
+            create a queue with (owner, itemIdSet = itemIds, completedQueue = 0, and creationDate = current date);
 
     incrementCompletedQueue (owner: User, itemId: String)
         requires
             exists a queue $q$ under this user with current date;
-            itemId exists in $q$.itemSet;
+            itemId exists in $q$.itemIdSet;
         effect
             add one count to completedQueue;
-            remove itemId from $q$.itemSet;
+            remove itemId from $q$.itemIdSet;
 ```
 
 ### Note
@@ -458,7 +458,8 @@ where
     in Sessioning: user of session is owner
 
 then
-    QueueSystem.generateDailyQueue (owner) : (queue)
+    ItemCollection._getTenRandomItems(owner): (itemIdSet)
+    QueueSystem.generateDailyQueue (owner, itemIds: itemIdSet) : (queue)
     Requesting.respond (request, queue)
 ```
 
@@ -473,8 +474,8 @@ where
     in Sessioning: user of session is owner
     in QueueSystem: item is in current queue for owner
 then
-    SwipeSystem.recordSwipe (owner, item, decision, comment)
-    QueueSystem.incrementCompletedQueue (owner, item)
+    SwipeSystem.recordSwipe (owner, item.itemId, decision, comment)
+    QueueSystem.incrementCompletedQueue (owner, item.itemId)
     Requesting.respond (request, status: "recorded")
 ```
 
@@ -501,8 +502,8 @@ where
     comments is set of all c where
         there exists s in swipes with s.comment = c
 then
-    SwipeSystem._getSwipeStats(owner: user, item): (total, approval)
-    SwipeSystem._getSwipeComments (owner: user, item): (comments)
+    SwipeSystem._getSwipeStats(owner: user, item.itemId): (total, approval)
+    SwipeSystem._getSwipeComments (owner: user, item.itemId): (comments)
     Requesting.respond (request, { total, approval, comments })
 ```
 
