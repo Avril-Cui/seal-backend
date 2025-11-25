@@ -1,3 +1,14 @@
+---
+timestamp: 'Tue Nov 25 2025 13:38:45 GMT-0500 (Eastern Standard Time)'
+parent: '[[../20251125_133845.28658e8b.md]]'
+content_id: 89ab682403d0e45f0c098844d92bd662855382cce92bed36ba77ca426c7787dc
+---
+
+# concept: ItemCollection
+
+This is how I implemented my ItemCollection concept:
+
+```
 // src/concepts/ItemCollection/ItemCollectionConcept.ts
 import { Collection, Db } from "npm:mongodb";
 import { Empty, ID } from "@utils/types.ts";
@@ -587,3 +598,5 @@ Please provide insights on whether this purchase seems impulsive, considering th
     return [{ item: itemDoc }];
   }
 }
+
+```

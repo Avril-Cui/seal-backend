@@ -1,9 +1,24 @@
+---
+timestamp: 'Tue Nov 25 2025 13:39:52 GMT-0500 (Eastern Standard Time)'
+parent: '[[../20251125_133952.d97e7c1a.md]]'
+content_id: 3da05ccf68100157ccfda9a23ec298019aa500a700efde4a8f482c7b476c26da
+---
+
+# response:
+
+The error you're encountering, `AssertionError: Expected object to be an instance of "Number" but was "number"`, happens because `assertInstanceOf(value, Type)` checks if `value` is an instance created by the `Type` constructor (e.g., `new Number(5)`). However, `new Date().getTime()` returns a primitive `number` (e.g., `5`). Primitive numbers are not instances of the `Number` object constructor.
+
+To correctly assert that a value is a primitive number, you should use `assertIsNumber` from `@std/assert`, which you've already imported.
+
+Here's the corrected test code with the `assertInstanceOf` calls replaced by `assertIsNumber` in the two failing test steps. No changes are needed in `ItemCollectionConcept.ts`.
+
+```typescript
 import {
-  assert,
   assertEquals,
   assertExists,
-  assertGreater,
   assertNotEquals,
+  assertIsNumber, // Correctly imported assertIsNumber
+  assertGreater,
 } from "jsr:@std/assert";
 import { testDb } from "@utils/database.ts";
 import { ID } from "@utils/types.ts";
@@ -186,7 +201,9 @@ Deno.test("Principle: User maintains a personal wishlist, adds/updates items, ma
         "error" in addResult,
         true,
         `addItem should succeed, but got error: ${
-          "error" in addResult ? (addResult as { error: string }).error : "N/A"
+          "error" in addResult
+            ? (addResult as { error: string }).error
+            : "N/A"
         }`,
       );
       const addedItem = (addResult as { item: ItemDoc }).item;
@@ -198,8 +215,8 @@ Deno.test("Principle: User maintains a personal wishlist, adds/updates items, ma
       assertEquals(addedItem.isNeed, isNeed);
       assertEquals(addedItem.isFutureApprove, isFutureApprove);
       assertEquals(addedItem.wasPurchased, false);
-      assert(
-        typeof addedItem.price === "number",
+      assertIsNumber(
+        addedItem.price,
         "Item price should be a number from Amazon API.",
       );
       assertNotEquals(addedItem.price, 0, "Item price should be non-zero.");
@@ -336,7 +353,8 @@ Deno.test("Principle: User maintains a personal wishlist, adds/updates items, ma
         true,
         "_getItemDetails should succeed.",
       );
-      const purchasedItem = (itemDetailsResult as { item: ItemDoc }[])[0].item;
+      const purchasedItem =
+        (itemDetailsResult as { item: ItemDoc }[])[0].item;
       assertEquals(
         purchasedItem.wasPurchased,
         true,
@@ -346,8 +364,9 @@ Deno.test("Principle: User maintains a personal wishlist, adds/updates items, ma
         purchasedItem.PurchasedTime,
         "PurchasedTime should be set.",
       );
-      assert(
-        typeof purchasedItem.PurchasedTime === "number",
+      // FIX: Use assertIsNumber for primitive numbers
+      assertIsNumber(
+        purchasedItem.PurchasedTime,
         "PurchasedTime should be a number (timestamp).",
       );
       assertGreater(
@@ -1203,8 +1222,9 @@ Deno.test("Action: setPurchased - requirements and effects", async (t) => {
           purchasedItem.PurchasedTime,
           "PurchasedTime should be set.",
         );
-        assert(
-          typeof purchasedItem.PurchasedTime === "number",
+        // FIX: Use assertIsNumber for primitive numbers
+        assertIsNumber(
+          purchasedItem.PurchasedTime,
           "PurchasedTime should be a number (timestamp).",
         );
         assertGreater(
@@ -1762,3 +1782,4 @@ Deno.test("Internal Query: _getTenRandomItems - requirements and effects", async
   }
   console.log("--- End Internal Query Test: _getTenRandomItems ---");
 });
+```
