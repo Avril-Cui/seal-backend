@@ -84,14 +84,14 @@ actions:
     updateIsFutureApprove (owner: User, item: Item, isFutureApprove: String)
         requires
             exists a wishlist $w$ with this user;
-            item exists in $w$'s itemSet;
+            item.itemId exists in $w$'s itemIdSet;
         effect
             update the given attribute of this item;
 
     setPurchased (owner: User, item: Item)
         requires
             exists a wishlist $w$ with this user;
-            item $i$'s id exists in $w$'s itemIdSet;
+            item $i$.itemId exists in $w$'s itemIdSet;
             $i$.wasPurchased is False;
         effect
             set $i$.wasPurchased as True;
