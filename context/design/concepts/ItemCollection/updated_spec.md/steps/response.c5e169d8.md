@@ -1,0 +1,733 @@
+---
+timestamp: 'Tue Nov 25 2025 13:12:35 GMT-0500 (Eastern Standard Time)'
+parent: '[[../20251125_131235.8be78f8d.md]]'
+content_id: c5e169d8ab42956bd0b2a8c6b1d9e484b801735a7220d196fdc9fc86528ffbd5
+---
+
+# response:
+
+Let's update the `ItemCollectionConcept` implementation to align with the new concept specification, including the state definition, actions, and the new `_getTenRandomItems` action, and adjusted `getAIInsight` action.
+
+### Key Changes Identified:
+
+1. **Concept Type Parameters:** The spec clarifies `[User, AmazonAPI, GeminiLLM]`. The `Item` generic type parameter is removed from the concept's declaration, `itemId` is a `String` within the `Item` state.
+2. **State Structure (`ItemDoc` and `WishListDoc`):**
+   * `ItemDoc` now includes an `owner: User` field. Its `_id` will serve as `itemId`.
+   * `WishListDoc`'s `_id` will be `owner: User`, and its item list property is named `itemIdSet: ItemID[]`.
+   * `PurchasedTime` in `ItemDoc` will be `number | undefined`.
+3. **Action Return Types:** `addItem` explicitly states "return the added item", so it should return the full `ItemDoc`.
+4. **`getAIInsight` Action:**
+   * Adds `context_prompt: String` as an input argument.
+   * The prompt sent to the LLM will be a combination of `context_prompt` and item attributes.
+   * The `GeminiLLM` class provided in the note will be used, specifically its `executeLLM` method.
+5. **New Action `_getTenRandomItems`:** This query-like action needs to be implemented.
+6. **`PurchasedTime` type:** Changed from `Date` to `number` (timestamp).
+7. **`Item` type ambiguity:** In action signatures like `updateItemName (owner: User, item: Item, itemName: String)`, `item: Item` will be interpreted as `itemId: ID` (a string).
+8. **Commenting:** All actions will have updated JSDoc comments reflecting the `requires` and `effects` from the new spec.
+
+Let's refine the `GeminiLLMClient` interface for injection, reflecting the provided `GeminiLLM` class:
+
+```typescript
+// src/services/geminiLLM.ts (Refined from the provided class)
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+export interface GeminiLLMClientConfig {
+  apiKey: string;
+  maxRetries?: number;
+  timeoutMs?: number;
+  initialBackoffMs?: number;
+}
+
+export interface GeminiLLMClient {
+  executeLLM(prompt: string): Promise<string | { error: string }>; // Modified to return error object
+  clearCache(): void;
+}
+
+export class GeminiLLM implements GeminiLLMClient {
+  private apiKey: string;
+  private maxRetries: number;
+  private timeoutMs: number;
+  private initialBackoffMs: number;
+  private requestCache: Map<string, string> = new Map();
+
+  constructor(config: GeminiLLMClientConfig) {
+      this.apiKey = config.apiKey;
+      this.maxRetries = config.maxRetries ?? 3;
+      this.timeoutMs = config.timeoutMs ?? 30000;
+      this.initialBackoffMs = config.initialBackoffMs ?? 1000;
+  }
+
+  async executeLLM(prompt: string): Promise<string | { error: string }> {
+      const cachedResponse = this.requestCache.get(prompt);
+      if (cachedResponse) {
+          // console.log('✅ Using cached LLM response (idempotent request)');
+          return cachedResponse;
+      }
+
+      let lastError: Error | null = null;
+
+      for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+          try {
+              if (attempt > 0) {
+                  const backoffMs = this.initialBackoffMs * Math.pow(2, attempt - 1);
+                  // console.log(`⏳ Retrying LLM request (attempt ${attempt + 1}/${this.maxRetries + 1}) after ${backoffMs}ms backoff...`);
+                  await this.sleep(backoffMs);
+              }
+
+              const result = await this.executeWithTimeout(prompt);
+              this.requestCache.set(prompt, result);
+              return result;
+          } catch (error) {
+              lastError = error as Error;
+
+              if (this.isRetryableError(error)) {
+                  // console.warn(`⚠️ Retryable error on attempt ${attempt + 1}: ${(error as Error).message}`);
+                  continue;
+              } else {
+                  return { error: this.enhanceErrorMessage(error).message };
+              }
+          }
+      }
+      return { error: `❌ LLM request failed after ${this.maxRetries + 1} attempts. Last error: ${lastError?.message || 'Unknown error'}` };
+  }
+
+  private async executeWithTimeout(prompt: string): Promise<string> {
+      return new Promise(async (resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+              reject(new Error(`Request timed out after ${this.timeoutMs}ms`));
+          }, this.timeoutMs);
+
+          try {
+              const genAI = new GoogleGenerativeAI(this.apiKey);
+              const model = genAI.getGenerativeModel({
+                  model: "gemini-2.5-flash-lite",
+                  generationConfig: {
+                      maxOutputTokens: 1000,
+                      temperature: 0.1,
+                  }
+              });
+
+              const result = await model.generateContent(prompt);
+              const response = result.response;
+              const text = response.text();
+
+              clearTimeout(timeoutId);
+              resolve(text);
+          } catch (error) {
+              clearTimeout(timeoutId);
+              reject(error);
+          }
+      });
+  }
+
+  private isRetryableError(error: unknown): boolean {
+      const errorMessage = (error as Error).message?.toLowerCase() || '';
+      const retryablePatterns = [
+          'timeout', 'network', 'econnreset', 'enotfound', 'rate limit', 'quota exceeded', '429', '500', '502', '503', '504'
+      ];
+      return retryablePatterns.some(pattern => errorMessage.includes(pattern));
+  }
+
+  private enhanceErrorMessage(error: unknown): Error {
+      const originalError = error as Error;
+      const errorMessage = originalError.message || 'Unknown error';
+      if (errorMessage.includes('API key')) {
+          return new Error('API Authentication Error: Invalid or missing API key.');
+      }
+      if (errorMessage.includes('quota') || errorMessage.includes('rate limit')) {
+          return new Error('API Quota Error: Rate limit or quota exceeded.');
+      }
+      if (errorMessage.includes('timeout')) {
+          return new Error(`Timeout Error: Request exceeded ${this.timeoutMs}ms timeout.`);
+      }
+      if (errorMessage.includes('network') || errorMessage.includes('ECONNRESET')) {
+          return new Error('Network Error: Failed to connect to Gemini API.');
+      }
+      return new Error(`LLM Error: ${errorMessage}`);
+  }
+
+  clearCache(): void {
+      this.requestCache.clear();
+  }
+}
+```
+
+Now, here's the updated `ItemCollectionConcept` implementation:
+
+```typescript
+// src/concepts/ItemCollection/ItemCollectionConcept.ts
+import { Collection, Db } from "npm:mongodb";
+import { ID, Empty } from "@utils/types.ts";
+import { freshID } from "@utils/database.ts";
+import { AmazonAPIClient } from "@services/amazonAPI.ts";
+import { GeminiLLMClient } from "@services/geminiLLM.ts"; // Use the client interface
+
+// Declare collection prefix, use concept name
+const PREFIX = "ItemCollection" + ".";
+
+// Generic types of this concept (User is external ID)
+type User = ID;
+type ItemID = ID; // Renamed for clarity, this is the unique item identifier
+
+/**
+ * a set of Items with
+ *   an owner User
+ *   an itemId String  // this is a unique id, maps to _id
+ *   an itemName String
+ *   a description String
+ *   a photo String
+ *   a price Number
+ *   a reason String  // user's reflection on why they want to purchase
+ *   a isNeed String  // user's reflection on is this a "need" or "want"
+ *   a isFutureApprove String  // user's reflection on whether their future-self will like this purchase
+ *   an wasPurchased Flag
+ *   an PurchasedTime Number  [Optional]
+ */
+interface ItemDoc {
+  _id: ItemID; // This is the unique itemId
+  owner: User; // The owner of this specific item entry
+  itemName: string;
+  description: string;
+  photo: string;
+  price: number;
+  reason: string;
+  isNeed: string; // e.g., "yes", "no", "maybe"
+  isFutureApprove: string; // e.g., "yes", "no", "unsure"
+  wasPurchased: boolean;
+  PurchasedTime?: number; // Changed to number (timestamp)
+}
+
+/**
+ * a set of WishLists with
+ *     an owner User
+ *     an itemIdSet set of Strings  // this contains unique ids identifying items
+ */
+interface WishListDoc {
+  _id: User; // The owner ID is the _id of the wishlist document
+  itemIdSet: ItemID[]; // Renamed from itemIds
+}
+
+export default class ItemCollectionConcept {
+  private wishlists: Collection<WishListDoc>;
+  private items: Collection<ItemDoc>;
+  private amazonAPI: AmazonAPIClient;
+  private geminiLLM: GeminiLLMClient;
+
+  /**
+   * concept: ItemCollection [User, AmazonAPI, GeminiLLM]
+   *
+   * purpose:
+   *     Tracks and manage items that users are considering for purchase.
+   *
+   * principles:
+   *     (1) Users maintain a personal wishlist of items they intend to purchase.
+   *     (2) Adding an item requires users to enter reflection questions.
+   *     (3) Item metadata is fetched from AmazonAPI to reduce user effort.
+   *     (4) Users can update attributes of the items they own.
+   *     (5) Users can mark items as purchased after they made the purchase.
+   */
+  constructor(
+    private readonly db: Db,
+    amazonAPI: AmazonAPIClient,
+    geminiLLM: GeminiLLMClient,
+  ) {
+    this.wishlists = this.db.collection(PREFIX + "wishlists");
+    this.items = this.db.collection(PREFIX + "items");
+    this.amazonAPI = amazonAPI;
+    this.geminiLLM = geminiLLM;
+  }
+
+  /**
+   * _getTenRandomItems (owner: User): (itemIdSet: set of Strings)
+   *
+   * **requires**
+   *   exists at least ten items with owner not matching the given owner
+   *
+   * **effects**
+   *   select by random ten items with owner not matching the given owner;
+   *   return an itemIdSet containing the itemIds of these ten items;
+   */
+  async _getTenRandomItems({
+    owner,
+  }: {
+    owner: User;
+  }): Promise<{ itemIdSet: ItemID[] }[] | { error: string }> {
+    // Find items not owned by the given owner
+    const otherItems = await this.items.find({ owner: { $ne: owner } }).toArray();
+
+    if (otherItems.length < 10) {
+      // The spec says 'requires at least ten items', so if not, return an error.
+      // Alternatively, one could return fewer than 10 or an empty array depending on specific design choice.
+      return { error: "Not enough items from other owners to select ten." };
+    }
+
+    // Shuffle and pick 10 random items
+    for (let i = otherItems.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [otherItems[i], otherItems[j]] = [otherItems[j], otherItems[i]];
+    }
+
+    const randomTenItemIDs = otherItems.slice(0, 10).map((item) => item._id);
+
+    return [{ itemIdSet: randomTenItemIDs }];
+  }
+
+  /**
+   * addItem (owner: User, url: String, reason: String, isNeed: String, isFutureApprove: String): (item: ItemDoc)
+   *
+   * **effect**
+   *   fetch item's itemName, description, photo, and price with amazonAPI;
+   *   generate a new unique itemId;
+   *   create a new item with (owner, itemId, itemName, description, photo, price, reason, isNeed, isFutureApprove, wasPurchased=False);
+   *   add item to the itemIdSet under the wishlist with owner matching this user;
+   *   return the added item;
+   */
+  async addItem({
+    owner,
+    url,
+    reason,
+    isNeed,
+    isFutureApprove,
+  }: {
+    owner: User;
+    url: string;
+    reason: string;
+    isNeed: string;
+    isFutureApprove: string;
+  }): Promise<{ item: ItemDoc } | { error: string }> {
+    // 1. Fetch item details from Amazon API
+    const amazonDetails = await this.amazonAPI.fetchItemDetails(url);
+    if ("error" in amazonDetails) {
+      return { error: `Amazon API error: ${amazonDetails.error}` };
+    }
+
+    const newItemId = freshID();
+    const newItem: ItemDoc = {
+      _id: newItemId,
+      owner, // Now part of the ItemDoc
+      itemName: amazonDetails.itemName,
+      description: amazonDetails.description,
+      photo: amazonDetails.photo,
+      price: amazonDetails.price,
+      reason,
+      isNeed,
+      isFutureApprove,
+      wasPurchased: false,
+    };
+
+    // 2. Insert new item into the items collection
+    await this.items.insertOne(newItem);
+
+    // 3. Find or create the wishlist for the owner and add the item
+    const existingWishlist = await this.wishlists.findOne({ _id: owner }); // Use owner as _id
+
+    if (existingWishlist) {
+      // Add to existing wishlist, avoiding duplicates
+      if (!existingWishlist.itemIdSet.includes(newItemId)) {
+        await this.wishlists.updateOne(
+          { _id: owner },
+          { $push: { itemIdSet: newItemId } },
+        );
+      }
+    } else {
+      // Create a new wishlist for the owner
+      await this.wishlists.insertOne({
+        _id: owner, // owner is the _id
+        itemIdSet: [newItemId],
+      });
+    }
+
+    return { item: newItem };
+  }
+
+  /**
+   * removeItem (owner: User, itemId: String)
+   *
+   * **requires**
+   *   exists a wishlist $w$ with this user;
+   *   itemId exists in $w$'s itemIdSet;
+   *
+   * **effect**
+   *   remove itemId from the itemIdSet;
+   */
+  async removeItem({
+    owner,
+    itemId,
+  }: {
+    owner: User;
+    itemId: ItemID;
+  }): Promise<Empty | { error: string }> {
+    const wishlist = await this.wishlists.findOne({ _id: owner });
+
+    if (!wishlist) {
+      return { error: `No wishlist found for owner: ${owner}` };
+    }
+    if (!wishlist.itemIdSet.includes(itemId)) {
+      return {
+        error: `Item ${itemId} not found in wishlist for owner: ${owner}`,
+      };
+    }
+
+    await this.wishlists.updateOne(
+      { _id: owner },
+      { $pull: { itemIdSet: itemId } },
+    );
+
+    // The spec only mentions removing from the itemIdSet, not deleting the item itself.
+    // So, we do not delete the item from the 'items' collection here.
+
+    return {};
+  }
+
+  // --- Update Actions ---
+
+  /**
+   * _updateItemAttribute(owner: User, itemId: ItemID, field: keyof ItemDoc, value: any): Promise<Empty | { error: string }>
+   * Helper function for common update logic.
+   */
+  private async _updateItemAttribute<K extends keyof ItemDoc>(
+    owner: User,
+    itemId: ItemID,
+    field: K,
+    value: ItemDoc[K],
+  ): Promise<Empty | { error: string }> {
+    const wishlist = await this.wishlists.findOne({ _id: owner });
+
+    if (!wishlist) {
+      return { error: `No wishlist found for owner: ${owner}` };
+    }
+    if (!wishlist.itemIdSet.includes(itemId)) {
+      return {
+        error: `Item ${itemId} not found in wishlist for owner: ${owner}`,
+      };
+    }
+
+    const itemDoc = await this.items.findOne({ _id: itemId, owner }); // Also check owner consistency
+    if (!itemDoc) {
+      return { error: `Item details for ${itemId} not found or not owned by ${owner}.` };
+    }
+
+    await this.items.updateOne({ _id: itemId, owner }, { $set: { [field]: value } });
+    return {};
+  }
+
+  /**
+   * updateItemName (owner: User, item: ItemID, itemName: String)
+   *
+   * **requires**
+   *   exists a wishlist $w$ with this user;
+   *   item.itemId exists in $w$'s itemIdSet;
+   *
+   * **effect**
+   *   update the itemName attribute of this item;
+   */
+  async updateItemName({
+    owner,
+    item: itemId, // Renamed 'item' argument to 'itemId' for clarity matching spec interpretation
+    itemName,
+  }: {
+    owner: User;
+    item: ItemID;
+    itemName: string;
+  }): Promise<Empty | { error: string }> {
+    return this._updateItemAttribute(owner, itemId, "itemName", itemName);
+  }
+
+  /**
+   * updateDescription (owner: User, item: ItemID, description: String)
+   *
+   * **requires**
+   *   exists a wishlist $w$ with this user;
+   *   item.itemId exists in $w$'s itemIdSet;
+   *
+   * **effect**
+   *   update the description attribute of this item;
+   */
+  async updateDescription({
+    owner,
+    item: itemId,
+    description,
+  }: {
+    owner: User;
+    item: ItemID;
+    description: string;
+  }): Promise<Empty | { error: string }> {
+    return this._updateItemAttribute(owner, itemId, "description", description);
+  }
+
+  /**
+   * updatePhoto (owner: User, item: ItemID, photo: String)
+   *
+   * **requires**
+   *   exists a wishlist $w$ with this user;
+   *   item.itemId exists in $w$'s itemIdSet;
+   *
+   * **effect**
+   *   update the photo attribute of this item;
+   */
+  async updatePhoto({
+    owner,
+    item: itemId,
+    photo,
+  }: {
+    owner: User;
+    item: ItemID;
+    photo: string;
+  }): Promise<Empty | { error: string }> {
+    return this._updateItemAttribute(owner, itemId, "photo", photo);
+  }
+
+  /**
+   * updatePrice (owner: User, item: ItemID, price: Number)
+   *
+   * **requires**
+   *   exists a wishlist $w$ with this user;
+   *   item.itemId exists in $w$'s itemIdSet;
+   *
+   * **effect**
+   *   update the price attribute of this item;
+   */
+  async updatePrice({
+    owner,
+    item: itemId,
+    price,
+  }: {
+    owner: User;
+    item: ItemID;
+    price: number;
+  }): Promise<Empty | { error: string }> {
+    // Additional practical validation (not explicitly in spec, but good practice)
+    if (price < 0) {
+      return { error: "Price cannot be negative." };
+    }
+    return this._updateItemAttribute(owner, itemId, "price", price);
+  }
+
+  /**
+   * updateReason (owner: User, item: ItemID, reason: String)
+   *
+   * **requires**
+   *   exists a wishlist $w$ with this user;
+   *   item.itemId exists in $w$'s itemIdSet;
+   *
+   * **effect**
+   *   update the reason attribute of this item;
+   */
+  async updateReason({
+    owner,
+    item: itemId,
+    reason,
+  }: {
+    owner: User;
+    item: ItemID;
+    reason: string;
+  }): Promise<Empty | { error: string }> {
+    return this._updateItemAttribute(owner, itemId, "reason", reason);
+  }
+
+  /**
+   * updateIsNeed (owner: User, item: ItemID, isNeed: String)
+   *
+   * **requires**
+   *   exists a wishlist $w$ with this user;
+   *   item.itemId exists in $w$'s itemIdSet;
+   *
+   * **effect**
+   *   update the isNeed attribute of this item;
+   */
+  async updateIsNeed({
+    owner,
+    item: itemId,
+    isNeed,
+  }: {
+    owner: User;
+    item: ItemID;
+    isNeed: string;
+  }): Promise<Empty | { error: string }> {
+    return this._updateItemAttribute(owner, itemId, "isNeed", isNeed);
+  }
+
+  /**
+   * updateIsFutureApprove (owner: User, item: ItemID, isFutureApprove: String)
+   *
+   * **requires**
+   *   exists a wishlist $w$ with this user;
+   *   item.itemId exists in $w$'s itemIdSet;
+   *
+   * **effect**
+   *   update the isFutureApprove attribute of this item;
+   */
+  async updateIsFutureApprove({
+    owner,
+    item: itemId,
+    isFutureApprove,
+  }: {
+    owner: User;
+    item: ItemID;
+    isFutureApprove: string;
+  }): Promise<Empty | { error: string }> {
+    return this._updateItemAttribute(
+      owner,
+      itemId,
+      "isFutureApprove",
+      isFutureApprove,
+    );
+  }
+
+  /**
+   * setPurchased (owner: User, item: ItemID)
+   *
+   * **requires**
+   *   exists a wishlist $w$ with this user;
+   *   item $i$.itemId exists in $w$'s itemIdSet;
+   *   $i$.wasPurchased is False;
+   *
+   * **effect**
+   *   set $i$.wasPurchased as True;
+   *   set $i$.PurchasedTime as the current time of this action;
+   */
+  async setPurchased({
+    owner,
+    item: itemId,
+  }: {
+    owner: User;
+    item: ItemID;
+  }): Promise<Empty | { error: string }> {
+    const wishlist = await this.wishlists.findOne({ _id: owner });
+
+    if (!wishlist) {
+      return { error: `No wishlist found for owner: ${owner}` };
+    }
+    if (!wishlist.itemIdSet.includes(itemId)) {
+      return {
+        error: `Item ${itemId} not found in wishlist for owner: ${owner}`,
+      };
+    }
+
+    const itemDoc = await this.items.findOne({ _id: itemId, owner }); // Check owner consistency
+    if (!itemDoc) {
+      return { error: `Item details for ${itemId} not found or not owned by ${owner}.` };
+    }
+    if (itemDoc.wasPurchased) {
+      return { error: `Item ${itemId} has already been marked as purchased.` };
+    }
+
+    await this.items.updateOne(
+      { _id: itemId, owner },
+      { $set: { wasPurchased: true, PurchasedTime: new Date().getTime() } }, // Use timestamp (number)
+    );
+    return {};
+  }
+
+  /**
+   * async getAIInsight (owner: User, item: ItemID, context_prompt: String): (llm_response: String)
+   *
+   * **requires**
+   *   exists a wishlist $w$ with this user;
+   *   item.itemId exists in $w$'s itemIdSet;
+   *
+   * **effect**
+   *   send context_prompt with the item to geminiLLM (including all the attributes under item, like description, price, reason, isNeed, isFutureApprove) and ask for insights on whether geminiLLM thinks this purchase is impulsive;
+   *   return the llm_response;
+   */
+  async getAIInsight({
+    owner,
+    item: itemId,
+    context_prompt,
+  }: {
+    owner: User;
+    item: ItemID;
+    context_prompt: string;
+  }): Promise<{ llm_response: string } | { error: string }> {
+    const wishlist = await this.wishlists.findOne({ _id: owner });
+
+    if (!wishlist) {
+      return { error: `No wishlist found for owner: ${owner}` };
+    }
+    if (!wishlist.itemIdSet.includes(itemId)) {
+      return {
+        error: `Item ${itemId} not found in wishlist for owner: ${owner}`,
+      };
+    }
+
+    const itemDoc = await this.items.findOne({ _id: itemId, owner }); // Check owner consistency
+    if (!itemDoc) {
+      return { error: `Item details for ${itemId} not found or not owned by ${owner}.` };
+    }
+
+    const { itemName, description, price, reason, isNeed, isFutureApprove } =
+      itemDoc;
+
+    // Construct the full prompt for the LLM
+    const fullPrompt = `${context_prompt}
+
+Here are the details of the item:
+Item Name: ${itemName}
+Description: ${description}
+Price: $${price}
+User's Reason for wanting it: ${reason}
+Is this a "need" or "want"? ${isNeed}
+Will my future self approve of this purchase? ${isFutureApprove}
+
+Please provide insights on whether this purchase seems impulsive, considering the user's reflections.`;
+
+    const llmResponse = await this.geminiLLM.executeLLM(fullPrompt);
+
+    if ("error" in llmResponse) {
+      return { error: `LLM API error: ${llmResponse.error}` };
+    }
+
+    return { llm_response: llmResponse };
+  }
+
+  // --- Queries ---
+
+  /**
+   * _getWishListItems (owner: User): (item: ItemDoc)
+   *
+   * **requires** owner exists and has a wishlist
+   *
+   * **effects** returns a set of all item documents in the owner's wishlist
+   */
+  async _getWishListItems({
+    owner,
+  }: {
+    owner: User;
+  }): Promise<{ item: ItemDoc }[] | { error: string }> {
+    const wishlist = await this.wishlists.findOne({ _id: owner });
+    if (!wishlist) {
+      return { error: `No wishlist found for owner: ${owner}` };
+    }
+
+    if (wishlist.itemIdSet.length === 0) {
+      return [];
+    }
+
+    // Ensure items returned are also owned by the user, for consistency
+    const items = await this.items
+      .find({ _id: { $in: wishlist.itemIdSet }, owner })
+      .toArray();
+
+    return items.map((item) => ({ item }));
+  }
+
+  /**
+   * _getItemDetails (itemId: ItemID): (item: ItemDoc)
+   *
+   * **requires** item exists
+   *
+   * **effects** returns the details of a specific item
+   */
+  async _getItemDetails({
+    itemId,
+  }: {
+    itemId: ItemID;
+  }): Promise<{ item: ItemDoc }[] | { error: string }> {
+    const itemDoc = await this.items.findOne({ _id: itemId });
+    if (!itemDoc) {
+      return { error: `Item details for ${itemId} not found.` };
+    }
+    return [{ item: itemDoc }];
+  }
+}
+```

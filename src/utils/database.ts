@@ -1,8 +1,19 @@
-// This import loads the `.env` file as environment variables
-import "jsr:@std/dotenv/load";
+import { loadSync } from "jsr:@std/dotenv";
 import { Db, MongoClient } from "npm:mongodb";
 import { ID } from "@utils/types.ts";
 import { generate } from "jsr:@std/uuid/unstable-v7";
+
+try {
+  loadSync({ export: true });
+} catch (error) {
+  if (error instanceof Deno.errors.PermissionDenied) {
+    console.warn(
+      "Skipping .env loading due to permission restrictions. Ensure env vars are set.",
+    );
+  } else {
+    throw error;
+  }
+}
 
 async function initMongoClient() {
   const DB_CONN = Deno.env.get("MONGODB_URL");

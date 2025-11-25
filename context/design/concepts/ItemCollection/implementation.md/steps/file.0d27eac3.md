@@ -1,11 +1,18 @@
+---
+timestamp: 'Sun Nov 23 2025 13:25:17 GMT-0500 (Eastern Standard Time)'
+parent: '[[../20251123_132517.74fb586c.md]]'
+content_id: 0d27eac3cfe2795b0d283036eb897110942d633223153f359f24fb9c5765f303
+---
+
+# file: deno.json
+
+```json
 {
     "imports": {
         "@concepts/": "./src/concepts/",
         "@concepts": "./src/concepts/concepts.ts",
-        "@google/generative-ai": "npm:@google/generative-ai@^0.24.1",
         "@test-concepts": "./src/concepts/test_concepts.ts",
         "@utils/": "./src/utils/",
-        "@services/": "./src/services/",
         "@engine": "./src/engine/mod.ts",
         "@syncs": "./src/syncs/syncs.ts"
     },
@@ -24,3 +31,4 @@
         }
     }
 }
+```

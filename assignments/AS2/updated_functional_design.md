@@ -97,12 +97,12 @@ actions:
             set $i$.wasPurchased as True;
             set $i$.PurchasedTime as the current time of this action;
     
-    async getAIInsight (owner: User, item: Item): (llm_response: String)
+    async getAIInsight (owner: User, item: Item, context_prompt: String): (llm_response: String)
         requires
             exists a wishlist $w$ with this user;
             item.itemId exists in $w$'s itemIdSet;
         effect
-            send item to geminiLLM (including all the attributes under item, like description, price, reason, isNeed, isFutureApprove) and ask for insights on whether geminiLLM thinks this purchase is impulsive;
+            send context_prompt with the item to geminiLLM (including all the attributes under item, like description, price, reason, isNeed, isFutureApprove) and ask for insights on whether geminiLLM thinks this purchase is impulsive;
             return the llm_response;
 
 ```
