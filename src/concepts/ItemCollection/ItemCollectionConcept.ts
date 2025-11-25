@@ -483,11 +483,9 @@ export default class ItemCollectionConcept {
   async getAIInsight({
     owner,
     item: itemId,
-    context_prompt,
   }: {
     owner: User;
     item: ItemID;
-    context_prompt: string;
   }): Promise<{ llm_response: string } | { error: string }> {
     const wishlist = await this.wishlists.findOne({ _id: owner });
 
@@ -507,34 +505,25 @@ export default class ItemCollectionConcept {
       };
     }
 
-    const { itemName, description, price, reason, isNeed, isFutureApprove } =
-      itemDoc;
+    // Build the prompt for the LLM
+    const prompt = `Please analyze this purchase decision:
 
-    // Construct the full prompt for the LLM
-    const fullPrompt = `${context_prompt}
+Item: ${itemDoc.itemName}
+Description: ${itemDoc.description}
+Price: $${itemDoc.price}
+User's reason: ${itemDoc.reason}
+Is this a need? ${itemDoc.isNeed}
+Will future self approve? ${itemDoc.isFutureApprove}
 
-Here are the details of the item:
-Item Name: ${itemName}
-Description: ${description}
-Price: $${price}
-User's Reason for wanting it: ${reason}
-Is this a "need" or "want"? ${isNeed}
-Will my future self approve of this purchase? ${isFutureApprove}
+Based on these reflections, provide insight on whether this purchase seems impulsive or well-considered.`;
 
-Please provide insights on whether this purchase seems impulsive, considering the user's reflections.`;
+    const llmResponse = await this.geminiLLM.executeLLM(prompt);
 
-    const llmResponse = await this.geminiLLM.executeLLM(fullPrompt);
-
-    // IMPROVED TYPE GUARD: Check if llmResponse is an object AND has an 'error' property
-    if (
-      typeof llmResponse === "object" && llmResponse !== null &&
-      "error" in llmResponse
-    ) {
+    if (typeof llmResponse === "object" && "error" in llmResponse) {
       return { error: `LLM API error: ${llmResponse.error}` };
     }
 
-    // Now TypeScript knows llmResponse must be a string if it didn't enter the error block
-    return { llm_response: llmResponse };
+    return { llm_response: llmResponse as string };
   }
 
   // --- Queries ---

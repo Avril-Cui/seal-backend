@@ -133,12 +133,12 @@ class MockGeminiLLMClient implements GeminiLLMClient {
     if (prompt.includes("impulsive")) {
       return "Based on the provided details, the purchase appears to be well-considered rather than impulsive.";
     }
-    return `Mock LLM response for prompt: "${
-      prompt.substring(0, Math.min(prompt.length, 50))
-    }"...`;
+    return `Mock LLM response for the given purchase analysis.`;
   }
 
-  clearCache(): void {} // Required by GeminiLLMClient interface
+  clearCache(): void {
+    // Mock implementation - no cache to clear
+  }
 }
 // endregion
 
@@ -373,7 +373,6 @@ Deno.test("Principle: User maintains a personal wishlist, adds/updates items, ma
       const insightResult = await itemCollectionConcept.getAIInsight({
         owner: userA,
         item: itemId,
-        context_prompt: contextPrompt,
       });
 
       assertNotEquals(
@@ -1298,7 +1297,6 @@ Deno.test("Action: getAIInsight - requirements and effects", async (t) => {
       const result = await itemCollectionConcept.getAIInsight({
         owner: userB,
         item: itemId,
-        context_prompt: contextPrompt,
       });
       assertEquals(
         "error" in result,
@@ -1325,11 +1323,10 @@ Deno.test("Action: getAIInsight - requirements and effects", async (t) => {
         console.log(
           `Trace: Attempting to get AI insight for non-existent item (${nonExistentItemId}) in userA's wishlist.`,
         );
-        const result = await itemCollectionConcept.getAIInsight({
-          owner: userA,
-          item: nonExistentItemId,
-          context_prompt: contextPrompt,
-        });
+         const result = await itemCollectionConcept.getAIInsight({
+           owner: userA,
+           item: nonExistentItemId,
+         });
         assertEquals(
           "error" in result,
           true,
@@ -1357,7 +1354,6 @@ Deno.test("Action: getAIInsight - requirements and effects", async (t) => {
       const result = await itemCollectionConcept.getAIInsight({
         owner: userA,
         item: itemId,
-        context_prompt: contextPrompt,
       });
       geminiLLM.setShouldFail(false); // Reset for other tests
 
@@ -1389,7 +1385,6 @@ Deno.test("Action: getAIInsight - requirements and effects", async (t) => {
       const insightResult = await itemCollectionConcept.getAIInsight({
         owner: userA,
         item: itemId,
-        context_prompt: contextPrompt,
       });
 
       assertNotEquals(
