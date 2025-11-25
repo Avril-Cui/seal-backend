@@ -231,6 +231,7 @@ Deno.test("Principle Trace: User records, updates swipe, and feedback is availab
       }. Correct.`,
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -338,6 +339,7 @@ Deno.test("Action: recordSwipe - requirements and effects", async () => {
       `  -> Swipe recorded without comment. Comments query failed as expected.`,
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -503,6 +505,7 @@ Deno.test("Action: updateDecision - requirements and effects", async () => {
       `  -> Swipe updated decision and comment re-added. Stats: approval=0. Comment: 'Re-added comment.'`,
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -612,6 +615,7 @@ Deno.test("Action: _getSwipeStats - requirements and effects", async () => {
       `  -> Alice's stats for Movie: Total=1, Approval=0. Correctly reflects 'Don't Buy'.`,
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -700,6 +704,7 @@ Deno.test("Action: _getSwipeComments - requirements and effects", async () => {
       }`,
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });

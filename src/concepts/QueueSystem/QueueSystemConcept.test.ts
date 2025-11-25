@@ -155,6 +155,7 @@ Deno.test("Principle: User generates a queue, completes items, and views updated
       "Principle fulfillment: User A successfully generated a queue, completed items, and observed the completion count increase as expected.",
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -245,6 +246,7 @@ Deno.test("Action: generateDailyQueue requirements are enforced", async (t) => {
       console.log(`Effect confirmed: completedQueue is 0 for the new queue.`);
     });
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -310,6 +312,7 @@ Deno.test("Action: _getCompletedQueue requirements and effects", async (t) => {
       );
     });
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -421,6 +424,7 @@ Deno.test("Action: incrementCompletedQueue requirements and effects", async (t) 
     // through the concept's public/internal helper methods.
     // If a helper like `_getQueueItems({owner})` existed, it would be used here.
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });

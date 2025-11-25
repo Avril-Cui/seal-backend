@@ -222,6 +222,7 @@ Deno.test("Principle: User customizes profile on signup, then edits it", async (
       "\nPrinciple Fulfilled: The series of actions demonstrate that a user can successfully customize their profile on signup and then modify various aspects of their profile, aligning with the UserProfile concept's principle.",
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -298,6 +299,7 @@ Deno.test("Action: createUser requires no existing user with matching UID", asyn
       "  Original user's profile verified to be unchanged, confirming `effects` for failed action.",
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -369,6 +371,7 @@ Deno.test("Action: updateProfileName requires user exists", async () => {
       "  Updating name for non-existent user correctly failed, requirement satisfied.",
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -446,6 +449,7 @@ Deno.test("Action: updateProfilePicture requires user exists", async () => {
       "  Updating profile picture for non-existent user correctly failed, requirement satisfied.",
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -509,6 +513,7 @@ Deno.test("Action: updatePassword requires user exists", async () => {
       "  Updating password for non-existent user correctly failed, requirement satisfied.",
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -587,6 +592,7 @@ Deno.test("Action: updateInterests requires user exists", async () => {
       "  Updating interests for non-existent user correctly failed, requirement satisfied.",
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -662,6 +668,7 @@ Deno.test("Query: _getProfile requires user exists", async () => {
       "  Retrieving profile for non-existent user correctly failed, requirement satisfied.",
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });

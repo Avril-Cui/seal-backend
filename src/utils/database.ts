@@ -64,13 +64,15 @@ export async function getDb() {
 
 /**
  * Test database initialization
+ * Creates a unique test database per test to avoid conflicts
+ * IMPORTANT: Tests should drop the database at the end using: await testDb.dropDatabase()
  * @returns {[Db, MongoClient]} initialized test database and client
  */
 export async function testDb() {
   const [client, DB_NAME] = await init();
-  // Use a unique database name for each test to avoid interference
-  // MongoDB has a 38-byte database name limit, so use a short random suffix
-  const uniqueId = Math.random().toString(36).substring(2, 10);
+  // Use a unique database name for each test to avoid interference during parallel execution
+  // Use timestamp + random suffix to ensure uniqueness
+  const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
   const test_DB_NAME = `test-${uniqueId}`;
   const test_Db = client.db(test_DB_NAME);
   await dropAllCollections(test_Db);

@@ -96,6 +96,7 @@ Deno.test("Principle: User accounts are unique by email, and users can log in", 
       },
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -202,6 +203,7 @@ Deno.test("Action: signup - requirements and effects", async (t) => {
       },
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -313,6 +315,7 @@ Deno.test("Action: login - requirements and effects", async (t) => {
       },
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });

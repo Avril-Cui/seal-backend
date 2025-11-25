@@ -8,5 +8,5 @@ src/concepts/concepts.ts
 src/concepts/test_concepts.ts
 src/syncs/syncs.ts
 .env
-node_modules/node_modules/
 node_modules/
+.claude/

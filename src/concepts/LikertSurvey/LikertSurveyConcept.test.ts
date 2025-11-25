@@ -99,6 +99,7 @@ Deno.test("Principle: Author creates survey, respondent answers, author views re
       "The respondent should have two answers recorded.",
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -132,6 +133,7 @@ Deno.test("Action: createSurvey requires scaleMin < scaleMax", async () => {
       "Should fail when scaleMin == scaleMax.",
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -152,6 +154,7 @@ Deno.test("Action: addQuestion requires an existing survey", async () => {
       "Adding a question to a non-existent survey should fail.",
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -230,6 +233,7 @@ Deno.test("Action: submitResponse requirements are enforced", async () => {
       "Submitting a value above the maximum scale should fail.",
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });
@@ -303,6 +307,7 @@ Deno.test("Action: updateResponse successfully updates a response and enforces r
       "The answer's value should be updated to 5.",
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
 });

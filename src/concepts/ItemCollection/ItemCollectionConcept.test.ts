@@ -401,6 +401,7 @@ Deno.test("Principle: User maintains a personal wishlist, adds/updates items, ma
       );
     });
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
   console.log("--- End Principle Test ---");
@@ -580,6 +581,7 @@ Deno.test("Action: addItem - requirements and effects", async (t) => {
       },
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
   console.log("--- End Action Test: addItem ---");
@@ -741,6 +743,7 @@ Deno.test("Action: removeItem - requirements and effects", async (t) => {
       },
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
   console.log("--- End Action Test: removeItem ---");
@@ -1089,6 +1092,7 @@ Deno.test("Action: update* methods - requirements and effects", async (t) => {
       console.log("Effect confirmed: isFutureApprove updated.");
     });
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
   console.log("--- End Action Test: update* methods ---");
@@ -1255,6 +1259,7 @@ Deno.test("Action: setPurchased - requirements and effects", async (t) => {
       },
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
   console.log("--- End Action Test: setPurchased ---");
@@ -1412,6 +1417,7 @@ Deno.test("Action: getAIInsight - requirements and effects", async (t) => {
       );
     });
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
   console.log("--- End Action Test: getAIInsight ---");
@@ -1544,6 +1550,7 @@ Deno.test("Query: _getWishListItems - requirements and effects", async (t) => {
       },
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
   console.log("--- End Query Test: _getWishListItems ---");
@@ -1636,6 +1643,7 @@ Deno.test("Query: _getItemDetails - requirements and effects", async (t) => {
       },
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
   console.log("--- End Query Test: _getItemDetails ---");
@@ -1766,6 +1774,7 @@ Deno.test("Internal Query: _getTenRandomItems - requirements and effects", async
       },
     );
   } finally {
+    await db.dropDatabase();
     await client.close();
   }
   console.log("--- End Internal Query Test: _getTenRandomItems ---");
