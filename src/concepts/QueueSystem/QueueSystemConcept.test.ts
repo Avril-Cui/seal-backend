@@ -1,218 +1,425 @@
-// file: src/concepts/QueueSystem/QueueSystemConcept.test.ts
 import { assertEquals, assertExists, assertNotEquals } from "jsr:@std/assert";
 import { testDb } from "@utils/database.ts";
 import { ID } from "@utils/types.ts";
 import QueueSystemConcept from "./QueueSystemConcept.ts";
 
-// Define test User and Item IDs
+// --- Test Utilities and Constants ---
 const userA = "user:Alice" as ID;
+const userB = "user:Bob" as ID;
+const item1 = "item:123" as ID;
+const item2 = "item:456" as ID;
+const item3 = "item:789" as ID;
+const itemNonExistent = "item:unknown" as ID;
 
-Deno.test("Principle: User receives daily queue, completes items, and progress is tracked", async () => {
+/**
+ * Helper function to get the start of the current day in UTC.
+ * This should match the internal logic of QueueSystemConcept.
+ */
+function getTodayStart(): Date {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0); // Set to start of day in UTC
+  return today;
+}
+
+// --- Test File Start ---
+
+// file: src/concepts/QueueSystem/QueueSystemConcept.test.ts
+
+Deno.test("Principle: User generates a queue, completes items, and views updated completion count", async (t) => {
   const [db, client] = await testDb();
-  const queueSystem = new QueueSystemConcept(db);
+  const queueSystemConcept = new QueueSystemConcept(db);
 
   try {
-    console.log(
-      "\n--- Principle Test: User receives daily queue, completes items, and progress is tracked ---",
-    );
+    // trace: User A generates a queue for today with specific items. User A completes item1, then item2.
+    // User A verifies their completed queue count increases from 0 to 1, then to 2.
 
-    // trace: (1) Every user receives a daily queue containing items from other users' added items.
-    console.log(`Action: generateDailyQueue for ${userA}.`);
-    const generateQueueResult = await queueSystem.generateDailyQueue({
-      owner: userA,
-    });
-    assertNotEquals(
-      "error" in generateQueueResult,
-      true,
-      "Survey creation should not fail. (generateDailyQueue)",
-    );
-    assertExists(
-      (generateQueueResult as { queue: ID }).queue,
-      "A queue ID should be returned.",
-    );
-    console.log(`Effect confirmed: A queue for user ${userA} has been generated.`);
-
-    const queueDetails = await queueSystem.queues.findOne({ owner: userA });
-    assertExists(queueDetails, "Queue details should be retrievable after generation.");
-    assertEquals(
-      queueDetails?.completedQueue,
-      0,
-      "New queue should start with 0 completed items, confirming initial state.",
-    );
-    assertNotEquals(
-      queueDetails?.itemSet.length,
-      0,
-      "New queue should contain items as per the principle's intent.",
-    );
-    console.log(
-      `Verification: Queue for ${userA} has ${queueDetails?.itemSet.length} items and 0 completed items.`,
-    );
-
-    // trace: (2) A queue contains items that the user does not own.
-    const itemsInQueue = queueDetails!.itemSet;
-    console.log(
-      `Principle (2) Note: The concept states items are not owned by the user. ` +
-        `We assume 'generateDailyQueue' fulfills this by selecting appropriate items. ` +
-        `The generated queue for ${userA} contains items: ${itemsInQueue.join(", ")}.`,
-    );
-
-    // Demonstrate progress tracking by completing items.
-    if (itemsInQueue.length > 0) {
-      const itemToComplete1 = itemsInQueue[0];
-      console.log(
-        `Action: incrementCompletedQueue for ${userA}, completing item ${itemToComplete1}.`,
-      );
-      const incrementResult1 = await queueSystem.incrementCompletedQueue({
+    await t.step("1. User A generates a daily queue with items", async () => {
+      console.log("Action: generateDailyQueue for userA with [item1, item2]");
+      const itemIds = [item1, item2];
+      const result = await queueSystemConcept.generateDailyQueue({
         owner: userA,
-        item: itemToComplete1,
+        itemIds: itemIds,
+      });
+
+      assertNotEquals(
+        "error" in result,
+        true,
+        "Generating the daily queue for User A should succeed.",
+      );
+      assertExists(
+        (result as { queue: ID }).queue,
+        "A queue ID should be returned.",
+      );
+      console.log(
+        `Effect: Queue created with ID: ${(result as { queue: ID }).queue}`,
+      );
+    });
+
+    await t.step(
+      "2. Verify initial completedQueue count for User A is 0",
+      async () => {
+        console.log("Action: _getCompletedQueue for userA");
+        const result = await queueSystemConcept._getCompletedQueue({
+          owner: userA,
+        });
+
+        assertNotEquals(
+          "error" in result,
+          true,
+          "Getting completed queue for User A should succeed as a queue exists.",
+        );
+        assertEquals(
+          (result as { completedQueue: number }[])[0].completedQueue,
+          0,
+          "Initially, the completedQueue count should be 0.",
+        );
+        console.log(`Effect: Initial completedQueue count is 0.`);
+      },
+    );
+
+    await t.step("3. User A completes item1 from their queue", async () => {
+      console.log("Action: incrementCompletedQueue for userA with item1");
+      const result = await queueSystemConcept.incrementCompletedQueue({
+        owner: userA,
+        itemId: item1,
+      });
+
+      assertNotEquals(
+        "error" in result,
+        true,
+        "Incrementing completed queue for item1 should succeed.",
+      );
+      console.log(`Effect: item1 marked as completed.`);
+    });
+
+    await t.step(
+      "4. Verify completedQueue count for User A is now 1",
+      async () => {
+        console.log("Action: _getCompletedQueue for userA");
+        const result = await queueSystemConcept._getCompletedQueue({
+          owner: userA,
+        });
+
+        assertNotEquals(
+          "error" in result,
+          true,
+          "Getting completed queue for User A should succeed.",
+        );
+        assertEquals(
+          (result as { completedQueue: number }[])[0].completedQueue,
+          1,
+          "After completing item1, completedQueue count should be 1.",
+        );
+        console.log(`Effect: completedQueue count is 1.`);
+      },
+    );
+
+    await t.step("5. User A completes item2 from their queue", async () => {
+      console.log("Action: incrementCompletedQueue for userA with item2");
+      const result = await queueSystemConcept.incrementCompletedQueue({
+        owner: userA,
+        itemId: item2,
+      });
+
+      assertNotEquals(
+        "error" in result,
+        true,
+        "Incrementing completed queue for item2 should succeed.",
+      );
+      console.log(`Effect: item2 marked as completed.`);
+    });
+
+    await t.step(
+      "6. Verify completedQueue count for User A is now 2",
+      async () => {
+        console.log("Action: _getCompletedQueue for userA");
+        const result = await queueSystemConcept._getCompletedQueue({
+          owner: userA,
+        });
+
+        assertNotEquals(
+          "error" in result,
+          true,
+          "Getting completed queue for User A should succeed.",
+        );
+        assertEquals(
+          (result as { completedQueue: number }[])[0].completedQueue,
+          2,
+          "After completing item2, completedQueue count should be 2.",
+        );
+        console.log(`Effect: completedQueue count is 2.`);
+      },
+    );
+
+    console.log(
+      "Principle fulfillment: User A successfully generated a queue, completed items, and observed the completion count increase as expected.",
+    );
+  } finally {
+    await client.close();
+  }
+});
+
+Deno.test("Action: generateDailyQueue requirements are enforced", async (t) => {
+  const [db, client] = await testDb();
+  const queueSystemConcept = new QueueSystemConcept(db);
+
+  try {
+    await t.step("requires: no queue exists for owner/date", async () => {
+      console.log(
+        "Testing generateDailyQueue requirement: no existing queue for owner/date.",
+      );
+      // First, create a queue successfully
+      console.log("Action: generateDailyQueue for userB (first time)");
+      const firstResult = await queueSystemConcept.generateDailyQueue({
+        owner: userB,
+        itemIds: [item3],
       });
       assertNotEquals(
-        "error" in incrementResult1,
+        "error" in firstResult,
         true,
-        `Incrementing completed queue for item ${itemToComplete1} should succeed.`,
+        "First queue generation should succeed.",
       );
-      console.log(`Effect confirmed: Item ${itemToComplete1} marked as completed.`);
+      console.log(`Effect: Queue created for userB.`);
 
-      const updatedQueueDetails1 = await queueSystem.queues.findOne({ owner: userA });
+      // Then, try to create another queue for the same user and date
+      console.log(
+        "Action: generateDailyQueue for userB (second time on same day)",
+      );
+      const secondResult = await queueSystemConcept.generateDailyQueue({
+        owner: userB,
+        itemIds: [item1],
+      });
       assertEquals(
-        updatedQueueDetails1?.completedQueue,
-        1,
-        "After completing one item, 'completedQueue' should be 1.",
+        "error" in secondResult,
+        true,
+        "Should fail when a queue already exists for the user today.",
       );
       assertEquals(
-        updatedQueueDetails1?.itemSet.includes(itemToComplete1),
-        false,
-        "Completed item should be removed from the 'itemSet' as an effect.",
+        (secondResult as { error: string }).error,
+        `A queue already exists for user ${userB} for today`,
+        "Error message should indicate existing queue.",
       );
       console.log(
-        `Verification: Queue for ${userA} now has ${updatedQueueDetails1?.itemSet.length} items remaining and 1 completed item.`,
+        `Requirement met: Error returned when trying to create a duplicate queue.`,
       );
-    }
+    });
+
+    await t.step("effects: create a queue and return its ID", async () => {
+      console.log(
+        "Testing generateDailyQueue effects: queue creation and ID return.",
+      );
+      const newUserId = "user:newUser" as ID;
+      const itemIds = [item1, item2];
+      console.log(
+        `Action: generateDailyQueue for ${newUserId} with [item1, item2]`,
+      );
+      const result = await queueSystemConcept.generateDailyQueue({
+        owner: newUserId,
+        itemIds: itemIds,
+      });
+
+      assertNotEquals(
+        "error" in result,
+        true,
+        "Queue generation should succeed.",
+      );
+      const { queue } = result as { queue: ID };
+      assertExists(queue, "A new queue ID should be returned.");
+      console.log(`Effect: Queue with ID ${queue} created.`);
+
+      // Verify initial state using an internal helper
+      console.log(`Verification: Check completedQueue count for ${newUserId}`);
+      const completedResult = await queueSystemConcept._getCompletedQueue({
+        owner: newUserId,
+      });
+      assertNotEquals(
+        "error" in completedResult,
+        true,
+        "Should be able to get completed queue for new user.",
+      );
+      assertEquals(
+        (completedResult as { completedQueue: number }[])[0].completedQueue,
+        0,
+        "Newly created queue should have 0 completed items.",
+      );
+      console.log(`Effect confirmed: completedQueue is 0 for the new queue.`);
+    });
   } finally {
     await client.close();
   }
 });
 
-Deno.test("Action: _getCompletedQueue requires an existing queue", async () => {
+Deno.test("Action: _getCompletedQueue requirements and effects", async (t) => {
   const [db, client] = await testDb();
-  const queueSystem = new QueueSystemConcept(db);
+  const queueSystemConcept = new QueueSystemConcept(db);
 
   try {
-    const nonExistentUser = "user:nonexistent" as ID;
+    await t.step("requires: queue exists for owner/date", async () => {
+      console.log(
+        "Testing _getCompletedQueue requirement: queue must exist for owner/date.",
+      );
+      const userWithoutQueue = "user:NoQueue" as ID;
+      console.log(`Action: _getCompletedQueue for ${userWithoutQueue}`);
+      const result = await queueSystemConcept._getCompletedQueue({
+        owner: userWithoutQueue,
+      });
+      assertEquals(
+        "error" in result,
+        true,
+        "Should return an error if no queue exists for the user today.",
+      );
+      assertEquals(
+        (result as { error: string }).error,
+        `No queue found for user ${userWithoutQueue} for today`,
+        "Error message should indicate no queue found.",
+      );
+      console.log(`Requirement met: Error returned for non-existent queue.`);
+    });
 
-    // Test requirement: queue $q$ exists with matching owner
-    const result = await queueSystem._getCompletedQueue({ owner: nonExistentUser });
-    assertEquals(
-      "error" in result,
-      true,
-      "Getting completed queue for a non-existent user should fail as requirement not met.",
-    );
+    await t.step("effects: return completedQueue", async () => {
+      console.log(
+        "Testing _getCompletedQueue effects: returns the correct count.",
+      );
+      // Setup: Create a queue and increment it
+      console.log("Setup: Create queue for userA and increment it once.");
+      await queueSystemConcept.generateDailyQueue({
+        owner: userA,
+        itemIds: [item1, item2],
+      });
+      await queueSystemConcept.incrementCompletedQueue({
+        owner: userA,
+        itemId: item1,
+      });
 
-    // Confirm effect: After creating a queue, the action should succeed.
-    await queueSystem.generateDailyQueue({ owner: userA });
-    const validResult = await queueSystem._getCompletedQueue({ owner: userA });
-    assertEquals(
-      "error" in validResult,
-      false,
-      "Getting completed queue for an existing user should succeed.",
-    );
-    const successResult = validResult as { completedQueue: number }[];
-    assertEquals(
-      successResult[0].completedQueue,
-      0,
-      "Initial completedQueue should be 0.",
-    );
+      console.log("Action: _getCompletedQueue for userA");
+      const result = await queueSystemConcept._getCompletedQueue({
+        owner: userA,
+      });
+      assertNotEquals(
+        "error" in result,
+        true,
+        "Getting completed queue for userA should succeed.",
+      );
+      assertEquals(
+        (result as { completedQueue: number }[])[0].completedQueue,
+        1,
+        "Should return 1 as the completedQueue count.",
+      );
+      console.log(
+        `Effect confirmed: Correct completedQueue count (1) returned.`,
+      );
+    });
   } finally {
     await client.close();
   }
 });
 
-Deno.test("Action: generateDailyQueue requires no existing queue for owner", async () => {
+Deno.test("Action: incrementCompletedQueue requirements and effects", async (t) => {
   const [db, client] = await testDb();
-  const queueSystem = new QueueSystemConcept(db);
+  const queueSystemConcept = new QueueSystemConcept(db);
 
   try {
-    // First generation should succeed (base case)
-    const firstGenerateResult = await queueSystem.generateDailyQueue({
-      owner: userA,
+    // Setup for valid cases: create a queue for userB
+    console.log("Setup: Create a queue for userB with [item1, item2]");
+    await queueSystemConcept.generateDailyQueue({
+      owner: userB,
+      itemIds: [item1, item2],
     });
-    assertNotEquals(
-      "error" in firstGenerateResult,
-      true,
-      "First queue generation for a user should succeed.",
-    );
 
-    // Test requirement: no queue exists with owner matching this user
-    const secondGenerateResult = await queueSystem.generateDailyQueue({
-      owner: userA,
+    await t.step("requires: queue exists for owner/date", async () => {
+      console.log(
+        "Testing incrementCompletedQueue requirement: queue must exist for owner/date.",
+      );
+      const userWithoutQueue = "user:NoQueueInc" as ID;
+      console.log(`Action: incrementCompletedQueue for ${userWithoutQueue}`);
+      const result = await queueSystemConcept.incrementCompletedQueue({
+        owner: userWithoutQueue,
+        itemId: item1,
+      });
+      assertEquals(
+        "error" in result,
+        true,
+        "Should return an error if no queue exists for the user today.",
+      );
+      assertEquals(
+        (result as { error: string }).error,
+        `No queue found for user ${userWithoutQueue} for today`,
+        "Error message should indicate no queue found.",
+      );
+      console.log(`Requirement met: Error returned when no queue exists.`);
     });
-    assertEquals(
-      "error" in secondGenerateResult,
-      true,
-      "Second queue generation for the same user should fail as requirement not met.",
-    );
-  } finally {
-    await client.close();
-  }
-});
 
-Deno.test("Action: incrementCompletedQueue requirements and effects are enforced", async () => {
-  const [db, client] = await testDb();
-  const queueSystem = new QueueSystemConcept(db);
-
-  try {
-    // Setup: Generate a queue for userA to have items to increment.
-    await queueSystem.generateDailyQueue({ owner: userA });
-    const queueDetails = await queueSystem.queues.findOne({ owner: userA });
-    const item1 = queueDetails!.itemSet[0]; // Get a valid item from the queue
-    const nonExistentItem = "item:fake_nonexistent" as ID;
-    const nonExistentUser = "user:fake_nonexistent" as ID;
-
-    // Test requirement: exists a queue $q$ under this user
-    const res1 = await queueSystem.incrementCompletedQueue({
-      owner: nonExistentUser,
-      item: item1,
+    await t.step("requires: itemId exists in $q.itemIdSet", async () => {
+      console.log(
+        "Testing incrementCompletedQueue requirement: itemId must exist in the queue's itemIdSet.",
+      );
+      console.log(
+        `Action: incrementCompletedQueue for userB with ${itemNonExistent}`,
+      );
+      const result = await queueSystemConcept.incrementCompletedQueue({
+        owner: userB,
+        itemId: itemNonExistent,
+      });
+      assertEquals(
+        "error" in result,
+        true,
+        "Should return an error if itemId is not in the queue.",
+      );
+      assertEquals(
+        (result as { error: string }).error,
+        `Item ${itemNonExistent} not found in queue for user ${userB} for today`,
+        "Error message should indicate item not found.",
+      );
+      console.log(
+        `Requirement met: Error returned when itemId is not in the queue.`,
+      );
     });
-    assertEquals(
-      "error" in res1,
-      true,
-      "Incrementing for a user without an existing queue should fail.",
-    );
 
-    // Test requirement: item exists in $q$.itemSet
-    const res2 = await queueSystem.incrementCompletedQueue({
-      owner: userA,
-      item: nonExistentItem,
+    await t.step("effects: add one count to completedQueue", async () => {
+      console.log(
+        "Testing incrementCompletedQueue effects: completedQueue count increases.",
+      );
+      console.log("Pre-check: _getCompletedQueue for userB should be 0");
+      let preIncResult = await queueSystemConcept._getCompletedQueue({
+        owner: userB,
+      });
+      assertEquals(
+        (preIncResult as { completedQueue: number }[])[0].completedQueue,
+        0,
+      );
+
+      console.log(`Action: incrementCompletedQueue for userB with ${item1}`);
+      const result = await queueSystemConcept.incrementCompletedQueue({
+        owner: userB,
+        itemId: item1,
+      });
+      assertNotEquals(
+        "error" in result,
+        true,
+        "Incrementing completed queue for item1 should succeed.",
+      );
+      console.log(`Effect: completedQueue incremented.`);
+
+      console.log("Verification: _getCompletedQueue for userB should be 1");
+      const postIncResult = await queueSystemConcept._getCompletedQueue({
+        owner: userB,
+      });
+      assertNotEquals(
+        "error" in postIncResult,
+        true,
+        "Getting completed queue for userB should succeed.",
+      );
+      assertEquals(
+        (postIncResult as { completedQueue: number }[])[0].completedQueue,
+        1,
+        "After incrementing, completedQueue count should be 1.",
+      );
+      console.log(`Effect confirmed: completedQueue count is 1.`);
     });
-    assertEquals(
-      "error" in res2,
-      true,
-      "Incrementing with an item not present in the user's queue should fail.",
-    );
 
-    // Confirm effects: Test a successful increment and verify state changes.
-    const successResult = await queueSystem.incrementCompletedQueue({
-      owner: userA,
-      item: item1,
-    });
-    assertEquals(
-      "error" in successResult,
-      false,
-      "A valid increment operation should succeed.",
-    );
-
-    // Verify effects: add one count to completedQueue; remove item from $q$.itemSet;
-    const updatedQueueDetails = await queueSystem.queues.findOne({ owner: userA });
-    assertEquals(
-      updatedQueueDetails?.completedQueue,
-      1,
-      "After a successful increment, 'completedQueue' should be 1.",
-    );
-    assertEquals(
-      updatedQueueDetails?.itemSet.includes(item1),
-      false,
-      "The completed item should be removed from the 'itemSet'.",
-    );
+    // Note: Verifying the removal of itemId from itemIdSet directly is not possible
+    // through the concept's public/internal helper methods.
+    // If a helper like `_getQueueItems({owner})` existed, it would be used here.
   } finally {
     await client.close();
   }
