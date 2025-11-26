@@ -145,6 +145,39 @@ export default class SwipeSystemConcept {
   }
 
   /**
+   * _getCommunitySwipeStats (itemId: String, excludeUserId: String): (total: Number, approval: Number)
+   *
+   * **effect**
+   *     get all swipes for this itemId from users other than excludeUserId;
+   *     let positive := number of swipes with matching itemId (excluding excludeUserId) and decision equals "Buy"
+   *     let negative := number of swipes with matching itemId (excluding excludeUserId) and decision equals "Don't Buy"
+   *     return total = positive + negative and approval = positive
+   */
+  async _getCommunitySwipeStats(
+    { itemId, excludeUserId }: { itemId: ItemId; excludeUserId?: UserId },
+  ): Promise<{ total: number; approval: number } | { error: string }> {
+    const query: { itemId: ItemId; userId?: { $ne: UserId } } = { itemId };
+
+    // Exclude the item owner's swipes if specified
+    if (excludeUserId) {
+      query.userId = { $ne: excludeUserId };
+    }
+
+    const allSwipes = await this.swipes.find(query).toArray();
+
+    if (allSwipes.length === 0) {
+      return { error: "No community swipes found for this item." };
+    }
+
+    const positive =
+      allSwipes.filter((swipe) => swipe.decision === "Buy").length;
+    const negative =
+      allSwipes.filter((swipe) => swipe.decision === "Don't Buy").length;
+
+    return { total: positive + negative, approval: positive };
+  }
+
+  /**
    * _getSwipeComments (ownerUserId: String, itemId: String): (comments: set of String)
    *
    * **requires**

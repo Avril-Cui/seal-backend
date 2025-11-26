@@ -76,6 +76,24 @@ export default class QueueSystemConcept {
   }
 
   /**
+   * _getTodayQueue (owner: User): (itemIdSet: set of Strings, completedQueue: Number)
+   *
+   * **effects**
+   *     if queue exists with matching owner with the current date, return itemIdSet and completedQueue;
+   *     otherwise return null for both
+   */
+  async _getTodayQueue(
+    { owner }: { owner: User },
+  ): Promise<{ itemIdSet: string[]; completedQueue: number } | { error: string }> {
+    const today = getTodayStart();
+    const queue = await this.queues.findOne({ owner, creationDate: today });
+    if (!queue) {
+      return { error: `No queue found for user ${owner} for today` };
+    }
+    return { itemIdSet: queue.itemIdSet, completedQueue: queue.completedQueue };
+  }
+
+  /**
    * generateDailyQueue (owner: User, itemIds: set of Strings): (queue: Queue)
    *
    * **requires**
