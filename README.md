@@ -6,6 +6,10 @@ Team SEAL: Fuqi Cui, Lauren Yoo, Elaine Jiang, Stanley Zhao
 4.  - [Updated concept design](/assignments/AS2/updated_functional_design.md)
     - [Alpha Updated Development Plan](/assignments/AS4%20-%20Alpha/Alpha%20Checkpoint%20Updates.md)
 
+# Demo Alpha
+[![Watch the video](https://img.youtube.com/vi/8QrR26eFPms/hqdefault.jpg)](https://www.youtube.com/watch?v=8QrR26eFPms)
+
+
 # How to run this code base?
 1. Create a `.env` file with:
   ```
