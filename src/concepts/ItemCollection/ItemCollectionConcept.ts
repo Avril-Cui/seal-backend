@@ -490,6 +490,76 @@ export default class ItemCollectionConcept {
   }
 
   /**
+   * updateItem (owner: User, itemId: ItemID, itemName: String, description: String, photo: String, price: Number, reason: String, isNeed: String, isFutureApprove: String)
+   *
+   * **requires**
+   *   exists a wishlist $w$ with this user;
+   *   itemId exists in $w$'s itemIdSet;
+   *
+   * **effect**
+   *   update all attributes of this item;
+   */
+  async updateItem({
+    owner,
+    itemId,
+    itemName,
+    description,
+    photo,
+    price,
+    reason,
+    isNeed,
+    isFutureApprove,
+  }: {
+    owner: User;
+    itemId: ItemID;
+    itemName?: string;
+    description?: string;
+    photo?: string;
+    price?: number;
+    reason?: string;
+    isNeed?: string;
+    isFutureApprove?: string;
+  }): Promise<Empty | { error: string }> {
+    const wishlist = await this.wishlists.findOne({ _id: owner });
+
+    if (!wishlist) {
+      return { error: `No wishlist found for owner: ${owner}` };
+    }
+    if (!wishlist.itemIdSet.includes(itemId)) {
+      return {
+        error: `Item ${itemId} not found in wishlist for owner: ${owner}`,
+      };
+    }
+
+    const itemDoc = await this.items.findOne({ _id: itemId, owner });
+    if (!itemDoc) {
+      return {
+        error: `Item details for ${itemId} not found or not owned by ${owner}.`,
+      };
+    }
+
+    // Build update object with only provided fields
+    const updateFields: Partial<ItemDoc> = {};
+    if (itemName !== undefined) updateFields.itemName = itemName;
+    if (description !== undefined) updateFields.description = description;
+    if (photo !== undefined) updateFields.photo = photo;
+    if (price !== undefined) {
+      if (price < 0) {
+        return { error: "Price cannot be negative." };
+      }
+      updateFields.price = price;
+    }
+    if (reason !== undefined) updateFields.reason = reason;
+    if (isNeed !== undefined) updateFields.isNeed = isNeed;
+    if (isFutureApprove !== undefined) updateFields.isFutureApprove = isFutureApprove;
+
+    await this.items.updateOne({ _id: itemId, owner }, {
+      $set: updateFields,
+    });
+    return {};
+  }
+
+  /**
    * setPurchased (owner: User, item: ItemID)
    *
    * **requires**
