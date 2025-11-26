@@ -117,7 +117,74 @@ export default class ItemCollectionConcept {
   }
 
   /**
-   * addItem (owner: User, url: String, reason: String, isNeed: String, isFutureApprove: String): (item: ItemDoc)
+   * addItem (owner: User, itemName: String, description: String, photo: String, price: Number, reason: String, isNeed: String, isFutureApprove: String): (item: Item)
+   *
+   * **effect**
+   *   generate a new unique itemId;
+   *   create a new item with (owner, itemId, itemName, description, photo, price, reason, isNeed, isFutureApprove, wasPurchased=False);
+   *   add item to the itemIdSet under the wishlist with owner matching this user;
+   *   return the added item;
+   */
+  async addItem({
+    owner,
+    itemName,
+    description,
+    photo,
+    price,
+    reason,
+    isNeed,
+    isFutureApprove,
+  }: {
+    owner: User;
+    itemName: string;
+    description: string;
+    photo: string;
+    price: number;
+    reason: string;
+    isNeed: string;
+    isFutureApprove: string;
+  }): Promise<{ item: ItemDoc } | { error: string }> {
+    const newItemId = freshID();
+    const newItem: ItemDoc = {
+      _id: newItemId,
+      owner,
+      itemName,
+      description,
+      photo,
+      price,
+      reason,
+      isNeed,
+      isFutureApprove,
+      wasPurchased: false,
+    };
+
+    // Insert new item into the items collection
+    await this.items.insertOne(newItem);
+
+    // Find or create the wishlist for the owner and add the item
+    const existingWishlist = await this.wishlists.findOne({ _id: owner });
+
+    if (existingWishlist) {
+      // Add to existing wishlist, avoiding duplicates
+      if (!existingWishlist.itemIdSet.includes(newItemId)) {
+        await this.wishlists.updateOne(
+          { _id: owner },
+          { $push: { itemIdSet: newItemId } },
+        );
+      }
+    } else {
+      // Create a new wishlist for the owner
+      await this.wishlists.insertOne({
+        _id: owner,
+        itemIdSet: [newItemId],
+      });
+    }
+
+    return { item: newItem };
+  }
+
+  /**
+   * addAmazonItem (owner: User, url: String, reason: String, isNeed: String, isFutureApprove: String): (item: ItemDoc)
    *
    * **effect**
    *   fetch item's itemName, description, photo, and price with amazonAPI;
@@ -126,7 +193,7 @@ export default class ItemCollectionConcept {
    *   add item to the itemIdSet under the wishlist with owner matching this user;
    *   return the added item;
    */
-  async addItem({
+  async addAmazonItem({
     owner,
     url,
     reason,
@@ -148,7 +215,7 @@ export default class ItemCollectionConcept {
     const newItemId = freshID();
     const newItem: ItemDoc = {
       _id: newItemId,
-      owner, // Now part of the ItemDoc
+      owner,
       itemName: amazonDetails.itemName,
       description: amazonDetails.description,
       photo: amazonDetails.photo,
@@ -163,7 +230,7 @@ export default class ItemCollectionConcept {
     await this.items.insertOne(newItem);
 
     // 3. Find or create the wishlist for the owner and add the item
-    const existingWishlist = await this.wishlists.findOne({ _id: owner }); // Use owner as _id
+    const existingWishlist = await this.wishlists.findOne({ _id: owner });
 
     if (existingWishlist) {
       // Add to existing wishlist, avoiding duplicates
@@ -176,7 +243,7 @@ export default class ItemCollectionConcept {
     } else {
       // Create a new wishlist for the owner
       await this.wishlists.insertOne({
-        _id: owner, // owner is the _id
+        _id: owner,
         itemIdSet: [newItemId],
       });
     }
@@ -526,7 +593,63 @@ Based on these reflections, provide insight on whether this purchase seems impul
     return { llm_response: llmResponse as string };
   }
 
+  /**
+   * fetchAmazonDetails (url: String): (itemName, description, photo, price)
+   *
+   * **effect**
+   *   fetch item's itemName, description, photo, and price with amazonAPI;
+   *   return the fetched details WITHOUT adding to database;
+   */
+  async fetchAmazonDetails({
+    url,
+  }: {
+    url: string;
+  }): Promise<
+    | {
+      itemName: string;
+      description: string;
+      photo: string;
+      price: number;
+    }
+    | { error: string }
+  > {
+    const amazonDetails = await this.amazonAPI.fetchItemDetails(url);
+    if ("error" in amazonDetails) {
+      return { error: `Amazon API error: ${amazonDetails.error}` };
+    }
+    return amazonDetails;
+  }
+
   // --- Queries ---
+
+  /**
+   * _getUserWishList (owner: User): (shoppingCart: set of Items)
+   *
+   * **requires** exists at least one item with the matching owner
+   *
+   * **effects** return a set of all items belong to this owner
+   */
+  async _getUserWishList({
+    owner,
+  }: {
+    owner: User;
+  }): Promise<{ item: ItemDoc }[] | { error: string }> {
+    const wishlist = await this.wishlists.findOne({ _id: owner });
+    if (!wishlist) {
+      return { error: `No wishlist found for owner: ${owner}` };
+    }
+
+    if (wishlist.itemIdSet.length === 0) {
+      return [];
+    }
+
+    // Ensure items returned are also owned by the user, for consistency
+    const items = await this.items
+      .find({ _id: { $in: wishlist.itemIdSet }, owner })
+      .toArray();
+
+    return items.map((item) => ({ item }));
+  }
 
   /**
    * _getWishListItems (owner: User): (item: ItemDoc)

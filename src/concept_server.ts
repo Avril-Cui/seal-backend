@@ -1,8 +1,11 @@
 import { Hono } from "jsr:@hono/hono";
+import { cors } from "jsr:@hono/hono/cors";
 import { getDb } from "@utils/database.ts";
 import { walk } from "jsr:@std/fs";
 import { parseArgs } from "jsr:@std/cli/parse-args";
 import { toFileUrl } from "jsr:@std/path/to-file-url";
+import { MockAmazonAPIClient } from "@services/amazonAPI.ts";
+import { GeminiLLM } from "@services/geminiLLM.ts";
 
 // Parse command-line arguments for port and base URL
 const flags = parseArgs(Deno.args, {
@@ -23,6 +26,23 @@ const CONCEPTS_DIR = "src/concepts";
 async function main() {
   const [db] = await getDb();
   const app = new Hono();
+
+  // Initialize shared service instances
+  const amazonAPI = new MockAmazonAPIClient();
+  const geminiLLM = new GeminiLLM({
+    apiKey: Deno.env.get("GEMINI_API_KEY") || "mock-api-key",
+  });
+
+  // Enable CORS for frontend
+  app.use(
+    "*",
+    cors({
+      origin: ["http://localhost:5173", "http://localhost:5174"],
+      allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+    })
+  );
 
   app.get("/", (c) => c.text("Concept Server is running."));
 
@@ -56,7 +76,14 @@ async function main() {
         continue;
       }
 
-      const instance = new ConceptClass(db);
+      // Special handling for ItemCollection which requires additional dependencies
+      let instance;
+      if (conceptName === "ItemCollection") {
+        instance = new ConceptClass(db, amazonAPI, geminiLLM);
+      } else {
+        instance = new ConceptClass(db);
+      }
+
       const conceptApiName = conceptName;
       console.log(
         `- Registering concept: ${conceptName} at ${BASE_URL}/${conceptApiName}`,

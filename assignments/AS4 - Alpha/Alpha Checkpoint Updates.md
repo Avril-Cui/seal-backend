@@ -10,7 +10,11 @@ We also built a scrappy frontend MVP that covers the full ByeBuy experience: sig
 
 ## What Remains to Be Done
 
-We still need to fully connect the frontend to the backend by replacing all localStorage mocks with real API calls to the concepts and syncs for authentication, wishlist operations, queue generation, swiping, and statistics. We must also integrate the Chrome extension’s scraped metadata into the backend’s ItemCollection rather than logging it locally. Additional remaining tasks include refining the behavior of daily queues and community statistics—such as determining unlock thresholds, handling small sample sizes, and validating against spammy or extremely fast swipes. We also need to add the AI feedback endpoint that invokes `getAIInsight` and implement its frontend UI. Finally, the deployed app requires a round of usability improvements and bug fixes, including accessibility reviews, mobile responsiveness adjustments, and clearer loading and error states.
+We still need to fully connect the frontend to the backend by replacing all localStorage mocks with real API calls to the concepts and syncs for authentication, wishlist operations, queue generation, swiping, and statistics. This is partially done with some frontend connected with the backend server, but we need to finalize our backend syncs.
+
+We must also integrate the Chrome extension’s scraped metadata into the backend’s ItemCollection rather than logging it locally. Additional remaining tasks include refining the behavior of daily queues and community statistics—such as determining unlock thresholds, handling small sample sizes, and validating against spammy or extremely fast swipes. We also need to add the AI feedback endpoint that invokes `getAIInsight` and implement its frontend UI. Finally, the deployed app requires a round of usability improvements and bug fixes, including accessibility reviews, mobile responsiveness adjustments, and clearer loading and error states.
+
+We also need to finalize using the AmazonAPI to fetch data related to an item's url. We currently mocked the effect of AmazonAPI, but we will look into implementing this for Beta checkpoint. Our idea is that is AmazonAPI doesn't work, we will use our Chrome extension to automatically scrape the item information, which will provide the same smooth user experience.
 
 ## How Our Plans Have Changed
 

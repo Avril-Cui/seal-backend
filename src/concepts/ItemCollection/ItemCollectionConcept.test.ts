@@ -174,7 +174,7 @@ Deno.test("Principle: User maintains a personal wishlist, adds/updates items, ma
       console.log(
         `Trace: User ${userA} calls addItem with URL "${itemUrl}" and reflections.`,
       );
-      const addResult = await itemCollectionConcept.addItem({
+      const addResult = await itemCollectionConcept.addAmazonItem({
         owner: userA,
         url: itemUrl,
         reason,
@@ -276,7 +276,7 @@ Deno.test("Principle: User maintains a personal wishlist, adds/updates items, ma
       "3. User A attempts to update an item attribute they don't own.",
       async () => {
         // First add an item for UserB
-        const addResultB = await itemCollectionConcept.addItem({
+        const addResultB = await itemCollectionConcept.addAmazonItem({
           owner: userB,
           url: "https://amazon.com/another_gadget_B",
           reason: "for userB",
@@ -431,7 +431,7 @@ Deno.test("Action: addItem - requirements and effects", async (t) => {
         "Trace: Attempting to add item with a URL that will cause Amazon API to fail.",
       );
       amazonAPI.setShouldFail(true);
-      const result = await itemCollectionConcept.addItem({
+      const result = await itemCollectionConcept.addAmazonItem({
         ...commonItemData,
         url: "https://amazon.com/fail",
       });
@@ -463,7 +463,7 @@ Deno.test("Action: addItem - requirements and effects", async (t) => {
         console.log(
           `Trace: Calling addItem for user ${userA} with URL: ${itemUrl}`,
         );
-        const addResult = await itemCollectionConcept.addItem({
+        const addResult = await itemCollectionConcept.addAmazonItem({
           ...commonItemData,
           url: itemUrl,
         });
@@ -526,7 +526,7 @@ Deno.test("Action: addItem - requirements and effects", async (t) => {
         console.log(
           `Trace: Calling addItem for user ${userA} with another URL: ${itemUrl2}`,
         );
-        const addResult = await itemCollectionConcept.addItem({
+        const addResult = await itemCollectionConcept.addAmazonItem({
           ...commonItemData,
           url: itemUrl2,
         });
@@ -602,7 +602,7 @@ Deno.test("Action: removeItem - requirements and effects", async (t) => {
 
   try {
     // Setup: Add two items for userA
-    const addResult1 = await itemCollectionConcept.addItem({
+    const addResult1 = await itemCollectionConcept.addAmazonItem({
       owner: userA,
       url: "https://amazon.com/item1",
       reason: "r1",
@@ -611,7 +611,7 @@ Deno.test("Action: removeItem - requirements and effects", async (t) => {
     });
     itemId1 = (addResult1 as { item: ItemDoc }).item._id;
 
-    const addResult2 = await itemCollectionConcept.addItem({
+    const addResult2 = await itemCollectionConcept.addAmazonItem({
       owner: userA,
       url: "https://amazon.com/item2",
       reason: "r2",
@@ -763,7 +763,7 @@ Deno.test("Action: update* methods - requirements and effects", async (t) => {
 
   try {
     // Setup: Add one item for userA
-    const addResult = await itemCollectionConcept.addItem({
+    const addResult = await itemCollectionConcept.addAmazonItem({
       owner: userA,
       url: "https://amazon.com/item1",
       reason: "original reason",
@@ -836,7 +836,7 @@ Deno.test("Action: update* methods - requirements and effects", async (t) => {
       "Requires: Item must be owned by the user attempting to update.",
       async () => {
         // Add an item for userB
-        const addResultB = await itemCollectionConcept.addItem({
+        const addResultB = await itemCollectionConcept.addAmazonItem({
           owner: userB,
           url: "https://amazon.com/another_gadget_B",
           reason: "for userB",
@@ -1112,7 +1112,7 @@ Deno.test("Action: setPurchased - requirements and effects", async (t) => {
 
   try {
     // Setup: Add one item for userA
-    const addResult = await itemCollectionConcept.addItem({
+    const addResult = await itemCollectionConcept.addAmazonItem({
       owner: userA,
       url: "https://amazon.com/item1",
       reason: "r",
@@ -1280,7 +1280,7 @@ Deno.test("Action: getAIInsight - requirements and effects", async (t) => {
 
   try {
     // Setup: Add one item for userA
-    const addResult = await itemCollectionConcept.addItem({
+    const addResult = await itemCollectionConcept.addAmazonItem({
       owner: userA,
       url: "https://amazon.com/item1",
       reason: "I need this for work",
@@ -1498,7 +1498,7 @@ Deno.test("Query: _getWishListItems - requirements and effects", async (t) => {
         console.log(
           `Trace: Adding items for user ${userA} and then retrieving wishlist.`,
         );
-        const addResult1 = await itemCollectionConcept.addItem({
+        const addResult1 = await itemCollectionConcept.addAmazonItem({
           owner: userA,
           url: "https://amazon.com/item1",
           reason: "r1",
@@ -1507,7 +1507,7 @@ Deno.test("Query: _getWishListItems - requirements and effects", async (t) => {
         });
         const itemId1 = (addResult1 as { item: ItemDoc }).item._id;
 
-        const addResult2 = await itemCollectionConcept.addItem({
+        const addResult2 = await itemCollectionConcept.addAmazonItem({
           owner: userA,
           url: "https://amazon.com/item2",
           reason: "r2",
@@ -1566,7 +1566,7 @@ Deno.test("Query: _getItemDetails - requirements and effects", async (t) => {
 
   try {
     // Setup: Add one item for userA
-    const addResult = await itemCollectionConcept.addItem({
+    const addResult = await itemCollectionConcept.addAmazonItem({
       owner: userA,
       url: "https://amazon.com/item1",
       reason: "r",
@@ -1661,21 +1661,21 @@ Deno.test("Internal Query: _getTenRandomItems - requirements and effects", async
       "Requires: At least ten items from other owners must exist (fail case).",
       async () => {
         // Add a few items for userA and userB, but less than 10 total from other owners
-        await itemCollectionConcept.addItem({
+        await itemCollectionConcept.addAmazonItem({
           owner: userA,
           url: "https://amazon.com/item1",
           reason: "r",
           isNeed: "n",
           isFutureApprove: "f",
         });
-        await itemCollectionConcept.addItem({
+        await itemCollectionConcept.addAmazonItem({
           owner: userB,
           url: "https://amazon.com/item2",
           reason: "r",
           isNeed: "n",
           isFutureApprove: "f",
         });
-        await itemCollectionConcept.addItem({
+        await itemCollectionConcept.addAmazonItem({
           owner: userB,
           url: "https://amazon.com/another_gadget_B",
           reason: "r",
@@ -1716,7 +1716,7 @@ Deno.test("Internal Query: _getTenRandomItems - requirements and effects", async
         // userB has 2 items from previous step
         // Add 8 more items for userC to reach 10+ (2 for userB + 8 for userC = 10 other items)
         for (let i = 0; i < 8; i++) {
-          await itemCollectionConcept.addItem({
+          await itemCollectionConcept.addAmazonItem({
             owner: userC,
             url: `https://amazon.com/random_item_${i}`, // Using more distinct URLs from mock
             reason: `random_r${i}`,

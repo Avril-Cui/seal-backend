@@ -53,14 +53,27 @@ state:
     a geminiLLM GeminiLLM
 
 actions:
+    _getUserWishList (owner: User): (shoppingCart: set of Items)
+        requires
+            exists at least one item with the matching owner
+        effect
+            return a set of all items belong to this owner
+
     _getTenRandomItems (owner: User): (itemIdSet: set of Strings)
       requires
         exists at least ten items with owner not matching the given owner
       effect
         select by random ten items with owner not matching the given owner;
         return an itemIdSet containing the itemIds of these ten items; 
+    
+    addItem (owner: User, itemName: String, description: String, photo: String, price: Number, reason: String, isNeed: String, isFutureApprove: String): (item: Item)
+        effect
+            generate a new unique itemId;
+            create a new item with (owner, itemId, itemName, description, photo, price, reason, isNeed, isFutureApprove, wasPurchased=False);
+            add item to the itemIdSet under the wishlist with owner matching this user;
+            return the added item;
 
-    addItem (owner: User, url: String, reason: String, isNeed: String, isFutureApprove: String): (item: Item)
+    addAmazonItem (owner: User, url: String, reason: String, isNeed: String, isFutureApprove: String): (item: Item)
         effect
             fetch item's itemName, description, photo, and price with amazonAPI;
             generate a new unique itemId;
