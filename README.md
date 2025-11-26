@@ -6,3 +6,18 @@ Team SEAL: Fuqi Cui, Lauren Yoo, Elaine Jiang, Stanley Zhao
 4.  - [Updated concept design](/assignments/AS2/updated_functional_design.md)
     - [Alpha Updated Development Plan](/assignments/AS4%20-%20Alpha/Alpha%20Checkpoint%20Updates.md)
 
+# How to run this code base?
+1. Create a `.env` file with:
+  ```
+  GEMINI_API_KEY=
+  GEMINI_MODEL=gemini-2.5-flash
+  GEMINI_CONFIG=./geminiConfig.json
+  MONGODB_URL=
+  DB_NAME=
+   ```
+
+2. Install Deno: https://deno.land/
+
+3. Run `deno task concepts` to start the server
+
+4. Run `deno test -A` to run the test cases
