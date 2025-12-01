@@ -252,6 +252,73 @@ export default class ItemCollectionConcept {
   }
 
   /**
+   * addItemFromExtension (owner: User, itemName: String, description: String, photo: String, 
+   *                       price: String, reason: String, isNeed: String, isFutureApprove: String): (item: Item)
+   *
+   * **effect**
+   *   parse price string to number;
+   *   generate a new unique itemId;
+   *   create a new item with (owner, itemId, itemName, description, photo, price, reason, isNeed, isFutureApprove, wasPurchased=False);
+   *   add item to the itemIdSet under the wishlist with owner matching this user;
+   *   return the added item;
+   */
+  async addItemFromExtension({
+    owner,
+    itemName,
+    description,
+    photo,
+    price,
+    reason,
+    isNeed,
+    isFutureApprove,
+  }: {
+    owner: User;
+    itemName: string;
+    description: string;
+    photo: string;
+    price: string;
+    reason: string;
+    isNeed: string;
+    isFutureApprove: string;
+  }): Promise<{ item: ItemDoc } | { error: string }> {
+    const numericPrice = parseFloat(String(price).replace(/[^0-9.]/g, "")) || 0;
+
+    const newItemId = freshID();
+    const newItem: ItemDoc = {
+      _id: newItemId,
+      owner,
+      itemName,
+      description,
+      photo,
+      price: numericPrice,
+      reason,
+      isNeed,
+      isFutureApprove,
+      wasPurchased: false,
+    };
+
+    await this.items.insertOne(newItem);
+
+    const existingWishlist = await this.wishlists.findOne({ _id: owner });
+
+    if (existingWishlist) {
+      if (!existingWishlist.itemIdSet.includes(newItemId)) {
+        await this.wishlists.updateOne(
+          { _id: owner },
+          { $push: { itemIdSet: newItemId } },
+        );
+      }
+    } else {
+      await this.wishlists.insertOne({
+        _id: owner,
+        itemIdSet: [newItemId],
+      });
+    }
+
+    return { item: newItem };
+  }
+
+  /**
    * removeItem (owner: User, itemId: String)
    *
    * **requires**
