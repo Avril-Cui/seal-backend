@@ -25,6 +25,8 @@ type ItemID = ID; // Renamed for clarity, this is the unique item identifier
  *   a isFutureApprove String  // user's reflection on whether their future-self will like this purchase
  *   an wasPurchased Flag
  *   an PurchasedTime Number  [Optional]
+ *   an actualPrice Number  [Optional]  // actual price paid when purchased
+ *   a quantity Number  [Optional]  // quantity purchased, only set when item is purchased
  */
 export interface ItemDoc { // ADDED 'export'
   _id: ItemID; // This is the unique itemId
@@ -38,6 +40,8 @@ export interface ItemDoc { // ADDED 'export'
   isFutureApprove: string; // e.g., "yes", "no", "unsure"
   wasPurchased: boolean;
   PurchasedTime?: number; // Changed to number (timestamp)
+  actualPrice?: number; // Actual price paid when purchased
+  quantity?: number; // Quantity purchased, only set when item is purchased
 }
 
 /**
@@ -560,23 +564,33 @@ export default class ItemCollectionConcept {
   }
 
   /**
-   * setPurchased (owner: User, item: ItemID)
+   * setPurchased (owner: User, item: ItemID, quantity: number, purchaseTime?: number, actualPrice?: number)
    *
    * **requires**
    *   exists a wishlist $w$ with this user;
    *   item $i$.itemId exists in $w$'s itemIdSet;
    *   $i$.wasPurchased is False;
+   *   quantity is greater than 0 and is a whole number;
    *
    * **effect**
    *   set $i$.wasPurchased as True;
-   *   set $i$.PurchasedTime as the current time of this action;
+   *   if purchaseTime is provided, set $i$.PurchasedTime as purchaseTime;
+   *   otherwise, set $i$.PurchasedTime as the current time of this action;
+   *   if actualPrice is provided, set $i$.actualPrice as actualPrice;
+   *   set $i$.quantity as quantity;
    */
   async setPurchased({
     owner,
     item: itemId,
+    quantity,
+    purchaseTime,
+    actualPrice,
   }: {
     owner: User;
     item: ItemID;
+    quantity: number;
+    purchaseTime?: number;
+    actualPrice?: number;
   }): Promise<Empty | { error: string }> {
     const wishlist = await this.wishlists.findOne({ _id: owner });
 
@@ -599,9 +613,33 @@ export default class ItemCollectionConcept {
       return { error: `Item ${itemId} has already been marked as purchased.` };
     }
 
+    // Validate quantity
+    if (quantity <= 0) {
+      return { error: "Quantity must be greater than 0." };
+    }
+    if (!Number.isInteger(quantity)) {
+      return { error: "Quantity must be a whole number." };
+    }
+
+    // Validate actualPrice if provided
+    if (actualPrice !== undefined && actualPrice < 0) {
+      return { error: "Actual price cannot be negative." };
+    }
+
+    // Build update object
+    const updateFields: Partial<ItemDoc> = {
+      wasPurchased: true,
+      PurchasedTime: purchaseTime !== undefined ? purchaseTime : new Date().getTime(),
+      quantity: quantity,
+    };
+
+    if (actualPrice !== undefined) {
+      updateFields.actualPrice = actualPrice;
+    }
+
     await this.items.updateOne(
       { _id: itemId, owner },
-      { $set: { wasPurchased: true, PurchasedTime: new Date().getTime() } }, // Use timestamp (number)
+      { $set: updateFields },
     );
     return {};
   }
@@ -655,6 +693,39 @@ Will future self approve? ${itemDoc.isFutureApprove}
 Based on these reflections, provide insight on whether this purchase seems impulsive or well-considered.`;
 
     const llmResponse = await this.geminiLLM.executeLLM(prompt);
+
+    if (typeof llmResponse === "object" && "error" in llmResponse) {
+      return { error: `LLM API error: ${llmResponse.error}` };
+    }
+
+    return { llm_response: llmResponse as string };
+  }
+
+  /**
+   * async getAIWishListInsight (owner: User, context_prompt: String): (llm_response: String)
+   *
+   * **requires**
+   *   exists a wishlist $w$ with this user;
+   *
+   * **effect**
+   *   send context_prompt to geminiLLM;
+   *   return the llm_response;
+   */
+  async getAIWishListInsight({
+    owner,
+    context_prompt,
+  }: {
+    owner: User;
+    context_prompt: string;
+  }): Promise<{ llm_response: string } | { error: string }> {
+    const wishlist = await this.wishlists.findOne({ _id: owner });
+
+    if (!wishlist) {
+      return { error: `No wishlist found for owner: ${owner}` };
+    }
+
+    // Send the context prompt to Gemini LLM
+    const llmResponse = await this.geminiLLM.executeLLM(context_prompt);
 
     if (typeof llmResponse === "object" && "error" in llmResponse) {
       return { error: `LLM API error: ${llmResponse.error}` };
@@ -745,6 +816,39 @@ Based on these reflections, provide insight on whether this purchase seems impul
     // Ensure items returned are also owned by the user, for consistency
     const items = await this.items
       .find({ _id: { $in: wishlist.itemIdSet }, owner })
+      .toArray();
+
+    return items.map((item) => ({ item }));
+  }
+
+  /**
+   * _getPurchasedItems (owner: User): (item: ItemDoc)
+   *
+   * **requires** owner exists
+   *
+   * **effects** returns a set of all item documents where wasPurchased is true for this owner
+   */
+  async _getPurchasedItems({
+    owner,
+  }: {
+    owner: User;
+  }): Promise<{ item: ItemDoc }[] | { error: string }> {
+    const wishlist = await this.wishlists.findOne({ _id: owner });
+    if (!wishlist) {
+      return { error: `No wishlist found for owner: ${owner}` };
+    }
+
+    if (wishlist.itemIdSet.length === 0) {
+      return [];
+    }
+
+    // Find items that are purchased
+    const items = await this.items
+      .find({
+        _id: { $in: wishlist.itemIdSet },
+        owner,
+        wasPurchased: true
+      })
       .toArray();
 
     return items.map((item) => ({ item }));
