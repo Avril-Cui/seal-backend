@@ -112,6 +112,7 @@ export const exclusions: Array<string> = [
   "/api/ItemCollection/getAIWishListInsight",
   "/api/ItemCollection/_getUserWishList",
   "/api/ItemCollection/_getWishListItems",
+  "/api/ItemCollection/_getPurchasedItems",
   "/api/ItemCollection/_getItemDetails",
   "/api/ItemCollection/_getPurchasedItems",
   // Internal/private methods

@@ -95,11 +95,14 @@ export const GetSwipeStatsRequest: Sync = ({ request, session, user, itemId, tot
       return new Frames({ ...originalFrame, authError: true });
     }
     // Then call the query (_getSwipeStats expects ownerUserId and itemId)
-    frames = await frames.query(SwipeSystem._getSwipeStats, { ownerUserId: user, itemId }, { total, approval });
-    if (frames.length === 0) {
-      return new Frames({ ...originalFrame, [total]: 0, [approval]: 0 });
+    const statsFrames = await frames.query(SwipeSystem._getSwipeStats, { ownerUserId: user, itemId }, { total, approval });
+    // Check if query returned an error (no swipes exist)
+    if (statsFrames.length > 0 && statsFrames[0].error) {
+      // No swipe stats found, return zero values
+      return new Frames({ ...originalFrame, total: 0, approval: 0 });
     }
-    return frames;
+    // Merge originalFrame with statsFrames to preserve request binding
+    return statsFrames.map(frame => ({ ...originalFrame, ...frame }));
   },
   then: actions([Requesting.respond, { request, total, approval }]),
 });
