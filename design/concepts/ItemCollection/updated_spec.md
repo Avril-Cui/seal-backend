@@ -1520,3 +1520,331 @@ Please provide insights on whether this purchase seems impulsive, considering th
   }
 }
 ```
+
+---
+
+# Update: Add AI Insight Caching and Amazon URL
+
+I want to update the ItemCollection concept to:
+1. Store the original Amazon product URL (`amazonUrl`) so users can return to purchase
+2. Cache AI insights persistently in the database to avoid redundant Gemini API calls
+3. Return structured JSON output from `getAIInsight` instead of raw text
+4. Invalidate cache when item fields change (using an input hash)
+
+## Updated Spec
+
+```
+concept: ItemCollection [User, AmazonAPI, GeminiLLM]
+
+purpose:
+    Tracks and manage items that users are considering for purchase.
+
+principles:
+    (1) Users maintain a personal wishlist of items they intend to purchase.
+    (2) Adding an item requires users to enter reflection questions.
+    (3) Item metadata is fetched from AmazonAPI to reduce user effort.
+    (4) Users can update attributes of the items they own.
+    (5) Users can mark items as purchased after they made the purchase.
+    (6) AI insights are cached to avoid redundant API calls when item info hasn't changed.
+
+state:
+    a set of Items with
+      an owner User
+      an itemId String  // this is a unique id
+      an itemName String
+      a description String
+      a photo String
+      a price Number
+      a reason String  // user's reflection on why they want to purchase
+      a isNeed String  // user's reflection on is this a "need" or "want"
+      a isFutureApprove String  // user's reflection on whether their future-self will like this purchase
+      an wasPurchased Flag
+      an PurchasedTime Number  [Optional]
+      an amazonUrl String  [Optional]  // original Amazon product page URL
+      a cachedAIInsight CachedAIInsight  [Optional]  // cached AI insight for this item
+
+    a set of CachedAIInsight with
+      a productName String  // summarized product name (3-5 words)
+      an impulseScore Number  // 1-10 score (1=deliberate, 10=impulsive)
+      a verdict String  // BUY, WAIT, or SKIP
+      a keyInsight String  // personalized insight addressing the user as "you"
+      a fact String  // numerical statistic with source citation
+      an advice String  // actionable advice for this purchase
+      a cachedAt Number  // timestamp when cached
+      an inputHash String  // hash of item fields to detect changes
+
+    a set of WishLists with
+        an owner User
+        an itemIdSet set of Strings
+
+    an amazonAPI AmazonAPI
+    a geminiLLM GeminiLLM
+
+actions:
+    // ... existing actions unchanged ...
+
+    addAmazonItem (owner: User, url: String, reason: String, isNeed: String, isFutureApprove: String): (item: Item)
+        effect
+            fetch item's itemName, description, photo, and price with amazonAPI;
+            generate a new unique itemId;
+            create a new item with (owner, itemId, itemName, description, photo, price, reason, isNeed, isFutureApprove, wasPurchased=False, amazonUrl=url);
+            add item to the itemIdSet under the wishlist with owner matching this user;
+            return the added item;
+
+    async getAIInsight (owner: User, item: Item): (structured: CachedAIInsight, cached: Boolean)
+        requires
+            exists a wishlist $w$ with this user;
+            item.itemId exists in $w$'s itemIdSet;
+        effect
+            generate inputHash from item's (itemName, description, price, reason, isNeed, isFutureApprove);
+            if item.cachedAIInsight exists and item.cachedAIInsight.inputHash matches inputHash:
+                return cached insight with cached=True;
+            else:
+                send item details to geminiLLM requesting JSON structured response;
+                parse response into CachedAIInsight (productName, impulseScore, verdict, keyInsight, fact, advice);
+                store cachedAIInsight on item with current timestamp and inputHash;
+                return structured insight with cached=False;
+
+    fetchAmazonDetails (url: String): (itemName, description, photo, price)
+        effect
+            fetch item's itemName, description, photo, and price with amazonAPI;
+            return the fetched details WITHOUT adding to database;
+```
+
+## Response: Updated Implementation
+
+```typescript
+// src/concepts/ItemCollection/ItemCollectionConcept.ts (updated sections)
+
+/**
+ * Cached AI Insight structure for persistent storage
+ */
+export interface CachedAIInsight {
+  productName: string;
+  impulseScore: number;
+  verdict: string;
+  keyInsight: string;
+  fact: string;
+  advice: string;
+  cachedAt: number; // timestamp when cached
+  inputHash: string; // hash of item fields to detect changes
+}
+
+export interface ItemDoc {
+  _id: ItemID;
+  owner: User;
+  itemName: string;
+  description: string;
+  photo: string;
+  price: number;
+  reason: string;
+  isNeed: string;
+  isFutureApprove: string;
+  wasPurchased: boolean;
+  PurchasedTime?: number;
+  amazonUrl?: string; // NEW: Original Amazon product URL
+  cachedAIInsight?: CachedAIInsight; // NEW: Cached AI insight for this item
+}
+
+// ... inside ItemCollectionConcept class ...
+
+/**
+ * addAmazonItem - stores the Amazon URL along with item details
+ */
+async addAmazonItem({
+  owner,
+  url,
+  reason,
+  isNeed,
+  isFutureApprove,
+}: {
+  owner: User;
+  url: string;
+  reason: string;
+  isNeed: string;
+  isFutureApprove: string;
+}): Promise<{ item: ItemDoc } | { error: string }> {
+  const amazonDetails = await this.amazonAPI.fetchItemDetails(url);
+  if ("error" in amazonDetails) {
+    return { error: `Amazon API error: ${amazonDetails.error}` };
+  }
+
+  const newItemId = freshID();
+  const newItem: ItemDoc = {
+    _id: newItemId,
+    owner,
+    itemName: amazonDetails.itemName,
+    description: amazonDetails.description,
+    photo: amazonDetails.photo,
+    price: amazonDetails.price,
+    reason,
+    isNeed,
+    isFutureApprove,
+    wasPurchased: false,
+    amazonUrl: url, // Store the original Amazon URL
+  };
+
+  await this.items.insertOne(newItem);
+  // ... add to wishlist logic ...
+  return { item: newItem };
+}
+
+/**
+ * getAIInsight - with persistent caching
+ * 
+ * **requires**
+ *   exists a wishlist $w$ with this user;
+ *   item.itemId exists in $w$'s itemIdSet;
+ *
+ * **effect**
+ *   generate inputHash from item's fields;
+ *   if cached insight exists with matching hash, return cached;
+ *   else call LLM, cache result, return fresh insight;
+ */
+async getAIInsight({
+  owner,
+  item: itemId,
+}: {
+  owner: User;
+  item: ItemID;
+}): Promise<{ llm_response: string; structured: object | null; cached: boolean } | { error: string }> {
+  const wishlist = await this.wishlists.findOne({ _id: owner });
+  if (!wishlist) {
+    return { error: `No wishlist found for owner: ${owner}` };
+  }
+  if (!wishlist.itemIdSet.includes(itemId)) {
+    return { error: `Item ${itemId} not found in wishlist for owner: ${owner}` };
+  }
+
+  const itemDoc = await this.items.findOne({ _id: itemId, owner });
+  if (!itemDoc) {
+    return { error: `Item details for ${itemId} not found or not owned by ${owner}.` };
+  }
+
+  // Generate hash of input fields to detect changes
+  const inputHash = this.generateInputHash(itemDoc);
+
+  // Check for cached AI insight
+  if (itemDoc.cachedAIInsight && itemDoc.cachedAIInsight.inputHash === inputHash) {
+    console.log(`Using cached AI insight for item ${itemId}`);
+    return {
+      llm_response: JSON.stringify(itemDoc.cachedAIInsight),
+      structured: {
+        productName: itemDoc.cachedAIInsight.productName,
+        impulseScore: itemDoc.cachedAIInsight.impulseScore,
+        verdict: itemDoc.cachedAIInsight.verdict,
+        keyInsight: itemDoc.cachedAIInsight.keyInsight,
+        fact: itemDoc.cachedAIInsight.fact,
+        advice: itemDoc.cachedAIInsight.advice,
+      },
+      cached: true,
+    };
+  }
+
+  // Build prompt for LLM requesting structured JSON output
+  const prompt = `You are a friendly AI shopping advisor speaking directly to the user. Analyze this purchase and return JSON.
+
+PRODUCT:
+- Full Name: "${itemDoc.itemName}"
+- Description: "${itemDoc.description}"
+- Price: $${itemDoc.price}
+
+USER'S REFLECTIONS:
+- Why you want it: "${itemDoc.reason}"
+- Need or want?: "${itemDoc.isNeed}"
+- Future-self approval?: "${itemDoc.isFutureApprove}"
+
+Respond with ONLY valid JSON (no markdown, no code blocks):
+{
+  "productName": "<if the product name is very long, summarize it to 3-5 words>",
+  "impulseScore": <number 1-10, where 1=very deliberate, 10=highly impulsive>,
+  "verdict": "<BUY or WAIT or SKIP>",
+  "keyInsight": "<one sentence addressing the user as 'you'>",
+  "fact": "<a specific numerical statistic with source>",
+  "advice": "<actionable advice using 'you'>"
+}`;
+
+  const llmResponse = await this.geminiLLM.executeLLM(prompt);
+
+  if (typeof llmResponse === "object" && "error" in llmResponse) {
+    return { error: `LLM API error: ${llmResponse.error}` };
+  }
+
+  try {
+    // Clean up response and parse JSON
+    let cleanResponse = (llmResponse as string).trim();
+    if (cleanResponse.startsWith("```json")) cleanResponse = cleanResponse.slice(7);
+    if (cleanResponse.startsWith("```")) cleanResponse = cleanResponse.slice(3);
+    if (cleanResponse.endsWith("```")) cleanResponse = cleanResponse.slice(0, -3);
+    cleanResponse = cleanResponse.trim();
+
+    const parsed = JSON.parse(cleanResponse);
+    const structured = {
+      productName: parsed.productName || itemDoc.itemName,
+      impulseScore: parsed.impulseScore || 5,
+      verdict: parsed.verdict || "WAIT",
+      keyInsight: parsed.keyInsight || "Unable to analyze",
+      fact: parsed.fact || "Studies show most impulse purchases are regretted",
+      advice: parsed.advice || "Consider waiting 24 hours before purchasing"
+    };
+
+    // Cache the AI insight in the database
+    const cachedInsight: CachedAIInsight = {
+      ...structured,
+      cachedAt: Date.now(),
+      inputHash,
+    };
+    await this.items.updateOne(
+      { _id: itemId },
+      { $set: { cachedAIInsight: cachedInsight } }
+    );
+    console.log(`Cached AI insight for item ${itemId}`);
+
+    return { llm_response: cleanResponse, structured, cached: false };
+  } catch (e) {
+    return { llm_response: llmResponse as string, structured: null, cached: false };
+  }
+}
+
+/**
+ * Generate a hash of item fields to detect changes for AI insight caching
+ */
+private generateInputHash(item: ItemDoc): string {
+  const inputString = `${item.itemName}|${item.description}|${item.price}|${item.reason}|${item.isNeed}|${item.isFutureApprove}`;
+  let hash = 0;
+  for (let i = 0; i < inputString.length; i++) {
+    const char = inputString.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return hash.toString(16);
+}
+
+/**
+ * fetchAmazonDetails - fetch details without adding to database
+ */
+async fetchAmazonDetails({
+  url,
+}: {
+  url: string;
+}): Promise<{ itemName: string; description: string; photo: string; price: number } | { error: string }> {
+  const amazonDetails = await this.amazonAPI.fetchItemDetails(url);
+  if ("error" in amazonDetails) {
+    return { error: `Amazon API error: ${amazonDetails.error}` };
+  }
+  return amazonDetails;
+}
+```
+
+## Notes
+- `amazonUrl` stores the original Amazon product page URL so users can easily return to purchase or view more details.
+- `cachedAIInsight` stores the AI analysis persistently in MongoDB to avoid redundant Gemini API calls. The cache is invalidated when any item field changes (detected via `inputHash`).
+- The `inputHash` is a simple hash of the concatenated item fields. If any field changes, the hash changes, triggering a fresh LLM call.
+- `getAIInsight` returns structured JSON with:
+  - `productName`: Summarized product name (3-5 words if original is long)
+  - `impulseScore`: 1-10 rating (1=deliberate, 10=impulsive)
+  - `verdict`: BUY, WAIT, or SKIP recommendation
+  - `keyInsight`: Personalized analysis addressing the user as "you"
+  - `fact`: Numerical statistic with source citation
+  - `advice`: Actionable recommendation specific to the item's price point
+- The `cached` boolean in the response indicates whether the insight was returned from cache (true) or freshly generated (false).
