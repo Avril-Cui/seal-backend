@@ -150,6 +150,7 @@ export default class ItemCollectionConcept {
     reason,
     isNeed,
     isFutureApprove,
+    amazonUrl,
   }: {
     owner: User;
     itemName: string;
@@ -159,6 +160,7 @@ export default class ItemCollectionConcept {
     reason: string;
     isNeed: string;
     isFutureApprove: string;
+    amazonUrl?: string;
   }): Promise<{ item: ItemDoc } | { error: string }> {
     const newItemId = freshID();
     const newItem: ItemDoc = {
@@ -172,6 +174,7 @@ export default class ItemCollectionConcept {
       isNeed,
       isFutureApprove,
       wasPurchased: false,
+      amazonUrl: amazonUrl || undefined,
     };
 
     // Insert new item into the items collection

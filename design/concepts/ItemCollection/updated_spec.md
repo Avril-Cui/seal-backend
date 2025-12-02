@@ -1583,6 +1583,15 @@ state:
 actions:
     // ... existing actions unchanged ...
 
+    addItem (owner: User, itemName: String, description: String, photo: String, price: Number, reason: String, isNeed: String, isFutureApprove: String, amazonUrl?: String): (item: Item)
+        effect
+            generate a new unique itemId;
+            create a new item with (owner, itemId, itemName, description, photo, price, reason, isNeed, isFutureApprove, wasPurchased=False, amazonUrl if provided);
+            add item to the itemIdSet under the wishlist with owner matching this user;
+            return the added item;
+        note
+            amazonUrl is optional - if provided (e.g., after using fetchAmazonDetails), it stores the original Amazon product URL for easy access later;
+
     addAmazonItem (owner: User, url: String, reason: String, isNeed: String, isFutureApprove: String): (item: Item)
         effect
             fetch item's itemName, description, photo, and price with amazonAPI;
@@ -1609,6 +1618,9 @@ actions:
         effect
             fetch item's itemName, description, photo, and price with amazonAPI;
             return the fetched details WITHOUT adding to database;
+        note
+            This action is used to auto-fill the add item form with Amazon product details. 
+            The returned data can then be passed to addItem along with the original URL as amazonUrl;
 ```
 
 ## Response: Updated Implementation
@@ -1649,7 +1661,58 @@ export interface ItemDoc {
 // ... inside ItemCollectionConcept class ...
 
 /**
- * addAmazonItem - stores the Amazon URL along with item details
+ * addItem - adds an item with optional amazonUrl
+ * 
+ * **effect**
+ *   generate a new unique itemId;
+ *   create a new item with all provided fields + wasPurchased=False;
+ *   if amazonUrl provided, store it for easy access to product page;
+ *   add item to the itemIdSet under the wishlist with owner matching this user;
+ *   return the added item;
+ */
+async addItem({
+  owner,
+  itemName,
+  description,
+  photo,
+  price,
+  reason,
+  isNeed,
+  isFutureApprove,
+  amazonUrl, // Optional: stores original Amazon URL if item was fetched from Amazon
+}: {
+  owner: User;
+  itemName: string;
+  description: string;
+  photo: string;
+  price: number;
+  reason: string;
+  isNeed: string;
+  isFutureApprove: string;
+  amazonUrl?: string;
+}): Promise<{ item: ItemDoc } | { error: string }> {
+  const newItemId = freshID();
+  const newItem: ItemDoc = {
+    _id: newItemId,
+    owner,
+    itemName,
+    description,
+    photo,
+    price,
+    reason,
+    isNeed,
+    isFutureApprove,
+    wasPurchased: false,
+    amazonUrl: amazonUrl || undefined, // Store Amazon URL if provided
+  };
+
+  await this.items.insertOne(newItem);
+  // ... add to wishlist logic ...
+  return { item: newItem };
+}
+
+/**
+ * addAmazonItem - fetches Amazon details and stores the URL
  */
 async addAmazonItem({
   owner,
@@ -1838,6 +1901,9 @@ async fetchAmazonDetails({
 
 ## Notes
 - `amazonUrl` stores the original Amazon product page URL so users can easily return to purchase or view more details.
+  - For `addAmazonItem`: The URL is automatically stored from the input parameter.
+  - For `addItem`: The URL can be optionally passed if the user used `fetchAmazonDetails` to auto-fill the form, then manually saved.
+  - On the frontend, items with `amazonUrl` display a "🔗 View on Amazon" link.
 - `cachedAIInsight` stores the AI analysis persistently in MongoDB to avoid redundant Gemini API calls. The cache is invalidated when any item field changes (detected via `inputHash`).
 - The `inputHash` is a simple hash of the concatenated item fields. If any field changes, the hash changes, triggering a fresh LLM call.
 - `getAIInsight` returns structured JSON with:
@@ -1848,3 +1914,4 @@ async fetchAmazonDetails({
   - `fact`: Numerical statistic with source citation
   - `advice`: Actionable recommendation specific to the item's price point
 - The `cached` boolean in the response indicates whether the insight was returned from cache (true) or freshly generated (false).
+- `fetchAmazonDetails` is a helper action that fetches product info from Amazon WITHOUT saving to the database. The frontend uses this to auto-fill the add item form, then calls `addItem` with the fetched data plus the original URL as `amazonUrl`.
