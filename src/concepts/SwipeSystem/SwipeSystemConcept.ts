@@ -204,4 +204,17 @@ export default class SwipeSystemConcept {
 
     return [{ comments: actualComments }];
   }
+
+  /**
+   * _getUserSwipeCount (userId: String): (count: Number)
+   *
+   * **effect**
+   *     return the number of swipes made by this user
+   */
+  async _getUserSwipeCount(
+    { userId }: { userId: UserId },
+  ): Promise<{ count: number } | { error: string }> {
+    const count = await this.swipes.countDocuments({ userId });
+    return { count };
+  }
 }

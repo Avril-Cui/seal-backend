@@ -43,7 +43,9 @@ state:
       a isNeed String  // user's reflection on is this a "need" or "want"
       a isFutureApprove String  // user's reflection on whether their future-self will like this purchase
       an wasPurchased Flag
-      an PurchasedTime Number  [Optional]
+      an PurchasedTime TimeStamp  [Optional]
+      an addedDate TimeStamp [Optional]
+      a quantity Number [Optional] // only set quantity when the item is purchased
 
     a set of WishLists with
         an owner User
@@ -69,7 +71,7 @@ actions:
     addItem (owner: User, itemName: String, description: String, photo: String, price: Number, reason: String, isNeed: String, isFutureApprove: String): (item: Item)
         effect
             generate a new unique itemId;
-            create a new item with (owner, itemId, itemName, description, photo, price, reason, isNeed, isFutureApprove, wasPurchased=False);
+            create a new item with (owner, itemId, itemName, description, photo, price, reason, isNeed, isFutureApprove, wasPurchased=False, addedDate=current time);
             add item to the itemIdSet under the wishlist with owner matching this user;
             return the added item;
 
@@ -101,14 +103,17 @@ actions:
         effect
             update the given attribute of this item;
     
-    setPurchased (owner: User, item: Item)
+    setPurchased (owner: User, item: Item, quantity: Number; purchaseTime?: TimeStamp)
         requires
             exists a wishlist $w$ with this user;
             item $i$.itemId exists in $w$'s itemIdSet;
             $i$.wasPurchased is False;
+            quantity is greater than 0 and is a whole number;
         effect
             set $i$.wasPurchased as True;
-            set $i$.PurchasedTime as the current time of this action;
+            if purchaseTime is provided, set $i$.PurchasedTime as purchaseTime;
+            otherwise, set $i$.PurchasedTime as the current time of this action;
+            set $i$.quantity as quantity;
     
     async getAIInsight (owner: User, item: Item, context_prompt: String): (llm_response: String)
         requires
@@ -116,6 +121,13 @@ actions:
             item.itemId exists in $w$'s itemIdSet;
         effect
             send context_prompt with the item to geminiLLM (including all the attributes under item, like description, price, reason, isNeed, isFutureApprove) and ask for insights on whether geminiLLM thinks this purchase is impulsive;
+            return the llm_response;
+    
+    async getAIWishListInsight (owner: User, context_prompt: String): (llm_response: String)
+        requires
+            exists a wishlist $w$ with this user;
+        effect
+            send context_prompt to geminiLLM;
             return the llm_response;
 
 ```
