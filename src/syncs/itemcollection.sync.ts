@@ -375,17 +375,17 @@ export const UpdateIsFutureApproveError: Sync = ({ request, error }) => ({
 // SET PURCHASED (Action)
 // ============================================
 
-export const SetPurchasedRequest: Sync = ({ request, session, user, itemId, purchased }) => ({
+export const SetPurchasedRequest: Sync = ({ request, session, user, item, quantity, purchaseTime, actualPrice }) => ({
   when: actions([
     Requesting.request,
-    { path: "/ItemCollection/setPurchased", session, itemId, purchased },
+    { path: "/ItemCollection/setPurchased", session, item, quantity, purchaseTime, actualPrice },
     { request },
   ]),
   where: async (frames) => {
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     return frames.filter(($) => $[user] !== undefined);
   },
-  then: actions([ItemCollection.setPurchased, { owner: user, itemId, purchased }]),
+  then: actions([ItemCollection.setPurchased, { owner: user, item, quantity, purchaseTime, actualPrice }]),
 });
 
 export const SetPurchasedResponse: Sync = ({ request }) => ({

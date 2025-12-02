@@ -101,7 +101,8 @@ export const GetSwipeStatsRequest: Sync = ({ request, session, user, itemId, tot
       // No swipe stats found, return zero values
       return new Frames({ ...originalFrame, total: 0, approval: 0 });
     }
-    return statsFrames;
+    // Merge originalFrame with statsFrames to preserve request binding
+    return statsFrames.map(frame => ({ ...originalFrame, ...frame }));
   },
   then: actions([Requesting.respond, { request, total, approval }]),
 });
