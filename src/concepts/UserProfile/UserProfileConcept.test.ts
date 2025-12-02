@@ -275,7 +275,7 @@ Deno.test("Action: createUser requires no existing user with matching UID", asyn
       "createUser should fail when UID already exists, confirming `requires` condition.",
     );
     assertEquals(
-      (duplicateCreateResult as { error: string }).error,
+      (duplicateCreateResult as unknown as { error: string }).error,
       `User with UID '${testUserB_UID}' already exists.`,
       "Error message should clearly indicate duplicate UID.",
     );
@@ -363,7 +363,7 @@ Deno.test("Action: updateProfileName requires user exists", async () => {
       "Updating name for a non-existent user should fail, confirming `requires` condition.",
     );
     assertEquals(
-      (failResult as { error: string }).error,
+      (failResult as unknown as { error: string }).error,
       `User with ID '${nonExistentUserId}' not found.`,
       "Error message should indicate user not found.",
     );
@@ -441,7 +441,7 @@ Deno.test("Action: updateProfilePicture requires user exists", async () => {
       "Updating profile picture for a non-existent user should fail, confirming `requires` condition.",
     );
     assertEquals(
-      (failResult as { error: string }).error,
+      (failResult as unknown as { error: string }).error,
       `User with ID '${nonExistentUserId}' not found.`,
       "Error message should indicate user not found.",
     );
@@ -505,7 +505,7 @@ Deno.test("Action: updatePassword requires user exists", async () => {
       "Updating password for a non-existent user should fail, confirming `requires` condition.",
     );
     assertEquals(
-      (failResult as { error: string }).error,
+      (failResult as unknown as { error: string }).error,
       `User with ID '${nonExistentUserId}' not found.`,
       "Error message should indicate user not found.",
     );
@@ -584,7 +584,7 @@ Deno.test("Action: updateInterests requires user exists", async () => {
       "Updating interests for a non-existent user should fail, confirming `requires` condition.",
     );
     assertEquals(
-      (failResult as { error: string }).error,
+      (failResult as unknown as { error: string }).error,
       `User with ID '${nonExistentUserId}' not found.`,
       "Error message should indicate user not found.",
     );
@@ -655,12 +655,12 @@ Deno.test("Query: _getProfile requires user exists", async () => {
       user: nonExistentUserId,
     });
     assertEquals(
-      "error" in failResult,
+      "error" in failResult[0],
       true,
       "Retrieving profile for a non-existent user should fail, confirming `requires` condition.",
     );
     assertEquals(
-      (failResult as { error: string }).error,
+      (failResult[0] as { error: string }).error,
       `User with ID '${nonExistentUserId}' not found.`,
       "Error message should indicate user not found.",
     );

@@ -266,12 +266,12 @@ Deno.test("Action: _getCompletedQueue requirements and effects", async (t) => {
         owner: userWithoutQueue,
       });
       assertEquals(
-        "error" in result,
+        "error" in result[0],
         true,
         "Should return an error if no queue exists for the user today.",
       );
       assertEquals(
-        (result as { error: string }).error,
+        (result[0] as { error: string }).error,
         `No queue found for user ${userWithoutQueue} for today`,
         "Error message should indicate no queue found.",
       );
@@ -345,7 +345,7 @@ Deno.test("Action: incrementCompletedQueue requirements and effects", async (t) 
         "Should return an error if no queue exists for the user today.",
       );
       assertEquals(
-        (result as { error: string }).error,
+        (result as unknown as { error: string }).error,
         `No queue found for user ${userWithoutQueue} for today`,
         "Error message should indicate no queue found.",
       );
@@ -369,7 +369,7 @@ Deno.test("Action: incrementCompletedQueue requirements and effects", async (t) 
         "Should return an error if itemId is not in the queue.",
       );
       assertEquals(
-        (result as { error: string }).error,
+        (result as unknown as { error: string }).error,
         `Item ${itemNonExistent} not found in queue for user ${userB} for today`,
         "Error message should indicate item not found.",
       );

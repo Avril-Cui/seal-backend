@@ -247,7 +247,7 @@ export default class UserProfileConcept {
   async _getProfile(
     { user }: { user: ID },
   ): Promise<
-    {
+    [{
       profile: {
         uid: string;
         name: string;
@@ -256,11 +256,11 @@ export default class UserProfileConcept {
         reward: number;
         fieldOfInterests: string[]; // Returns actual interest names for display
       };
-    }[] | { error: string }
+    }] | [{ error: string }]
   > {
     const userDoc = await this.users.findOne({ _id: user });
     if (!userDoc) {
-      return { error: `User with ID '${user}' not found.` };
+      return [{ error: `User with ID '${user}' not found.` }];
     }
 
     // Fetch the actual names for the fieldOfInterests IDs

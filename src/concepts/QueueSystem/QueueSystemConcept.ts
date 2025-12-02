@@ -64,12 +64,12 @@ export default class QueueSystemConcept {
    */
   async _getCompletedQueue(
     { owner }: { owner: User },
-  ): Promise<{ completedQueue: number }[] | { error: string }> {
+  ): Promise<{ completedQueue: number }[] | [{ error: string }]> {
     const today = getTodayStart();
     // Precondition check: queue exists with matching owner AND current date
     const queue = await this.queues.findOne({ owner, creationDate: today });
     if (!queue) {
-      return { error: `No queue found for user ${owner} for today` };
+      return [{ error: `No queue found for user ${owner} for today` }];
     }
     // Effect: return the completedQueue count
     return [{ completedQueue: queue.completedQueue }];
@@ -84,13 +84,13 @@ export default class QueueSystemConcept {
    */
   async _getTodayQueue(
     { owner }: { owner: User },
-  ): Promise<{ itemIdSet: string[]; completedQueue: number } | { error: string }> {
+  ): Promise<[{ itemIdSet: string[]; completedQueue: number }] | [{ error: string }]> {
     const today = getTodayStart();
     const queue = await this.queues.findOne({ owner, creationDate: today });
     if (!queue) {
-      return { error: `No queue found for user ${owner} for today` };
+      return [{ error: `No queue found for user ${owner} for today` }];
     }
-    return { itemIdSet: queue.itemIdSet, completedQueue: queue.completedQueue };
+    return [{ itemIdSet: queue.itemIdSet, completedQueue: queue.completedQueue }];
   }
 
   /**

@@ -892,10 +892,10 @@ RULES:
     owner,
   }: {
     owner: User;
-  }): Promise<{ item: ItemDoc }[] | { error: string }> {
+  }): Promise<{ item: ItemDoc }[] | [{ error: string }]> {
     const wishlist = await this.wishlists.findOne({ _id: owner });
     if (!wishlist) {
-      return { error: `No wishlist found for owner: ${owner}` };
+      return [{ error: `No wishlist found for owner: ${owner}` }];
     }
 
     if (wishlist.itemIdSet.length === 0) {
@@ -921,10 +921,10 @@ RULES:
     owner,
   }: {
     owner: User;
-  }): Promise<{ item: ItemDoc }[] | { error: string }> {
+  }): Promise<{ item: ItemDoc }[] | [{ error: string }]> {
     const wishlist = await this.wishlists.findOne({ _id: owner });
     if (!wishlist) {
-      return { error: `No wishlist found for owner: ${owner}` };
+      return [{ error: `No wishlist found for owner: ${owner}` }];
     }
 
     if (wishlist.itemIdSet.length === 0) {
@@ -950,10 +950,10 @@ RULES:
     itemId,
   }: {
     itemId: ItemID;
-  }): Promise<{ item: ItemDoc }[] | { error: string }> {
+  }): Promise<{ item: ItemDoc }[] | [{ error: string }]> {
     const itemDoc = await this.items.findOne({ _id: itemId });
     if (!itemDoc) {
-      return { error: `Item details for ${itemId} not found.` };
+      return [{ error: `Item details for ${itemId} not found.` }];
     }
     return [{ item: itemDoc }];
   }

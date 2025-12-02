@@ -126,14 +126,14 @@ export default class SwipeSystemConcept {
    */
   async _getSwipeStats(
     { ownerUserId, itemId }: { ownerUserId: UserId; itemId: ItemId },
-  ): Promise<{ total: number; approval: number } | { error: string }> {
+  ): Promise<[{ total: number; approval: number }] | [{ error: string }]> {
     const allSwipes = await this.swipes.find({
       userId: ownerUserId,
       itemId: itemId,
     }).toArray();
 
     if (allSwipes.length === 0) {
-      return { error: "No swipes found for the given user and item." };
+      return [{ error: "No swipes found for the given user and item." }];
     }
 
     const positive =
@@ -141,7 +141,7 @@ export default class SwipeSystemConcept {
     const negative =
       allSwipes.filter((swipe) => swipe.decision === "Don't Buy").length;
 
-    return { total: positive + negative, approval: positive };
+    return [{ total: positive + negative, approval: positive }];
   }
 
   /**
@@ -155,7 +155,7 @@ export default class SwipeSystemConcept {
    */
   async _getCommunitySwipeStats(
     { itemId, excludeUserId }: { itemId: ItemId; excludeUserId?: UserId },
-  ): Promise<{ total: number; approval: number } | { error: string }> {
+  ): Promise<[{ total: number; approval: number }] | [{ error: string }]> {
     const query: { itemId: ItemId; userId?: { $ne: UserId } } = { itemId };
 
     // Exclude the item owner's swipes if specified
@@ -166,7 +166,7 @@ export default class SwipeSystemConcept {
     const allSwipes = await this.swipes.find(query).toArray();
 
     if (allSwipes.length === 0) {
-      return { error: "No community swipes found for this item." };
+      return [{ error: "No community swipes found for this item." }];
     }
 
     const positive =
@@ -174,7 +174,7 @@ export default class SwipeSystemConcept {
     const negative =
       allSwipes.filter((swipe) => swipe.decision === "Don't Buy").length;
 
-    return { total: positive + negative, approval: positive };
+    return [{ total: positive + negative, approval: positive }];
   }
 
   /**
@@ -188,7 +188,7 @@ export default class SwipeSystemConcept {
    */
   async _getSwipeComments(
     { ownerUserId, itemId }: { ownerUserId: UserId; itemId: ItemId },
-  ): Promise<{ comments: string[] } | { error: string }> {
+  ): Promise<[{ comments: string[] }] | [{ error: string }]> {
     const comments = await this.swipes.find(
       { userId: ownerUserId, itemId: itemId, comment: { $ne: undefined } },
       { projection: { comment: 1, _id: 0 } }, // Only retrieve the comment field
@@ -199,9 +199,9 @@ export default class SwipeSystemConcept {
     ) => c !== undefined);
 
     if (actualComments.length === 0) {
-      return { error: "No comments found for the given user and item." };
+      return [{ error: "No comments found for the given user and item." }];
     }
 
-    return { comments: actualComments };
+    return [{ comments: actualComments }];
   }
 }
