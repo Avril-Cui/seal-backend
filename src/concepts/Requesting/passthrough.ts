@@ -25,12 +25,34 @@
  */
 
 export const inclusions: Record<string, string> = {
-  // Feel free to delete these example inclusions
-  "/api/LikertSurvey/_getSurveyQuestions": "this is a public query",
-  "/api/LikertSurvey/_getSurveyResponses": "responses are public",
-  "/api/LikertSurvey/_getRespondentAnswers": "answers are visible",
-  "/api/LikertSurvey/submitResponse": "allow anyone to submit response",
-  "/api/LikertSurvey/updateResponse": "allow anyone to update their response",
+  // ============================================
+  // UserAuth - Handled via syncs (to create sessions)
+  // ============================================
+
+  // ============================================
+  // Sessioning - No public routes (all handled via syncs or internal)
+  // ============================================
+
+  // ============================================
+  // LikertSurvey - Public survey access
+  // ============================================
+  "/api/LikertSurvey/_getSurveyQuestions": "public - view survey questions",
+  "/api/LikertSurvey/_getSurveyResponses": "public - view aggregated responses",
+  "/api/LikertSurvey/_getRespondentAnswers": "public - view individual answers",
+  "/api/LikertSurvey/submitResponse": "public - anyone can submit survey response",
+  "/api/LikertSurvey/updateResponse": "public - anyone can update their response",
+
+  // ============================================
+  // ItemCollection - Public community view only
+  // ============================================
+  "/api/ItemCollection/_getTenRandomItems": "public - community view of random items",
+  "/api/ItemCollection/fetchAmazonDetails": "public - just fetches product info, no auth needed",
+
+  // ============================================
+  // SwipeSystem - Public aggregate stats only
+  // ============================================
+  "/api/SwipeSystem/_getCommunitySwipeStats": "public - aggregate community statistics",
+  "/api/SwipeSystem/_getSwipeComments": "public - view comments on items",
 };
 
 /**
@@ -40,11 +62,78 @@ export const inclusions: Record<string, string> = {
  * instead trigger the normal Requesting.request action. As this
  * is the intended behavior, no justification is necessary.
  *
+ * These routes require authentication via syncs.
+ *
  * exclusions = ["route"]
  */
 
 export const exclusions: Array<string> = [
-  // Feel free to delete these example exclusions
+  // ============================================
+  // UserAuth - Handled via syncs to create sessions
+  // ============================================
+  "/api/UserAuth/signup",
+  "/api/UserAuth/login",
+
+  // ============================================
+  // Sessioning - Auth required
+  // ============================================
+  "/api/Sessioning/create",    // Only called by login/signup sync
+  "/api/Sessioning/delete",    // Logout - requires valid session
+  "/api/Sessioning/_getUser",  // Internal use only
+
+  // ============================================
+  // LikertSurvey - Admin only
+  // ============================================
   "/api/LikertSurvey/createSurvey",
   "/api/LikertSurvey/addQuestion",
+
+  // ============================================
+  // ItemCollection - All user-specific actions
+  // ============================================
+  "/api/ItemCollection/addItem",
+  "/api/ItemCollection/addAmazonItem",
+  "/api/ItemCollection/addItemFromExtension",
+  "/api/ItemCollection/removeItem",
+  "/api/ItemCollection/updateItemName",
+  "/api/ItemCollection/updateDescription",
+  "/api/ItemCollection/updatePhoto",
+  "/api/ItemCollection/updatePrice",
+  "/api/ItemCollection/updateReason",
+  "/api/ItemCollection/updateIsNeed",
+  "/api/ItemCollection/updateIsFutureApprove",
+  "/api/ItemCollection/updateItem",
+  "/api/ItemCollection/setPurchased",
+  "/api/ItemCollection/getAIInsight",
+  "/api/ItemCollection/_getUserWishList",
+  "/api/ItemCollection/_getWishListItems",
+  "/api/ItemCollection/_getItemDetails",
+  // Internal/private methods
+  "/api/ItemCollection/_updateItemAttribute",
+  "/api/ItemCollection/generateInputHash",
+
+  // ============================================
+  // QueueSystem - All user-specific actions
+  // ============================================
+  "/api/QueueSystem/_getCompletedQueue",
+  "/api/QueueSystem/_getTodayQueue",
+  "/api/QueueSystem/generateDailyQueue",
+  "/api/QueueSystem/incrementCompletedQueue",
+
+  // ============================================
+  // SwipeSystem - User-specific actions
+  // ============================================
+  "/api/SwipeSystem/recordSwipe",
+  "/api/SwipeSystem/updateDecision",
+  "/api/SwipeSystem/_getSwipeStats",
+
+  // ============================================
+  // UserProfile - All user-specific actions
+  // ============================================
+  "/api/UserProfile/createUser",
+  "/api/UserProfile/updateProfileName",
+  "/api/UserProfile/updateProfilePicture",
+  "/api/UserProfile/updatePassword",
+  "/api/UserProfile/updateInterests",
+  "/api/UserProfile/_getProfile",
+  "/api/UserProfile/ensureFieldsOfInterestsExist",
 ];

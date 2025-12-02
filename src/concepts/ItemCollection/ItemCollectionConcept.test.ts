@@ -300,7 +300,7 @@ Deno.test("Principle: User maintains a personal wishlist, adds/updates items, ma
           "updateItemName should fail if item is not owned by the user.",
         );
         assertEquals(
-          (result as { error: string }).error,
+          (result as unknown as { error: string }).error,
           `Item ${itemIdB} not found in wishlist for owner: ${userA}`,
           "Error message should indicate item not in current user's wishlist.",
         );
@@ -443,13 +443,13 @@ Deno.test("Action: addItem - requirements and effects", async (t) => {
         "addItem should fail if Amazon API call fails.",
       );
       assertEquals(
-        (result as { error: string }).error,
+        (result as unknown as { error: string }).error,
         "Amazon API error: Failed to fetch item details from Amazon.",
         "Error message should indicate Amazon API failure.",
       );
       console.log(
         `Requirement met: Failed as expected with error: "${
-          (result as { error: string }).error
+          (result as unknown as { error: string }).error
         }"`,
       );
     });
@@ -635,13 +635,13 @@ Deno.test("Action: removeItem - requirements and effects", async (t) => {
         "removeItem should fail if wishlist does not exist.",
       );
       assertEquals(
-        (result as { error: string }).error,
+        (result as unknown as { error: string }).error,
         `No wishlist found for owner: ${userB}`,
         "Error message should indicate missing wishlist.",
       );
       console.log(
         `Requirement met: Failed as expected with error: "${
-          (result as { error: string }).error
+          (result as unknown as { error: string }).error
         }"`,
       );
     });
@@ -664,13 +664,13 @@ Deno.test("Action: removeItem - requirements and effects", async (t) => {
           "removeItem should fail if item is not in wishlist.",
         );
         assertEquals(
-          (result as { error: string }).error,
+          (result as unknown as { error: string }).error,
           `Item ${nonExistentItemId} not found in wishlist for owner: ${userA}`,
           "Error message should indicate item not in wishlist.",
         );
         console.log(
           `Requirement met: Failed as expected with error: "${
-            (result as { error: string }).error
+            (result as unknown as { error: string }).error
           }"`,
         );
       },
@@ -789,13 +789,13 @@ Deno.test("Action: update* methods - requirements and effects", async (t) => {
         "updateItemName should fail if wishlist does not exist.",
       );
       assertEquals(
-        (result as { error: string }).error,
+        (result as unknown as { error: string }).error,
         `No wishlist found for owner: ${userB}`,
         "Error message should indicate missing wishlist.",
       );
       console.log(
         `Requirement met: Failed as expected with error: "${
-          (result as { error: string }).error
+          (result as unknown as { error: string }).error
         }"`,
       );
     });
@@ -819,13 +819,13 @@ Deno.test("Action: update* methods - requirements and effects", async (t) => {
           "updateItemName should fail if item is not in wishlist.",
         );
         assertEquals(
-          (result as { error: string }).error,
+          (result as unknown as { error: string }).error,
           `Item ${nonExistentItemId} not found in wishlist for owner: ${userA}`,
           "Error message should indicate item not in wishlist.",
         );
         console.log(
           `Requirement met: Failed as expected with error: "${
-            (result as { error: string }).error
+            (result as unknown as { error: string }).error
           }"`,
         );
       },
@@ -859,13 +859,13 @@ Deno.test("Action: update* methods - requirements and effects", async (t) => {
           "updateItemName should fail if item is not owned by the user.",
         );
         assertEquals(
-          (result as { error: string }).error,
+          (result as unknown as { error: string }).error,
           `Item ${itemIdB} not found in wishlist for owner: ${userA}`, // The check for item in wishlist covers this
           "Error message should indicate item not in current user's wishlist.",
         );
         console.log(
           `Requirement met: Failed as expected with error: "${
-            (result as { error: string }).error
+            (result as unknown as { error: string }).error
           }"`,
         );
       },
@@ -889,13 +889,13 @@ Deno.test("Action: update* methods - requirements and effects", async (t) => {
           "updatePrice should fail if price is negative.",
         );
         assertEquals(
-          (result as { error: string }).error,
+          (result as unknown as { error: string }).error,
           "Price cannot be negative.",
           "Error message should indicate negative price.",
         );
         console.log(
           `Requirement met: Failed as expected with error: "${
-            (result as { error: string }).error
+            (result as unknown as { error: string }).error
           }"`,
         );
       },
@@ -1136,13 +1136,13 @@ Deno.test("Action: setPurchased - requirements and effects", async (t) => {
         "setPurchased should fail if wishlist does not exist.",
       );
       assertEquals(
-        (result as { error: string }).error,
+        (result as unknown as { error: string }).error,
         `No wishlist found for owner: ${userB}`,
         "Error message should indicate missing wishlist.",
       );
       console.log(
         `Requirement met: Failed as expected with error: "${
-          (result as { error: string }).error
+          (result as unknown as { error: string }).error
         }"`,
       );
     });
@@ -1165,13 +1165,13 @@ Deno.test("Action: setPurchased - requirements and effects", async (t) => {
           "setPurchased should fail if item is not in wishlist.",
         );
         assertEquals(
-          (result as { error: string }).error,
+          (result as unknown as { error: string }).error,
           `Item ${nonExistentItemId} not found in wishlist for owner: ${userA}`,
           "Error message should indicate item not in wishlist.",
         );
         console.log(
           `Requirement met: Failed as expected with error: "${
-            (result as { error: string }).error
+            (result as unknown as { error: string }).error
           }"`,
         );
       },
@@ -1246,13 +1246,13 @@ Deno.test("Action: setPurchased - requirements and effects", async (t) => {
           "setPurchased should fail if item is already purchased.",
         );
         assertEquals(
-          (result as { error: string }).error,
+          (result as unknown as { error: string }).error,
           `Item ${itemId} has already been marked as purchased.`,
           "Error message should indicate already purchased item.",
         );
         console.log(
           `Requirement met: Failed as expected with error: "${
-            (result as { error: string }).error
+            (result as unknown as { error: string }).error
           }"`,
         );
       },
@@ -1304,13 +1304,13 @@ Deno.test("Action: getAIInsight - requirements and effects", async (t) => {
         "getAIInsight should fail if wishlist does not exist.",
       );
       assertEquals(
-        (result as { error: string }).error,
+        (result as unknown as { error: string }).error,
         `No wishlist found for owner: ${userB}`,
         "Error message should indicate missing wishlist.",
       );
       console.log(
         `Requirement met: Failed as expected with error: "${
-          (result as { error: string }).error
+          (result as unknown as { error: string }).error
         }"`,
       );
     });
@@ -1333,13 +1333,13 @@ Deno.test("Action: getAIInsight - requirements and effects", async (t) => {
           "getAIInsight should fail if item is not in wishlist.",
         );
         assertEquals(
-          (result as { error: string }).error,
+          (result as unknown as { error: string }).error,
           `Item ${nonExistentItemId} not found in wishlist for owner: ${userA}`,
           "Error message should indicate item not in wishlist.",
         );
         console.log(
           `Requirement met: Failed as expected with error: "${
-            (result as { error: string }).error
+            (result as unknown as { error: string }).error
           }"`,
         );
       },
@@ -1363,13 +1363,13 @@ Deno.test("Action: getAIInsight - requirements and effects", async (t) => {
         "getAIInsight should fail if LLM API call fails.",
       );
       assertEquals(
-        (result as { error: string }).error,
+        (result as unknown as { error: string }).error,
         "LLM API error: LLM API call failed.",
         "Error message should indicate LLM API failure.",
       );
       console.log(
         `Requirement met: Failed as expected with error: "${
-          (result as { error: string }).error
+          (result as unknown as { error: string }).error
         }"`,
       );
     });
@@ -1441,18 +1441,18 @@ Deno.test("Query: _getWishListItems - requirements and effects", async (t) => {
           owner: userB,
         });
         assertEquals(
-          "error" in result,
+          "error" in result[0],
           true,
           "Should return error if wishlist does not exist.",
         );
         assertEquals(
-          (result as { error: string }).error,
+          (result[0] as { error: string }).error,
           `No wishlist found for owner: ${userB}`,
           "Error message should indicate missing wishlist.",
         );
         console.log(
           `Requirement met: Failed as expected with error: "${
-            (result as { error: string }).error
+            (result[0] as { error: string }).error
           }"`,
         );
       },
@@ -1586,18 +1586,18 @@ Deno.test("Query: _getItemDetails - requirements and effects", async (t) => {
         itemId: nonExistentItemId,
       });
       assertEquals(
-        "error" in result,
+        "error" in result[0],
         true,
         "Should return error if item does not exist.",
       );
       assertEquals(
-        (result as { error: string }).error,
+        (result[0] as { error: string }).error,
         `Item details for ${nonExistentItemId} not found.`,
         "Error message should indicate item not found.",
       );
       console.log(
         `Requirement met: Failed as expected with error: "${
-          (result as { error: string }).error
+          (result[0] as { error: string }).error
         }"`,
       );
     });
@@ -1695,13 +1695,13 @@ Deno.test("Internal Query: _getTenRandomItems - requirements and effects", async
           "Should fail if not enough items from other owners.",
         );
         assertEquals(
-          (result as { error: string }).error,
+          (result as unknown as { error: string }).error,
           "Not enough items from other owners to select ten.",
           "Error message should indicate insufficient items.",
         );
         console.log(
           `Requirement met: Failed as expected with error: "${
-            (result as { error: string }).error
+            (result as unknown as { error: string }).error
           }"`,
         );
       },
@@ -1736,7 +1736,7 @@ Deno.test("Internal Query: _getTenRandomItems - requirements and effects", async
           "error" in result,
           true,
           `_getTenRandomItems should succeed, but got error: ${
-            "error" in result ? (result as { error: string }).error : "N/A"
+            "error" in result ? (result as unknown as { error: string }).error : "N/A"
           }`,
         );
         const itemIdSet = (result as { itemIdSet: ID[] }[])[0].itemIdSet;
