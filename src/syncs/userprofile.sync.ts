@@ -1,7 +1,7 @@
 /**
  * UserProfile synchronizations
  * All routes require session authentication
- * 
+ *
  * NOTE: Methods starting with "_" are queries and must use frames.query() in where clause
  */
 
@@ -28,7 +28,7 @@ export const CreateUserRequest: Sync = ({ request, session, user }) => ({
 export const CreateUserResponse: Sync = ({ request, profile }) => ({
   when: actions(
     [Requesting.request, { path: "/UserProfile/createUser" }, { request }],
-    [UserProfile.createUser, {}, { profile }],
+    [UserProfile.createUser, {}, { profile }]
   ),
   then: actions([Requesting.respond, { request, profile }]),
 });
@@ -36,7 +36,7 @@ export const CreateUserResponse: Sync = ({ request, profile }) => ({
 export const CreateUserError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/UserProfile/createUser" }, { request }],
-    [UserProfile.createUser, {}, { error }],
+    [UserProfile.createUser, {}, { error }]
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -45,7 +45,12 @@ export const CreateUserError: Sync = ({ request, error }) => ({
 // GET PROFILE (Query - handled in where clause)
 // ============================================
 
-export const GetProfileRequest: Sync = ({ request, session, user, profile }) => ({
+export const GetProfileRequest: Sync = ({
+  request,
+  session,
+  user,
+  profile,
+}) => ({
   when: actions([
     Requesting.request,
     { path: "/UserProfile/_getProfile", session },
@@ -72,7 +77,12 @@ export const GetProfileRequest: Sync = ({ request, session, user, profile }) => 
 // UPDATE PROFILE NAME (Action)
 // ============================================
 
-export const UpdateProfileNameRequest: Sync = ({ request, session, user, name }) => ({
+export const UpdateProfileNameRequest: Sync = ({
+  request,
+  session,
+  user,
+  name,
+}) => ({
   when: actions([
     Requesting.request,
     { path: "/UserProfile/updateProfileName", session, name },
@@ -82,21 +92,29 @@ export const UpdateProfileNameRequest: Sync = ({ request, session, user, name })
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     return frames.filter(($) => $[user] !== undefined);
   },
-  then: actions([UserProfile.updateProfileName, { owner: user, name }]),
+  then: actions([UserProfile.updateProfileName, { user: user, newName: name }]),
 });
 
 export const UpdateProfileNameResponse: Sync = ({ request }) => ({
   when: actions(
-    [Requesting.request, { path: "/UserProfile/updateProfileName" }, { request }],
-    [UserProfile.updateProfileName, {}, {}],
+    [
+      Requesting.request,
+      { path: "/UserProfile/updateProfileName" },
+      { request },
+    ],
+    [UserProfile.updateProfileName, {}, {}]
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
 
 export const UpdateProfileNameError: Sync = ({ request, error }) => ({
   when: actions(
-    [Requesting.request, { path: "/UserProfile/updateProfileName" }, { request }],
-    [UserProfile.updateProfileName, {}, { error }],
+    [
+      Requesting.request,
+      { path: "/UserProfile/updateProfileName" },
+      { request },
+    ],
+    [UserProfile.updateProfileName, {}, { error }]
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -105,7 +123,12 @@ export const UpdateProfileNameError: Sync = ({ request, error }) => ({
 // UPDATE PROFILE PICTURE (Action)
 // ============================================
 
-export const UpdateProfilePictureRequest: Sync = ({ request, session, user, profilePicture }) => ({
+export const UpdateProfilePictureRequest: Sync = ({
+  request,
+  session,
+  user,
+  profilePicture,
+}) => ({
   when: actions([
     Requesting.request,
     { path: "/UserProfile/updateProfilePicture", session, profilePicture },
@@ -115,21 +138,32 @@ export const UpdateProfilePictureRequest: Sync = ({ request, session, user, prof
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     return frames.filter(($) => $[user] !== undefined);
   },
-  then: actions([UserProfile.updateProfilePicture, { owner: user, profilePicture }]),
+  then: actions([
+    UserProfile.updateProfilePicture,
+    { owner: user, profilePicture },
+  ]),
 });
 
 export const UpdateProfilePictureResponse: Sync = ({ request }) => ({
   when: actions(
-    [Requesting.request, { path: "/UserProfile/updateProfilePicture" }, { request }],
-    [UserProfile.updateProfilePicture, {}, {}],
+    [
+      Requesting.request,
+      { path: "/UserProfile/updateProfilePicture" },
+      { request },
+    ],
+    [UserProfile.updateProfilePicture, {}, {}]
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
 
 export const UpdateProfilePictureError: Sync = ({ request, error }) => ({
   when: actions(
-    [Requesting.request, { path: "/UserProfile/updateProfilePicture" }, { request }],
-    [UserProfile.updateProfilePicture, {}, { error }],
+    [
+      Requesting.request,
+      { path: "/UserProfile/updateProfilePicture" },
+      { request },
+    ],
+    [UserProfile.updateProfilePicture, {}, { error }]
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -138,23 +172,37 @@ export const UpdateProfilePictureError: Sync = ({ request, error }) => ({
 // UPDATE PASSWORD (Action)
 // ============================================
 
-export const UpdatePasswordRequest: Sync = ({ request, session, user, currentPassword, newPassword }) => ({
+export const UpdatePasswordRequest: Sync = ({
+  request,
+  session,
+  user,
+  currentPassword,
+  newPassword,
+}) => ({
   when: actions([
     Requesting.request,
-    { path: "/UserProfile/updatePassword", session, currentPassword, newPassword },
+    {
+      path: "/UserProfile/updatePassword",
+      session,
+      currentPassword,
+      newPassword,
+    },
     { request },
   ]),
   where: async (frames) => {
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     return frames.filter(($) => $[user] !== undefined);
   },
-  then: actions([UserProfile.updatePassword, { owner: user, currentPassword, newPassword }]),
+  then: actions([
+    UserProfile.updatePassword,
+    { owner: user, currentPassword, newPassword },
+  ]),
 });
 
 export const UpdatePasswordResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/UserProfile/updatePassword" }, { request }],
-    [UserProfile.updatePassword, {}, {}],
+    [UserProfile.updatePassword, {}, {}]
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -162,7 +210,7 @@ export const UpdatePasswordResponse: Sync = ({ request }) => ({
 export const UpdatePasswordError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/UserProfile/updatePassword" }, { request }],
-    [UserProfile.updatePassword, {}, { error }],
+    [UserProfile.updatePassword, {}, { error }]
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -171,7 +219,12 @@ export const UpdatePasswordError: Sync = ({ request, error }) => ({
 // UPDATE INTERESTS (Action)
 // ============================================
 
-export const UpdateInterestsRequest: Sync = ({ request, session, user, interests }) => ({
+export const UpdateInterestsRequest: Sync = ({
+  request,
+  session,
+  user,
+  interests,
+}) => ({
   when: actions([
     Requesting.request,
     { path: "/UserProfile/updateInterests", session, interests },
@@ -187,7 +240,7 @@ export const UpdateInterestsRequest: Sync = ({ request, session, user, interests
 export const UpdateInterestsResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/UserProfile/updateInterests" }, { request }],
-    [UserProfile.updateInterests, {}, {}],
+    [UserProfile.updateInterests, {}, {}]
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -195,7 +248,7 @@ export const UpdateInterestsResponse: Sync = ({ request }) => ({
 export const UpdateInterestsError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/UserProfile/updateInterests" }, { request }],
-    [UserProfile.updateInterests, {}, { error }],
+    [UserProfile.updateInterests, {}, { error }]
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -204,7 +257,11 @@ export const UpdateInterestsError: Sync = ({ request, error }) => ({
 // ENSURE FIELDS OF INTERESTS EXIST (Action)
 // ============================================
 
-export const EnsureFieldsOfInterestsExistRequest: Sync = ({ request, session, user }) => ({
+export const EnsureFieldsOfInterestsExistRequest: Sync = ({
+  request,
+  session,
+  user,
+}) => ({
   when: actions([
     Requesting.request,
     { path: "/UserProfile/ensureFieldsOfInterestsExist", session },
@@ -219,16 +276,27 @@ export const EnsureFieldsOfInterestsExistRequest: Sync = ({ request, session, us
 
 export const EnsureFieldsOfInterestsExistResponse: Sync = ({ request }) => ({
   when: actions(
-    [Requesting.request, { path: "/UserProfile/ensureFieldsOfInterestsExist" }, { request }],
-    [UserProfile.ensureFieldsOfInterestsExist, {}, {}],
+    [
+      Requesting.request,
+      { path: "/UserProfile/ensureFieldsOfInterestsExist" },
+      { request },
+    ],
+    [UserProfile.ensureFieldsOfInterestsExist, {}, {}]
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
 
-export const EnsureFieldsOfInterestsExistError: Sync = ({ request, error }) => ({
+export const EnsureFieldsOfInterestsExistError: Sync = ({
+  request,
+  error,
+}) => ({
   when: actions(
-    [Requesting.request, { path: "/UserProfile/ensureFieldsOfInterestsExist" }, { request }],
-    [UserProfile.ensureFieldsOfInterestsExist, {}, { error }],
+    [
+      Requesting.request,
+      { path: "/UserProfile/ensureFieldsOfInterestsExist" },
+      { request },
+    ],
+    [UserProfile.ensureFieldsOfInterestsExist, {}, { error }]
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
