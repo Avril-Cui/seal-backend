@@ -8,7 +8,6 @@ const PREFIX = "UserProfile" + ".";
 // Define the User entity structure based on the new state
 /**
  * a set of Users with
- *   a uid String  // this is an unique id
  *   a name String
  *   an email String
  *   a password String
@@ -17,8 +16,7 @@ const PREFIX = "UserProfile" + ".";
  *   a fieldOfInterests set of FieldsOfInterests (stored as IDs)
  */
 interface UserDocument {
-  _id: ID; // The MongoDB document ID for the User entity
-  uid: string; // The user's unique identifier (as specified in the concept)
+  _id: ID; // The UserAuth._id is used directly as the document's primary key
   name: string;
   email: string;
   password: string; // Note: In a real application, passwords should be hashed and never stored in plain text.
@@ -88,7 +86,7 @@ export default class UserProfileConcept {
    *     no user exists with matching uid;
    *
    * **effects**
-   *     create a new user with (uid, name, email, password, profilePicture, reward = 0, fieldOfInterests);
+   *     create a new user with (uid as _id, name, email, password, profilePicture, reward = 0, fieldOfInterests);
    *     return user;
    */
   async createUser({
@@ -99,17 +97,17 @@ export default class UserProfileConcept {
     profilePicture,
     fieldOfInterests,
   }: {
-    uid: string;
+    uid: ID; // This is the UserAuth._id
     name: string;
     email: string;
     password: string;
     profilePicture: string;
     fieldOfInterests: string[]; // Expecting an array of interest NAMES (strings)
   }): Promise<{ user: ID } | { error: string }> {
-    // Check 'requires' condition: ensure no user with the given uid already exists
-    const existingUser = await this.users.findOne({ uid: uid });
+    // Check 'requires' condition: ensure no user with the given _id already exists
+    const existingUser = await this.users.findOne({ _id: uid });
     if (existingUser) {
-      return { error: `User with UID '${uid}' already exists.` };
+      return { error: `User with ID '${uid}' already exists.` };
     }
 
     // Resolve or create FieldsOfInterests entities and get their IDs
@@ -117,10 +115,9 @@ export default class UserProfileConcept {
       fieldOfInterests
     );
 
-    // 'effects': Create and insert a new UserDocument
+    // 'effects': Create and insert a new UserDocument using uid as _id
     const newUser: UserDocument = {
-      _id: freshID(), // Generate a unique ID for the user document
-      uid: uid,
+      _id: uid, // Use the UserAuth._id directly
       name: name,
       email: email,
       password: password,
@@ -150,9 +147,8 @@ export default class UserProfileConcept {
     newName: string;
   }): Promise<Empty | { error: string }> {
     // Check 'requires' condition implicitly by checking if update was successful
-    // Note: user is the uid from session, not the document _id
     const result = await this.users.updateOne(
-      { uid: user },
+      { _id: user },
       { $set: { name: newName } }
     );
 
@@ -179,9 +175,8 @@ export default class UserProfileConcept {
     newProfilePicture: string;
   }): Promise<Empty | { error: string }> {
     // Check 'requires' condition implicitly
-    // Note: user is the uid from session, not the document _id
     const result = await this.users.updateOne(
-      { uid: user },
+      { _id: user },
       { $set: { profilePicture: newProfilePicture } }
     );
 
@@ -208,9 +203,8 @@ export default class UserProfileConcept {
     newPassword: string;
   }): Promise<Empty | { error: string }> {
     // Check 'requires' condition implicitly
-    // Note: user is the uid from session, not the document _id
     const result = await this.users.updateOne(
-      { uid: user },
+      { _id: user },
       { $set: { password: newPassword } } // Reminder: Hash passwords in a real application!
     );
 
@@ -239,8 +233,7 @@ export default class UserProfileConcept {
     } // Expecting array of interest NAMES
   ): Promise<Empty | { error: string }> {
     // Check 'requires' condition: ensure user exists
-    // Note: user is the uid from session, not the document _id
-    const existingUser = await this.users.findOne({ uid: user });
+    const existingUser = await this.users.findOne({ _id: user });
     if (!existingUser) {
       return { error: `User with ID '${user}' not found.` };
     }
@@ -252,7 +245,7 @@ export default class UserProfileConcept {
 
     // 'effects': Update the 'fieldOfInterests' array for the specified user
     await this.users.updateOne(
-      { uid: user },
+      { _id: user },
       { $set: { fieldOfInterests: interestIDs } }
     );
     return {};
@@ -272,7 +265,6 @@ export default class UserProfileConcept {
     | [
         {
           profile: {
-            uid: string;
             name: string;
             email: string;
             profilePicture: string;
@@ -283,8 +275,7 @@ export default class UserProfileConcept {
       ]
     | [{ error: string }]
   > {
-    // Note: user is the uid from session, not the document _id
-    const userDoc = await this.users.findOne({ uid: user });
+    const userDoc = await this.users.findOne({ _id: user });
     if (!userDoc) {
       return [{ error: `User with ID '${user}' not found.` }];
     }
@@ -301,7 +292,6 @@ export default class UserProfileConcept {
     return [
       {
         profile: {
-          uid: userDoc.uid,
           name: userDoc.name,
           email: userDoc.email,
           profilePicture: userDoc.profilePicture,
