@@ -5,7 +5,7 @@
  * NOTE: Methods starting with "_" are queries and must use frames.query() in where clause
  */
 
-import { ItemCollection, Requesting, Sessioning } from "@concepts";
+import { ItemCollection, Requesting, Sessioning, UserProfile } from "@concepts";
 import { actions, Frames, Sync } from "@engine";
 
 // ============================================
@@ -498,7 +498,7 @@ export const GetWishListItemsRequest: Sync = ({ request, session, user, item, it
 // GET ITEM DETAILS (Query - handled in where clause)
 // ============================================
 
-export const GetItemDetailsRequest: Sync = ({ request, session, user, itemId, item }) => ({
+export const GetItemDetailsRequest: Sync = ({ request, session, user, itemId, item, profile, itemWithOwner }) => ({
   when: actions([
     Requesting.request,
     { path: "/ItemCollection/_getItemDetails", session, itemId },
@@ -512,11 +512,25 @@ export const GetItemDetailsRequest: Sync = ({ request, session, user, itemId, it
       return new Frames({ ...originalFrame, authError: true });
     }
     // Then call the query
-    frames = await frames.query(ItemCollection._getItemDetails, { owner: user, itemId }, { item });
+    frames = await frames.query(ItemCollection._getItemDetails, { itemId }, { item });
     if (frames.length === 0) {
       return new Frames({ ...originalFrame, queryError: "Item not found" });
     }
-    return frames;
+    
+    // Get the owner's profile to fetch their name
+    const itemData = frames[0][item];
+    const ownerId = itemData.owner;
+    
+    // Fetch owner's profile
+    frames = await frames.query(UserProfile._getProfile, { user: ownerId }, { profile });
+    if (frames.length === 0) {
+      // If profile not found, just use the item without owner name
+      return new Frames({ ...originalFrame, [itemWithOwner]: { ...itemData, ownerName: "User" } });
+    }
+    
+    // Add owner name to item
+    const ownerProfile = frames[0][profile];
+    return new Frames({ ...originalFrame, [itemWithOwner]: { ...itemData, ownerName: ownerProfile.name } });
   },
-  then: actions([Requesting.respond, { request, item }]),
+  then: actions([Requesting.respond, { request, item: itemWithOwner }]),
 });

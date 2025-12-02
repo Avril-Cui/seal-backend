@@ -317,6 +317,7 @@ Deno.test("Principle: User maintains a personal wishlist, adds/updates items, ma
       const purchaseResult = await itemCollectionConcept.setPurchased({
         owner: userA,
         item: itemId,
+        quantity: 1,
       });
       assertNotEquals(
         "error" in purchaseResult,
@@ -1129,6 +1130,7 @@ Deno.test("Action: setPurchased - requirements and effects", async (t) => {
       const result = await itemCollectionConcept.setPurchased({
         owner: userB,
         item: itemId,
+        quantity: 1,
       });
       assertEquals(
         "error" in result,
@@ -1158,6 +1160,7 @@ Deno.test("Action: setPurchased - requirements and effects", async (t) => {
         const result = await itemCollectionConcept.setPurchased({
           owner: userA,
           item: nonExistentItemId,
+          quantity: 1,
         });
         assertEquals(
           "error" in result,
@@ -1187,6 +1190,7 @@ Deno.test("Action: setPurchased - requirements and effects", async (t) => {
         const purchaseResult = await itemCollectionConcept.setPurchased({
           owner: userA,
           item: itemId,
+          quantity: 1,
         });
         assertNotEquals(
           "error" in purchaseResult,
@@ -1239,6 +1243,7 @@ Deno.test("Action: setPurchased - requirements and effects", async (t) => {
         const result = await itemCollectionConcept.setPurchased({
           owner: userA,
           item: itemId,
+          quantity: 1,
         });
         assertEquals(
           "error" in result,
