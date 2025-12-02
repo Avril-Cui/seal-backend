@@ -12,17 +12,17 @@ import { actions, Frames, Sync } from "@engine";
 // ADD ITEM (Action)
 // ============================================
 
-export const AddItemRequest: Sync = ({ request, session, user, itemName, description, photo, price, reason, isNeed, isFutureApprove }) => ({
+export const AddItemRequest: Sync = ({ request, session, user, itemName, description, photo, price, reason, isNeed, isFutureApprove, amazonUrl }) => ({
   when: actions([
     Requesting.request,
-    { path: "/ItemCollection/addItem", session, itemName, description, photo, price, reason, isNeed, isFutureApprove },
+    { path: "/ItemCollection/addItem", session, itemName, description, photo, price, reason, isNeed, isFutureApprove, amazonUrl },
     { request },
   ]),
   where: async (frames) => {
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     return frames.filter(($) => $[user] !== undefined);
   },
-  then: actions([ItemCollection.addItem, { owner: user, itemName, description, photo, price, reason, isNeed, isFutureApprove }]),
+  then: actions([ItemCollection.addItem, { owner: user, itemName, description, photo, price, reason, isNeed, isFutureApprove, amazonUrl }]),
 });
 
 export const AddItemResponse: Sync = ({ request, item }) => ({
