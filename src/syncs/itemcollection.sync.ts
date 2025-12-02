@@ -520,3 +520,32 @@ export const GetItemDetailsRequest: Sync = ({ request, session, user, itemId, it
   },
   then: actions([Requesting.respond, { request, item }]),
 });
+
+// ============================================
+// GET PURCHASED ITEMS (Query - handled in where clause)
+// ============================================
+
+export const GetPurchasedItemsRequest: Sync = ({ request, session, user, item, items }) => ({
+  when: actions([
+    Requesting.request,
+    { path: "/ItemCollection/_getPurchasedItems", session },
+    { request },
+  ]),
+  where: async (frames) => {
+    const originalFrame = frames[0];
+    // First verify session
+    frames = await frames.query(Sessioning._getUser, { session }, { user });
+    if (frames.length === 0) {
+      return new Frames({ ...originalFrame, authError: true });
+    }
+    // Then call the query - returns array of { item: ... }
+    frames = await frames.query(ItemCollection._getPurchasedItems, { owner: user }, { item });
+    if (frames.length === 0 || frames[0][item] === undefined) {
+      // Return empty array if no items or error
+      return new Frames({ ...originalFrame, [items]: [] });
+    }
+    // Collect all items into a single array
+    return frames.collectAs([item], items);
+  },
+  then: actions([Requesting.respond, { request, items }]),
+});
