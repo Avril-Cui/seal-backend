@@ -26,6 +26,20 @@ type ItemID = ID; // Renamed for clarity, this is the unique item identifier
  *   an wasPurchased Flag
  *   an PurchasedTime Number  [Optional]
  */
+/**
+ * Cached AI Insight structure for persistent storage
+ */
+export interface CachedAIInsight {
+  productName: string;
+  impulseScore: number;
+  verdict: string;
+  keyInsight: string;
+  fact: string;
+  advice: string;
+  cachedAt: number; // timestamp when cached
+  inputHash: string; // hash of item fields to detect changes
+}
+
 export interface ItemDoc { // ADDED 'export'
   _id: ItemID; // This is the unique itemId
   owner: User; // The owner of this specific item entry
@@ -38,6 +52,8 @@ export interface ItemDoc { // ADDED 'export'
   isFutureApprove: string; // e.g., "yes", "no", "unsure"
   wasPurchased: boolean;
   PurchasedTime?: number; // Changed to number (timestamp)
+  amazonUrl?: string; // Original Amazon product URL
+  cachedAIInsight?: CachedAIInsight; // Cached AI insight for this item
 }
 
 /**
@@ -134,6 +150,7 @@ export default class ItemCollectionConcept {
     reason,
     isNeed,
     isFutureApprove,
+    amazonUrl,
   }: {
     owner: User;
     itemName: string;
@@ -143,6 +160,7 @@ export default class ItemCollectionConcept {
     reason: string;
     isNeed: string;
     isFutureApprove: string;
+    amazonUrl?: string;
   }): Promise<{ item: ItemDoc } | { error: string }> {
     const newItemId = freshID();
     const newItem: ItemDoc = {
@@ -156,6 +174,7 @@ export default class ItemCollectionConcept {
       isNeed,
       isFutureApprove,
       wasPurchased: false,
+      amazonUrl: amazonUrl || undefined,
     };
 
     // Insert new item into the items collection
@@ -224,6 +243,7 @@ export default class ItemCollectionConcept {
       isNeed,
       isFutureApprove,
       wasPurchased: false,
+      amazonUrl: url, // Store the original Amazon URL
     };
 
     // 2. Insert new item into the items collection
@@ -690,7 +710,7 @@ export default class ItemCollectionConcept {
   }: {
     owner: User;
     item: ItemID;
-  }): Promise<{ llm_response: string } | { error: string }> {
+  }): Promise<{ llm_response: string; structured: object | null; cached: boolean } | { error: string }> {
     const wishlist = await this.wishlists.findOne({ _id: owner });
 
     if (!wishlist) {
@@ -709,17 +729,55 @@ export default class ItemCollectionConcept {
       };
     }
 
-    // Build the prompt for the LLM
-    const prompt = `Please analyze this purchase decision:
+    // Generate hash of input fields to detect changes
+    const inputHash = this.generateInputHash(itemDoc);
 
-Item: ${itemDoc.itemName}
-Description: ${itemDoc.description}
-Price: $${itemDoc.price}
-User's reason: ${itemDoc.reason}
-Is this a need? ${itemDoc.isNeed}
-Will future self approve? ${itemDoc.isFutureApprove}
+    // Check for cached AI insight
+    if (itemDoc.cachedAIInsight && itemDoc.cachedAIInsight.inputHash === inputHash) {
+      console.log(`Using cached AI insight for item ${itemId}`);
+      return {
+        llm_response: JSON.stringify(itemDoc.cachedAIInsight),
+        structured: {
+          productName: itemDoc.cachedAIInsight.productName,
+          impulseScore: itemDoc.cachedAIInsight.impulseScore,
+          verdict: itemDoc.cachedAIInsight.verdict,
+          keyInsight: itemDoc.cachedAIInsight.keyInsight,
+          fact: itemDoc.cachedAIInsight.fact,
+          advice: itemDoc.cachedAIInsight.advice,
+        },
+        cached: true,
+      };
+    }
 
-Based on these reflections, provide insight on whether this purchase seems impulsive or well-considered.`;
+    // Build a fact-based prompt for the LLM with JSON output
+    const prompt = `You are a friendly AI shopping advisor speaking directly to the user. Analyze this purchase and return JSON.
+
+PRODUCT:
+- Full Name: "${itemDoc.itemName}"
+- Description: "${itemDoc.description}"
+- Price: $${itemDoc.price}
+
+USER'S REFLECTIONS:
+- Why you want it: "${itemDoc.reason}"
+- Need or want?: "${itemDoc.isNeed}"
+- Future-self approval?: "${itemDoc.isFutureApprove}"
+
+Respond with ONLY valid JSON (no markdown, no code blocks):
+{
+  "productName": "<if the product name is very long, summarize it to 3-5 words, e.g. 'Battat Toy Camper Van'. Otherwise use the short name as-is>",
+  "impulseScore": <number 1-10, where 1=very deliberate, 10=highly impulsive>,
+  "verdict": "<BUY or WAIT or SKIP>",
+  "keyInsight": "<one sentence addressing the user as 'you', analyzing their specific reasoning for wanting this product>",
+  "fact": "<a specific numerical statistic with source, e.g. 'According to a 2023 Slickdeals survey, 73% of Americans make impulse purchases they later regret' or 'A Credit Karma study found the average American spends $314/month on impulse buys'>",
+  "advice": "<actionable advice using 'you', specific to this $${itemDoc.price} purchase>"
+}
+
+RULES:
+1. Use second person ("you", "your") throughout - speak directly to the user
+2. Summarize long product names to be concise (3-5 words max)
+3. The fact MUST include a specific percentage or dollar amount AND cite the source (study name, year, or organization)
+4. Reference the actual product and the user's stated reasoning
+5. Return ONLY the JSON object, nothing else`;
 
     const llmResponse = await this.geminiLLM.executeLLM(prompt);
 
@@ -727,7 +785,71 @@ Based on these reflections, provide insight on whether this purchase seems impul
       return { error: `LLM API error: ${llmResponse.error}` };
     }
 
-    return { llm_response: llmResponse as string };
+    // Try to parse JSON response
+    try {
+      // Clean up response - remove markdown code blocks if present
+      let cleanResponse = (llmResponse as string).trim();
+      if (cleanResponse.startsWith("```json")) {
+        cleanResponse = cleanResponse.slice(7);
+      }
+      if (cleanResponse.startsWith("```")) {
+        cleanResponse = cleanResponse.slice(3);
+      }
+      if (cleanResponse.endsWith("```")) {
+        cleanResponse = cleanResponse.slice(0, -3);
+      }
+      cleanResponse = cleanResponse.trim();
+
+      const parsed = JSON.parse(cleanResponse);
+      const structured = {
+        productName: parsed.productName || itemDoc.itemName,
+        impulseScore: parsed.impulseScore || 5,
+        verdict: parsed.verdict || "WAIT",
+        keyInsight: parsed.keyInsight || "Unable to analyze",
+        fact: parsed.fact || "Studies show most impulse purchases are regretted",
+        advice: parsed.advice || "Consider waiting 24 hours before purchasing"
+      };
+
+      // Cache the AI insight in the database
+      const cachedInsight: CachedAIInsight = {
+        ...structured,
+        cachedAt: Date.now(),
+        inputHash,
+      };
+      await this.items.updateOne(
+        { _id: itemId },
+        { $set: { cachedAIInsight: cachedInsight } }
+      );
+      console.log(`Cached AI insight for item ${itemId}`);
+
+      return { 
+        llm_response: cleanResponse,
+        structured,
+        cached: false,
+      };
+    } catch (e) {
+      // Fallback if JSON parsing fails
+      return { 
+        llm_response: llmResponse as string,
+        structured: null,
+        cached: false,
+      };
+    }
+  }
+
+  /**
+   * Generate a hash of item fields to detect changes for AI insight caching
+   */
+  private generateInputHash(item: ItemDoc): string {
+    const inputString = `${item.itemName}|${item.description}|${item.price}|${item.reason}|${item.isNeed}|${item.isFutureApprove}`;
+    // Simple hash function
+    let hash = 0;
+    for (let i = 0; i < inputString.length; i++) {
+      const char = inputString.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash.toString(16);
   }
 
   /**
