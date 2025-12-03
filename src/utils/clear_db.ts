@@ -17,10 +17,17 @@ async function clearDatabase() {
   console.log("🗑️  Starting database clear...\n");
 
   const MONGO_URL = Deno.env.get("MONGODB_URL");
+  const DB_NAME = Deno.env.get("DB_NAME");
 
   if (!MONGO_URL) {
-    console.error("❌ Error: MONGO_URL not found in environment variables!");
-    console.log("\n💡 Make sure your .env file has a MONGO_URL variable.\n");
+    console.error("❌ Error: MONGODB_URL not found in environment variables!");
+    console.log("\n💡 Make sure your .env file has a MONGODB_URL variable.\n");
+    return;
+  }
+
+  if (!DB_NAME) {
+    console.error("❌ Error: DB_NAME not found in environment variables!");
+    console.log("\n💡 Make sure your .env file has a DB_NAME variable.\n");
     return;
   }
 
@@ -28,9 +35,9 @@ async function clearDatabase() {
 
   try {
     await client.connect();
-    console.log("✅ Connected to MongoDB\n");
+    console.log(`✅ Connected to MongoDB (database: ${DB_NAME})\n`);
 
-    const db = client.db("test_seeded_db");
+    const db = client.db(DB_NAME);
 
     // Get all collections
     const collections = await db.listCollections().toArray();

@@ -207,11 +207,19 @@ async function seed() {
 
   // Connect to MongoDB
   const MONGO_URL = Deno.env.get("MONGODB_URL");
+  const DB_NAME = Deno.env.get("DB_NAME");
 
   if (!MONGO_URL) {
-    console.error("❌ Error: MONGO_URL not found in environment variables!");
-    console.log("\n💡 Make sure your .env file has a MONGO_URL variable.");
-    console.log("Example: MONGO_URL=mongodb+srv://...\n");
+    console.error("❌ Error: MONGODB_URL not found in environment variables!");
+    console.log("\n💡 Make sure your .env file has a MONGODB_URL variable.");
+    console.log("Example: MONGODB_URL=mongodb+srv://...\n");
+    return;
+  }
+
+  if (!DB_NAME) {
+    console.error("❌ Error: DB_NAME not found in environment variables!");
+    console.log("\n💡 Make sure your .env file has a DB_NAME variable.");
+    console.log("Example: DB_NAME=aw_concepts\n");
     return;
   }
 
@@ -219,9 +227,9 @@ async function seed() {
 
   try {
     await client.connect();
-    console.log("✅ Connected to MongoDB\n");
+    console.log(`✅ Connected to MongoDB (database: ${DB_NAME})\n`);
 
-    const db = client.db("test_seeded_db");
+    const db = client.db(DB_NAME);
 
     // Initialize concepts (no external dependencies needed for seed)
     const userAuth = new UserAuthConcept(db);
@@ -435,10 +443,7 @@ async function seed() {
     }
     console.log("\n💡 Testing recommendations:");
     console.log(
-      "   • Login as Diana or Eve for fresh swiping experience (no pre-existing swipes)"
-    );
-    console.log(
-      "   • Login as Alice, Bob, or Charlie to see community feedback on your items"
+      "   • Login as Alice, Bob, Charlie, Diana or Eve to Swipe on Items from other users"
     );
     console.log("   • All items have 2-3 community reviews from seed data\n");
   } catch (error) {
