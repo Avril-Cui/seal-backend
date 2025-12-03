@@ -217,4 +217,25 @@ export default class SwipeSystemConcept {
     const count = await this.swipes.countDocuments({ userId });
     return { count };
   }
+
+  /**
+   * _getUserSwipeStatistics (userId: String): (buyCount: Number, dontBuyCount: Number)
+   *
+   * **effect**
+   *     return the number of "Buy" and "Don't Buy" swipes made by this user
+   */
+  async _getUserSwipeStatistics(
+    { userId }: { userId: UserId },
+  ): Promise<{ buyCount: number; dontBuyCount: number } | { error: string }> {
+    const allSwipes = await this.swipes.find({ userId }).toArray();
+
+    if (allSwipes.length === 0) {
+      return { buyCount: 0, dontBuyCount: 0 };
+    }
+
+    const buyCount = allSwipes.filter((swipe) => swipe.decision === "Buy").length;
+    const dontBuyCount = allSwipes.filter((swipe) => swipe.decision === "Don't Buy").length;
+
+    return { buyCount, dontBuyCount };
+  }
 }

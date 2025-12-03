@@ -878,7 +878,7 @@ export const GetTenRandomItemsRequest: Sync = ({
   request,
   session,
   user,
-  items,
+  itemIdSet,
 }) => ({
   when: actions([
     Requesting.request,
@@ -891,63 +891,32 @@ export const GetTenRandomItemsRequest: Sync = ({
     // First verify session to get user
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     if (frames.length === 0) {
-      return new Frames({ ...originalFrame, authError: true });
+      return new Frames();
     }
 
     const currentUser = frames[0][user];
 
-    // Get random items excluding current user's items
-    frames = await frames.query(
-      ItemCollection._getTenRandomItems,
-      { owner: currentUser },
-      { items }
-    );
+    // Call _getTenRandomItems directly without binding
+    // It returns [{ itemIdSet }] or [{ error }]
+    const randomItemsResult = await ItemCollection._getTenRandomItems({
+      owner: currentUser,
+    });
 
-    if (frames.length === 0 || !frames[0][items]) {
-      return new Frames({ ...originalFrame, items: [], enrichedItems: [] });
+    // Check if there was an error
+    if ("error" in randomItemsResult[0]) {
+      return new Frames();
     }
 
-    // Get the items from the frame
-    const rawItems = frames[0][items];
+    const itemIds = randomItemsResult[0].itemIdSet;
+    if (!itemIds || itemIds.length === 0) {
+      return new Frames();
+    }
 
-    // Enrich each item with owner name
-    const enrichedItems = await Promise.all(
-      rawItems.map(async (itemWrapper: { item: Record<string, unknown> }) => {
-        const item = itemWrapper.item;
-        const ownerId = item.owner as string;
-
-        // Try to get the owner's profile
-        let ownerName = "User";
-        if (ownerId) {
-          try {
-            const profileResult = await UserProfile._getProfile({
-              user: ownerId,
-            });
-            if (
-              profileResult &&
-              profileResult.length > 0 &&
-              !("error" in profileResult[0])
-            ) {
-              const result = profileResult[0] as {
-                profile?: { name?: string };
-              };
-              ownerName = result.profile?.name || "User";
-            }
-          } catch (e) {
-            // Silently fail - use default "User"
-          }
-        }
-
-        return {
-          item: {
-            ...item,
-            ownerName,
-          },
-        };
-      })
-    );
-
-    return new Frames({ items: enrichedItems, enrichedItems });
+    // Return just the item IDs, frontend will fetch details separately
+    return new Frames({
+      ...originalFrame,
+      [itemIdSet]: itemIds
+    });
   },
-  then: actions([Requesting.respond, { request, items }]),
+  then: actions([Requesting.respond, { request, itemIdSet }]),
 });

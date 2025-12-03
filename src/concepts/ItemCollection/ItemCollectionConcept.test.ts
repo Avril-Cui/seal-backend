@@ -162,24 +162,6 @@ Deno.test(
       geminiLLM
     );
 
-    // Trace Step 4: User A marks the item as purchased.
-    // This demonstrates principle (5).
-    await t.step("4. User A marks the item as purchased.", async () => {
-      console.log(`Trace: User ${userA} calls setPurchased for item ${itemId}`);
-      const purchaseResult = await itemCollectionConcept.setPurchased({
-        owner: userA,
-        item: itemId,
-        quantity: 1,
-      });
-      assertNotEquals(
-        "error" in purchaseResult,
-        true,
-        `setPurchased should succeed, but got error: ${
-          "error" in purchaseResult
-            ? (purchaseResult as { error: string }).error
-            : "N/A"
-        }`,
-      );
     let itemId: ID; // Declare itemId here to be accessible across steps
 
     try {
@@ -1723,18 +1705,18 @@ Deno.test(
             owner: userA,
           });
           assertEquals(
-            "error" in result,
+            Array.isArray(result) && "error" in result[0],
             true,
             "Should fail if not enough items from other owners."
           );
           assertEquals(
-            (result as unknown as { error: string }).error,
+            (result as unknown as [{ error: string }])[0].error,
             "Not enough items from other owners to select ten.",
             "Error message should indicate insufficient items."
           );
           console.log(
             `Requirement met: Failed as expected with error: "${
-              (result as unknown as { error: string }).error
+              (result as unknown as [{ error: string }])[0].error
             }"`
           );
         }
@@ -1766,15 +1748,15 @@ Deno.test(
           });
 
           assertNotEquals(
-            "error" in result,
+            Array.isArray(result) && "error" in result[0],
             true,
             `_getTenRandomItems should succeed, but got error: ${
-              "error" in result
-                ? (result as unknown as { error: string }).error
+              Array.isArray(result) && "error" in result[0]
+                ? (result as unknown as [{ error: string }])[0].error
                 : "N/A"
             }`
           );
-          const itemIdSet = (result as { itemIdSet: ID[] }[])[0].itemIdSet;
+          const itemIdSet = (result as unknown as [{ itemIdSet: ID[] }])[0].itemIdSet;
           assertExists(itemIdSet, "Should return an itemIdSet.");
           assertEquals(
             itemIdSet.length,

@@ -23,14 +23,33 @@ export const GetTodayQueueRequest: Sync = ({ request, session, user, itemIdSet, 
     // First verify session
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     if (frames.length === 0) {
-      return new Frames({ ...originalFrame, authError: true });
+      return new Frames({ ...originalFrame, [itemIdSet]: [], [completedQueue]: 0 });
     }
-    // Then call the query
-    frames = await frames.query(QueueSystem._getTodayQueue, { owner: user }, { itemIdSet, completedQueue });
-    if (frames.length === 0) {
-      return new Frames({ ...originalFrame, queryError: "No queue found for today" });
+
+    const currentUser = frames[0][user];
+
+    // Call _getTodayQueue directly without binding
+    // It returns [{ itemIdSet, completedQueue }] or [{ error }]
+    const queueResult = await QueueSystem._getTodayQueue({ owner: currentUser });
+
+    // Check if there was an error (no queue found)
+    if ("error" in queueResult[0]) {
+      // Return empty queue data so frontend knows to generate new queue
+      return new Frames({
+        ...originalFrame,
+        [itemIdSet]: [],
+        [completedQueue]: 0
+      });
     }
-    return frames;
+
+    // Extract the data directly
+    const queueData = queueResult[0];
+
+    return new Frames({
+      ...originalFrame,
+      [itemIdSet]: queueData.itemIdSet,
+      [completedQueue]: queueData.completedQueue
+    });
   },
   then: actions([Requesting.respond, { request, itemIdSet, completedQueue }]),
 });
@@ -67,14 +86,27 @@ export const GetCompletedQueueRequest: Sync = ({ request, session, user, complet
     // First verify session
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     if (frames.length === 0) {
-      return new Frames({ ...originalFrame, authError: true });
+      return new Frames({ ...originalFrame, [completedQueue]: 0 });
     }
-    // Then call the query
-    frames = await frames.query(QueueSystem._getCompletedQueue, { owner: user }, { completedQueue });
-    if (frames.length === 0) {
-      return new Frames({ ...originalFrame, queryError: "No queue found for today" });
+
+    const currentUser = frames[0][user];
+
+    // Call _getCompletedQueue directly without binding
+    // It returns [{ completedQueue }] or [{ error }]
+    const queueResult = await QueueSystem._getCompletedQueue({ owner: currentUser });
+
+    // Check if there was an error (no queue found)
+    if ("error" in queueResult[0]) {
+      return new Frames({ ...originalFrame, [completedQueue]: 0 });
     }
-    return frames;
+
+    // Extract the data directly
+    const queueData = queueResult[0];
+
+    return new Frames({
+      ...originalFrame,
+      [completedQueue]: queueData.completedQueue
+    });
   },
   then: actions([Requesting.respond, { request, completedQueue }]),
 });

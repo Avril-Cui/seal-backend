@@ -122,24 +122,40 @@ export const GetSwipeStatsRequest: Sync = ({
   ]),
   where: async (frames) => {
     const originalFrame = frames[0];
+
+    // Check if itemId is provided
+    const currentItemId = originalFrame[itemId];
+    if (!currentItemId) {
+      // No itemId provided, return zeros
+      return new Frames({ ...originalFrame, [total]: 0, [approval]: 0 });
+    }
+
     // First verify session
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     if (frames.length === 0) {
-      return new Frames({ ...originalFrame, authError: true });
+      return new Frames({ ...originalFrame, [total]: 0, [approval]: 0 });
     }
-    // Then call the query (_getSwipeStats expects ownerUserId and itemId)
-    const statsFrames = await frames.query(
-      SwipeSystem._getSwipeStats,
-      { ownerUserId: user, itemId },
-      { total, approval }
-    );
-    // Check if query returned an error (no swipes exist)
-    if (statsFrames.length > 0 && statsFrames[0].error) {
+
+    const currentUser = frames[0][user];
+
+    // Call _getSwipeStats directly without binding
+    // It returns [{ total, approval }] or [{ error }]
+    const statsResult = await SwipeSystem._getSwipeStats({
+      ownerUserId: currentUser,
+      itemId: currentItemId
+    });
+
+    // Check if there was an error (no swipes exist)
+    if ("error" in statsResult[0]) {
       // No swipe stats found, return zero values
-      return new Frames({ ...originalFrame, total: 0, approval: 0 });
+      return new Frames({ ...originalFrame, [total]: 0, [approval]: 0 });
     }
-    // Merge originalFrame with statsFrames to preserve request binding
-    return statsFrames.map((frame) => ({ ...originalFrame, ...frame }));
+
+    return new Frames({
+      ...originalFrame,
+      [total]: statsResult[0].total,
+      [approval]: statsResult[0].approval
+    });
   },
   then: actions([Requesting.respond, { request, total, approval }]),
 });
@@ -176,4 +192,39 @@ export const GetUserSwipeCountRequest: Sync = ({
     return countFrames.map((frame) => ({ ...originalFrame, ...frame }));
   },
   then: actions([Requesting.respond, { request, count }]),
+});
+
+// ============================================
+// GET USER SWIPE STATISTICS (Query - handled in where clause)
+// Returns the number of Buy and Don't Buy swipes made by the user
+// ============================================
+
+export const GetUserSwipeStatisticsRequest: Sync = ({
+  request,
+  session,
+  user,
+  buyCount,
+  dontBuyCount,
+}) => ({
+  when: actions([
+    Requesting.request,
+    { path: "/SwipeSystem/_getUserSwipeStatistics", session },
+    { request },
+  ]),
+  where: async (frames) => {
+    const originalFrame = frames[0];
+    // First verify session
+    frames = await frames.query(Sessioning._getUser, { session }, { user });
+    if (frames.length === 0) {
+      return new Frames({ ...originalFrame, authError: true });
+    }
+    // Then call the query
+    const statsFrames = await frames.query(
+      SwipeSystem._getUserSwipeStatistics,
+      { userId: user },
+      { buyCount, dontBuyCount }
+    );
+    return statsFrames.map((frame) => ({ ...originalFrame, ...frame }));
+  },
+  then: actions([Requesting.respond, { request, buyCount, dontBuyCount }]),
 });

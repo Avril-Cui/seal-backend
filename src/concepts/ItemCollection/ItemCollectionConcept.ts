@@ -114,7 +114,7 @@ export default class ItemCollectionConcept {
     owner,
   }: {
     owner: User;
-  }): Promise<{ itemIdSet: ItemID[] }[] | { error: string }> {
+  }): Promise<[{ itemIdSet: ItemID[] }] | [{ error: string }]> {
     // Find items not owned by the given owner
     const otherItems = await this.items.find({ owner: { $ne: owner } })
       .toArray();
@@ -122,7 +122,7 @@ export default class ItemCollectionConcept {
     if (otherItems.length < 10) {
       // The spec says 'requires at least ten items', so if not, return an error.
       // Alternatively, one could return fewer than 10 or an empty array depending on specific design choice.
-      return { error: "Not enough items from other owners to select ten." };
+      return [{ error: "Not enough items from other owners to select ten." }];
     }
 
     // Shuffle and pick 10 random items
