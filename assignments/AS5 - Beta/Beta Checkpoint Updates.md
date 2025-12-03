@@ -6,7 +6,7 @@ We have completed all core features of the application. The UI has been improved
 
 ## What Remains to Be Done
 
-The remaining work includes implementing algorithmic swiping that tailors product recommendations to users' interests based on what they selected during registration, fixing minor bugs to create a smoother user experience, and conducting user testing.
+The remaining work includes implementing algorithmic swiping that tailors product recommendations to users' interests based on what they selected during registration, fixing minor bugs to create a smoother user experience, and conducting user testing. Also, we need to fix the issue of slow loading and generic outputs for the AI insights on our stats page.
 
 ## How Our Plans Have Changed
 
