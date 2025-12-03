@@ -122,40 +122,24 @@ export const GetSwipeStatsRequest: Sync = ({
   ]),
   where: async (frames) => {
     const originalFrame = frames[0];
-
-    // Check if itemId is provided
-    const currentItemId = originalFrame[itemId];
-    if (!currentItemId) {
-      // No itemId provided, return zeros
-      return new Frames({ ...originalFrame, [total]: 0, [approval]: 0 });
-    }
-
     // First verify session
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     if (frames.length === 0) {
-      return new Frames({ ...originalFrame, [total]: 0, [approval]: 0 });
+      return new Frames({ ...originalFrame, authError: true });
     }
-
-    const currentUser = frames[0][user];
-
-    // Call _getSwipeStats directly without binding
-    // It returns [{ total, approval }] or [{ error }]
-    const statsResult = await SwipeSystem._getSwipeStats({
-      ownerUserId: currentUser,
-      itemId: currentItemId
-    });
-
-    // Check if there was an error (no swipes exist)
-    if ("error" in statsResult[0]) {
+    // Then call the query (_getSwipeStats expects ownerUserId and itemId)
+    const statsFrames = await frames.query(
+      SwipeSystem._getSwipeStats,
+      { ownerUserId: user, itemId },
+      { total, approval }
+    );
+    // Check if query returned an error (no swipes exist)
+    if (statsFrames.length > 0 && statsFrames[0].error) {
       // No swipe stats found, return zero values
-      return new Frames({ ...originalFrame, [total]: 0, [approval]: 0 });
+      return new Frames({ ...originalFrame, total: 0, approval: 0 });
     }
-
-    return new Frames({
-      ...originalFrame,
-      [total]: statsResult[0].total,
-      [approval]: statsResult[0].approval
-    });
+    // Merge originalFrame with statsFrames to preserve request binding
+    return statsFrames.map((frame) => ({ ...originalFrame, ...frame }));
   },
   then: actions([Requesting.respond, { request, total, approval }]),
 });
@@ -181,15 +165,22 @@ export const GetUserSwipeCountRequest: Sync = ({
     // First verify session
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     if (frames.length === 0) {
-      return new Frames({ ...originalFrame, authError: true });
+      return new Frames({ ...originalFrame, count: 0 });
     }
-    // Then call the query
-    const countFrames = await frames.query(
-      SwipeSystem._getUserSwipeCount,
-      { userId: user },
-      { count }
-    );
-    return countFrames.map((frame) => ({ ...originalFrame, ...frame }));
+
+    const currentUser = frames[0][user];
+
+    // Call _getUserSwipeCount directly (returns plain object, not array)
+    const countResult = await SwipeSystem._getUserSwipeCount({ userId: currentUser });
+
+    if ("error" in countResult) {
+      return new Frames({ ...originalFrame, count: 0 });
+    }
+
+    return new Frames({
+      ...originalFrame,
+      count: countResult.count
+    });
   },
   then: actions([Requesting.respond, { request, count }]),
 });
@@ -216,15 +207,23 @@ export const GetUserSwipeStatisticsRequest: Sync = ({
     // First verify session
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     if (frames.length === 0) {
-      return new Frames({ ...originalFrame, authError: true });
+      return new Frames({ ...originalFrame, buyCount: 0, dontBuyCount: 0 });
     }
-    // Then call the query
-    const statsFrames = await frames.query(
-      SwipeSystem._getUserSwipeStatistics,
-      { userId: user },
-      { buyCount, dontBuyCount }
-    );
-    return statsFrames.map((frame) => ({ ...originalFrame, ...frame }));
+
+    const currentUser = frames[0][user];
+
+    // Call _getUserSwipeStatistics directly (returns plain object, not array)
+    const statsResult = await SwipeSystem._getUserSwipeStatistics({ userId: currentUser });
+
+    if ("error" in statsResult) {
+      return new Frames({ ...originalFrame, buyCount: 0, dontBuyCount: 0 });
+    }
+
+    return new Frames({
+      ...originalFrame,
+      buyCount: statsResult.buyCount,
+      dontBuyCount: statsResult.dontBuyCount
+    });
   },
   then: actions([Requesting.respond, { request, buyCount, dontBuyCount }]),
 });
