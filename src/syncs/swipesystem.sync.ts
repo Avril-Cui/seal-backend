@@ -125,7 +125,7 @@ export const GetSwipeStatsRequest: Sync = ({
     // First verify session
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     if (frames.length === 0) {
-      return new Frames({ ...originalFrame, total: 0, approval: 0 });
+      return new Frames({ ...originalFrame, [total]: 0, [approval]: 0 });
     }
 
     const currentUser = frames[0][user];
@@ -134,13 +134,13 @@ export const GetSwipeStatsRequest: Sync = ({
     const statsResult = await SwipeSystem._getSwipeStats({ ownerUserId: currentUser, itemId });
 
     if ("error" in statsResult[0]) {
-      return new Frames({ ...originalFrame, total: 0, approval: 0 });
+      return new Frames({ ...originalFrame, [total]: 0, [approval]: 0 });
     }
 
     return new Frames({
       ...originalFrame,
-      total: statsResult[0].total,
-      approval: statsResult[0].approval
+      [total]: statsResult[0].total,
+      [approval]: statsResult[0].approval
     });
   },
   then: actions([Requesting.respond, { request, total, approval }]),
@@ -167,7 +167,7 @@ export const GetUserSwipeCountRequest: Sync = ({
     // First verify session
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     if (frames.length === 0) {
-      return new Frames({ ...originalFrame, count: 0 });
+      return new Frames({ ...originalFrame, [count]: 0 });
     }
 
     const currentUser = frames[0][user];
@@ -176,12 +176,12 @@ export const GetUserSwipeCountRequest: Sync = ({
     const countResult = await SwipeSystem._getUserSwipeCount({ userId: currentUser });
 
     if ("error" in countResult) {
-      return new Frames({ ...originalFrame, count: 0 });
+      return new Frames({ ...originalFrame, [count]: 0 });
     }
 
     return new Frames({
       ...originalFrame,
-      count: countResult.count
+      [count]: countResult.count
     });
   },
   then: actions([Requesting.respond, { request, count }]),
@@ -209,7 +209,7 @@ export const GetUserSwipeStatisticsRequest: Sync = ({
     // First verify session
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     if (frames.length === 0) {
-      return new Frames({ ...originalFrame, buyCount: 0, dontBuyCount: 0 });
+      return new Frames({ ...originalFrame, [buyCount]: 0, [dontBuyCount]: 0 });
     }
 
     const currentUser = frames[0][user];
@@ -218,13 +218,13 @@ export const GetUserSwipeStatisticsRequest: Sync = ({
     const statsResult = await SwipeSystem._getUserSwipeStatistics({ userId: currentUser });
 
     if ("error" in statsResult) {
-      return new Frames({ ...originalFrame, buyCount: 0, dontBuyCount: 0 });
+      return new Frames({ ...originalFrame, [buyCount]: 0, [dontBuyCount]: 0 });
     }
 
     return new Frames({
       ...originalFrame,
-      buyCount: statsResult.buyCount,
-      dontBuyCount: statsResult.dontBuyCount
+      [buyCount]: statsResult.buyCount,
+      [dontBuyCount]: statsResult.dontBuyCount
     });
   },
   then: actions([Requesting.respond, { request, buyCount, dontBuyCount }]),
