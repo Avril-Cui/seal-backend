@@ -39,19 +39,23 @@ export const inclusions: Record<string, string> = {
   "/api/LikertSurvey/_getSurveyQuestions": "public - view survey questions",
   "/api/LikertSurvey/_getSurveyResponses": "public - view aggregated responses",
   "/api/LikertSurvey/_getRespondentAnswers": "public - view individual answers",
-  "/api/LikertSurvey/submitResponse": "public - anyone can submit survey response",
-  "/api/LikertSurvey/updateResponse": "public - anyone can update their response",
+  "/api/LikertSurvey/submitResponse":
+    "public - anyone can submit survey response",
+  "/api/LikertSurvey/updateResponse":
+    "public - anyone can update their response",
 
   // ============================================
   // ItemCollection - Public community view only
   // ============================================
-  "/api/ItemCollection/_getTenRandomItems": "public - community view of random items",
-  "/api/ItemCollection/fetchAmazonDetails": "public - just fetches product info, no auth needed",
+  // Note: _getTenRandomItems is excluded to add owner names via sync
+  "/api/ItemCollection/fetchAmazonDetails":
+    "public - just fetches product info, no auth needed",
 
   // ============================================
   // SwipeSystem - Public aggregate stats only
   // ============================================
-  "/api/SwipeSystem/_getCommunitySwipeStats": "public - aggregate community statistics",
+  "/api/SwipeSystem/_getCommunitySwipeStats":
+    "public - aggregate community statistics",
   "/api/SwipeSystem/_getSwipeComments": "public - view comments on items",
 };
 
@@ -77,9 +81,14 @@ export const exclusions: Array<string> = [
   // ============================================
   // Sessioning - Auth required
   // ============================================
-  "/api/Sessioning/create",    // Only called by login/signup sync
-  "/api/Sessioning/delete",    // Logout - requires valid session
-  "/api/Sessioning/_getUser",  // Internal use only
+  "/api/Sessioning/create", // Only called by login/signup sync
+  "/api/Sessioning/delete", // Logout - requires valid session
+  "/api/Sessioning/_getUser", // Internal use only
+
+  // ============================================
+  // ItemCollection - Enriched via syncs
+  // ============================================
+  "/api/ItemCollection/_getTenRandomItems", // Enriched with owner names via sync
 
   // ============================================
   // LikertSurvey - Admin only
@@ -104,10 +113,12 @@ export const exclusions: Array<string> = [
   "/api/ItemCollection/updateItem",
   "/api/ItemCollection/setPurchased",
   "/api/ItemCollection/getAIInsight",
+  "/api/ItemCollection/getAIWishListInsight",
   "/api/ItemCollection/_getUserWishList",
   "/api/ItemCollection/_getWishListItems",
   "/api/ItemCollection/_getPurchasedItems",
   "/api/ItemCollection/_getItemDetails",
+  "/api/ItemCollection/_getPurchasedItems",
   // Internal/private methods
   "/api/ItemCollection/_updateItemAttribute",
   "/api/ItemCollection/generateInputHash",
@@ -126,6 +137,7 @@ export const exclusions: Array<string> = [
   "/api/SwipeSystem/recordSwipe",
   "/api/SwipeSystem/updateDecision",
   "/api/SwipeSystem/_getSwipeStats",
+  "/api/SwipeSystem/_getUserSwipeCount",
 
   // ============================================
   // UserProfile - All user-specific actions
