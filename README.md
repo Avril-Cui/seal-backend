@@ -14,7 +14,7 @@ Team SEAL: Fuqi Cui, Lauren Yoo, Elaine Jiang, Stanley Zhao
    - [Beta Updated Development Plan](/assignments/AS5%20-%20Beta/Beta%20Checkpoint%20Updates.md)
    - #### Demo Beta [![Watch the video](ReplaceMe.jpg)](Replace me.com)
 
-# How to run this code base?
+# How to run this backend code base?
 
 1. Create a `.env` file with:
 
@@ -28,6 +28,25 @@ DB_NAME=
 
 2. Install Deno: https://deno.land/
 
-3. Run `deno task concepts` to start the server
+3. Run `deno run build; deno run start` to start the new server
 
-4. Run `deno test -A` to run the test cases
+# How to run tests?
+
+1. Run `deno test -A` to run the concept/sync cases
+
+2. To seed MongoDB with mock data for manual testing:
+    1. To the .env file edit `DB_NAME` field with name of desired test datebase name. 
+    ```
+    GEMINI_API_KEY=
+    GEMINI_MODEL=gemini-2.5-flash
+    GEMINI_CONFIG=./geminiConfig.json
+    MONGODB_URL=
+    DB_NAME=
+    ```
+
+    2. Restart backend
+
+    3. Run  `deno run -A src/utils/seed.ts` to seed. Follow console output to test actions in different user accounts
+
+    4. Optionally, Run `deno run -A src/utils/clear_db.ts` to reset `DB_NAME` in MongoDB
+

@@ -9,231 +9,241 @@ const userBob = "user:Bob" as ID;
 const itemBook = "item:BookA" as ID;
 const itemMovie = "item:MovieB" as ID;
 
-Deno.test("Principle Trace: User records, updates swipe, and feedback is available per user-item", async () => {
-  console.log(
-    "\n--- Principle Trace: User records, updates swipe, and feedback is available per user-item ---",
-  );
-  const [db, client] = await testDb();
-  const swipeSystem = new SwipeSystemConcept(db);
-
-  try {
-    // (1) User Alice records a "Buy" swipe for Item Book with a comment.
+Deno.test({
+  name: "Principle Trace: User records, updates swipe, and feedback is available per user-item",
+  sanitizeResources: false,
+  sanitizeOps: false,
+  fn: async () => {
     console.log(
-      `Step 1: Alice records 'Buy' for Book (comment: 'Great read, highly recommend!').`,
+      "\n--- Principle Trace: User records, updates swipe, and feedback is available per user-item ---"
     );
-    const recordAliceBookResult = await swipeSystem.recordSwipe({
-      ownerUserId: userAlice,
-      itemId: itemBook,
-      decision: "Buy",
-      comment: "Great read, highly recommend!",
-    });
-    assertNotEquals(
-      "error" in recordAliceBookResult,
-      true,
-      "Alice's first swipe should succeed.",
-    );
+    const [db, client] = await testDb();
+    const swipeSystem = new SwipeSystemConcept(db);
 
-    // (2) User Bob records a "Don't Buy" swipe for Item Book with a comment.
-    console.log(
-      `Step 2: Bob records 'Don't Buy' for Book (comment: 'Not my genre, found it boring.').`,
-    );
-    const recordBobBookResult = await swipeSystem.recordSwipe({
-      ownerUserId: userBob,
-      itemId: itemBook,
-      decision: "Don't Buy",
-      comment: "Not my genre, found it boring.",
-    });
-    assertNotEquals(
-      "error" in recordBobBookResult,
-      true,
-      "Bob's swipe should succeed.",
-    );
+    try {
+      // (1) User Alice records a "Buy" swipe for Item Book with a comment.
+      console.log(
+        `Step 1: Alice records 'Buy' for Book (comment: 'Great read, highly recommend!').`
+      );
+      const recordAliceBookResult = await swipeSystem.recordSwipe({
+        ownerUserId: userAlice,
+        itemId: itemBook,
+        decision: "Buy",
+        comment: "Great read, highly recommend!",
+      });
+      assertNotEquals(
+        "error" in recordAliceBookResult,
+        true,
+        "Alice's first swipe should succeed."
+      );
 
-    // (3) User Alice records a "Buy" swipe for Item Movie (no comment).
-    console.log(`Step 3: Alice records 'Buy' for Movie (no comment).`);
-    const recordAliceMovieResult = await swipeSystem.recordSwipe({
-      ownerUserId: userAlice,
-      itemId: itemMovie,
-      decision: "Buy",
-    });
-    assertNotEquals(
-      "error" in recordAliceMovieResult,
-      true,
-      "Alice's swipe for movie should succeed.",
-    );
+      // (2) User Bob records a "Don't Buy" swipe for Item Book with a comment.
+      console.log(
+        `Step 2: Bob records 'Don't Buy' for Book (comment: 'Not my genre, found it boring.').`
+      );
+      const recordBobBookResult = await swipeSystem.recordSwipe({
+        ownerUserId: userBob,
+        itemId: itemBook,
+        decision: "Don't Buy",
+        comment: "Not my genre, found it boring.",
+      });
+      assertNotEquals(
+        "error" in recordBobBookResult,
+        true,
+        "Bob's swipe should succeed."
+      );
 
-    // (4) Check _getSwipeStats for User Alice on Item Book: Expect total: 1, approval: 1.
-    console.log(`Step 4: Checking Alice's swipe stats for Book...`);
-    const statsAliceBook = await swipeSystem._getSwipeStats({
-      ownerUserId: userAlice,
-      itemId: itemBook,
-    });
-    assertNotEquals(
-      "error" in statsAliceBook[0],
-      true,
-      "Getting Alice's stats for Book should not fail.",
-    );
-    assertEquals(
-      (statsAliceBook[0] as { total: number; approval: number }).total,
-      1,
-      "Alice's total swipes for Book should be 1.",
-    );
-    assertEquals(
-      (statsAliceBook[0] as { total: number; approval: number }).approval,
-      1,
-      "Alice's approval for Book should be 1 (Buy).",
-    );
-    console.log(
-      `  -> Alice's stats for Book: Total=${
-        (statsAliceBook[0] as { total: number; approval: number }).total
-      }, Approval=${
-        (statsAliceBook[0] as { total: number; approval: number }).approval
-      }. Correctly reflects 'Buy'.`,
-    );
+      // (3) User Alice records a "Buy" swipe for Item Movie (no comment).
+      console.log(`Step 3: Alice records 'Buy' for Movie (no comment).`);
+      const recordAliceMovieResult = await swipeSystem.recordSwipe({
+        ownerUserId: userAlice,
+        itemId: itemMovie,
+        decision: "Buy",
+      });
+      assertNotEquals(
+        "error" in recordAliceMovieResult,
+        true,
+        "Alice's swipe for movie should succeed."
+      );
 
-    // (5) Check _getSwipeComments for User Alice on Item Book: Expect A's comment.
-    console.log(`Step 5: Checking Alice's swipe comments for Book...`);
-    const commentsAliceBook = await swipeSystem._getSwipeComments({
-      ownerUserId: userAlice,
-      itemId: itemBook,
-    });
-    assertNotEquals(
-      "error" in commentsAliceBook[0],
-      true,
-      "Getting Alice's comments for Book should not fail.",
-    );
-    assertEquals(
-      (commentsAliceBook[0] as { comments: string[] }).comments,
-      ["Great read, highly recommend!"],
-      "Alice's comment for Book should match.",
-    );
-    console.log(
-      `  -> Alice's comments for Book: ${
-        (commentsAliceBook[0] as { comments: string[] }).comments
-      }. Correct.`,
-    );
+      // (4) Check _getSwipeStats for User Alice on Item Book: Expect total: 1, approval: 1.
+      console.log(`Step 4: Checking Alice's swipe stats for Book...`);
+      const statsAliceBook = await swipeSystem._getSwipeStats({
+        ownerUserId: userAlice,
+        itemId: itemBook,
+      });
+      assertNotEquals(
+        "error" in statsAliceBook[0],
+        true,
+        "Getting Alice's stats for Book should not fail."
+      );
+      assertEquals(
+        (statsAliceBook[0] as { total: number; approval: number }).total,
+        1,
+        "Alice's total swipes for Book should be 1."
+      );
+      assertEquals(
+        (statsAliceBook[0] as { total: number; approval: number }).approval,
+        1,
+        "Alice's approval for Book should be 1 (Buy)."
+      );
+      console.log(
+        `  -> Alice's stats for Book: Total=${
+          (statsAliceBook[0] as { total: number; approval: number }).total
+        }, Approval=${
+          (statsAliceBook[0] as { total: number; approval: number }).approval
+        }. Correctly reflects 'Buy'.`
+      );
 
-    // (6) Check _getSwipeStats for User Bob on Item Book: Expect total: 1, approval: 0.
-    console.log(`Step 6: Checking Bob's swipe stats for Book...`);
-    const statsBobBook = await swipeSystem._getSwipeStats({
-      ownerUserId: userBob,
-      itemId: itemBook,
-    });
-    assertNotEquals(
-      "error" in statsBobBook[0],
-      true,
-      "Getting Bob's stats for Book should not fail.",
-    );
-    assertEquals(
-      (statsBobBook[0] as { total: number; approval: number }).total,
-      1,
-      "Bob's total swipes for Book should be 1.",
-    );
-    assertEquals(
-      (statsBobBook[0] as { total: number; approval: number }).approval,
-      0,
-      "Bob's approval for Book should be 0 (Don't Buy).",
-    );
-    console.log(
-      `  -> Bob's stats for Book: Total=${
-        (statsBobBook[0] as { total: number; approval: number }).total
-      }, Approval=${
-        (statsBobBook[0] as { total: number; approval: number }).approval
-      }. Correctly reflects 'Don't Buy'.`,
-    );
+      // (5) Check _getSwipeComments for User Alice on Item Book: Expect A's comment.
+      console.log(`Step 5: Checking Alice's swipe comments for Book...`);
+      const commentsAliceBook = await swipeSystem._getSwipeComments({
+        ownerUserId: userAlice,
+        itemId: itemBook,
+      });
+      assertNotEquals(
+        "error" in commentsAliceBook[0],
+        true,
+        "Getting Alice's comments for Book should not fail."
+      );
+      assertEquals(
+        (commentsAliceBook[0] as { comments: string[] }).comments,
+        ["Great read, highly recommend!"],
+        "Alice's comment for Book should match."
+      );
+      console.log(
+        `  -> Alice's comments for Book: ${
+          (commentsAliceBook[0] as { comments: string[] }).comments
+        }. Correct.`
+      );
 
-    // (7) Check _getSwipeComments for User Bob on Item Book: Expect B's comment.
-    console.log(`Step 7: Checking Bob's swipe comments for Book...`);
-    const commentsBobBook = await swipeSystem._getSwipeComments({
-      ownerUserId: userBob,
-      itemId: itemBook,
-    });
-    assertNotEquals(
-      "error" in commentsBobBook[0],
-      true,
-      "Getting Bob's comments for Book should not fail.",
-    );
-    assertEquals(
-      (commentsBobBook[0] as { comments: string[] }).comments,
-      ["Not my genre, found it boring."],
-      "Bob's comment for Book should match.",
-    );
-    console.log(
-      `  -> Bob's comments for Book: ${
-        (commentsBobBook[0] as { comments: string[] }).comments
-      }. Correct.`,
-    );
+      // (6) Check _getSwipeStats for User Bob on Item Book: Expect total: 1, approval: 0.
+      console.log(`Step 6: Checking Bob's swipe stats for Book...`);
+      const statsBobBook = await swipeSystem._getSwipeStats({
+        ownerUserId: userBob,
+        itemId: itemBook,
+      });
+      assertNotEquals(
+        "error" in statsBobBook[0],
+        true,
+        "Getting Bob's stats for Book should not fail."
+      );
+      assertEquals(
+        (statsBobBook[0] as { total: number; approval: number }).total,
+        1,
+        "Bob's total swipes for Book should be 1."
+      );
+      assertEquals(
+        (statsBobBook[0] as { total: number; approval: number }).approval,
+        0,
+        "Bob's approval for Book should be 0 (Don't Buy)."
+      );
+      console.log(
+        `  -> Bob's stats for Book: Total=${
+          (statsBobBook[0] as { total: number; approval: number }).total
+        }, Approval=${
+          (statsBobBook[0] as { total: number; approval: number }).approval
+        }. Correctly reflects 'Don't Buy'.`
+      );
 
-    // (8) User Alice updates their swipe for Item Book to "Don't Buy" and changes the comment.
-    console.log(
-      `Step 8: Alice updates swipe for Book to 'Don't Buy' and new comment 'Changed my mind, too slow.'.`,
-    );
-    const updateAliceBookResult = await swipeSystem.updateDecision({
-      ownerUserId: userAlice,
-      itemId: itemBook,
-      newDecision: "Don't Buy",
-      newComment: "Changed my mind, the pacing was too slow.",
-    });
-    assertNotEquals(
-      "error" in updateAliceBookResult,
-      true,
-      "Alice's update for Book should succeed.",
-    );
+      // (7) Check _getSwipeComments for User Bob on Item Book: Expect B's comment.
+      console.log(`Step 7: Checking Bob's swipe comments for Book...`);
+      const commentsBobBook = await swipeSystem._getSwipeComments({
+        ownerUserId: userBob,
+        itemId: itemBook,
+      });
+      assertNotEquals(
+        "error" in commentsBobBook[0],
+        true,
+        "Getting Bob's comments for Book should not fail."
+      );
+      assertEquals(
+        (commentsBobBook[0] as { comments: string[] }).comments,
+        ["Not my genre, found it boring."],
+        "Bob's comment for Book should match."
+      );
+      console.log(
+        `  -> Bob's comments for Book: ${
+          (commentsBobBook[0] as { comments: string[] }).comments
+        }. Correct.`
+      );
 
-    // (9) Check _getSwipeStats for User Alice on Item Book again: Expect total: 1, approval: 0.
-    console.log(`Step 9: Checking Alice's updated swipe stats for Book...`);
-    const updatedStatsAliceBook = await swipeSystem._getSwipeStats({
-      ownerUserId: userAlice,
-      itemId: itemBook,
-    });
-    assertNotEquals(
-      "error" in updatedStatsAliceBook[0],
-      true,
-      "Getting Alice's updated stats for Book should not fail.",
-    );
-    assertEquals(
-      (updatedStatsAliceBook[0] as { total: number; approval: number }).total,
-      1,
-      "Alice's total swipes for Book should still be 1.",
-    );
-    assertEquals(
-      (updatedStatsAliceBook[0] as { total: number; approval: number }).approval,
-      0,
-      "Alice's approval for Book should now be 0 (Don't Buy).",
-    );
-    console.log(
-      `  -> Alice's updated stats for Book: Total=${
-        (updatedStatsAliceBook[0] as { total: number; approval: number }).total
-      }, Approval=${
-        (updatedStatsAliceBook[0] as { total: number; approval: number }).approval
-      }. Correctly reflects 'Don't Buy'.`,
-    );
+      // (8) User Alice updates their swipe for Item Book to "Don't Buy" and changes the comment.
+      console.log(
+        `Step 8: Alice updates swipe for Book to 'Don't Buy' and new comment 'Changed my mind, too slow.'.`
+      );
+      const updateAliceBookResult = await swipeSystem.updateDecision({
+        ownerUserId: userAlice,
+        itemId: itemBook,
+        newDecision: "Don't Buy",
+        newComment: "Changed my mind, the pacing was too slow.",
+      });
+      assertNotEquals(
+        "error" in updateAliceBookResult,
+        true,
+        "Alice's update for Book should succeed."
+      );
 
-    // (10) Check _getSwipeComments for User Alice on Item Book again: Expect A's new comment.
-    console.log(`Step 10: Checking Alice's updated swipe comments for Book...`);
-    const updatedCommentsAliceBook = await swipeSystem._getSwipeComments({
-      ownerUserId: userAlice,
-      itemId: itemBook,
-    });
-    assertNotEquals(
-      "error" in updatedCommentsAliceBook[0],
-      true,
-      "Getting Alice's updated comments for Book should not fail.",
-    );
-    assertEquals(
-      (updatedCommentsAliceBook[0] as { comments: string[] }).comments,
-      ["Changed my mind, the pacing was too slow."],
-      "Alice's comment for Book should be updated.",
-    );
-    console.log(
-      `  -> Alice's updated comments for Book: ${
-        (updatedCommentsAliceBook[0] as { comments: string[] }).comments
-      }. Correct.`,
-    );
-  } finally {
-    await db.dropDatabase();
-    await client.close();
-  }
+      // (9) Check _getSwipeStats for User Alice on Item Book again: Expect total: 1, approval: 0.
+      console.log(`Step 9: Checking Alice's updated swipe stats for Book...`);
+      const updatedStatsAliceBook = await swipeSystem._getSwipeStats({
+        ownerUserId: userAlice,
+        itemId: itemBook,
+      });
+      assertNotEquals(
+        "error" in updatedStatsAliceBook[0],
+        true,
+        "Getting Alice's updated stats for Book should not fail."
+      );
+      assertEquals(
+        (updatedStatsAliceBook[0] as { total: number; approval: number }).total,
+        1,
+        "Alice's total swipes for Book should still be 1."
+      );
+      assertEquals(
+        (updatedStatsAliceBook[0] as { total: number; approval: number })
+          .approval,
+        0,
+        "Alice's approval for Book should now be 0 (Don't Buy)."
+      );
+      console.log(
+        `  -> Alice's updated stats for Book: Total=${
+          (updatedStatsAliceBook[0] as { total: number; approval: number })
+            .total
+        }, Approval=${
+          (updatedStatsAliceBook[0] as { total: number; approval: number })
+            .approval
+        }. Correctly reflects 'Don't Buy'.`
+      );
+
+      // (10) Check _getSwipeComments for User Alice on Item Book again: Expect A's new comment.
+      console.log(
+        `Step 10: Checking Alice's updated swipe comments for Book...`
+      );
+      const updatedCommentsAliceBook = await swipeSystem._getSwipeComments({
+        ownerUserId: userAlice,
+        itemId: itemBook,
+      });
+      assertNotEquals(
+        "error" in updatedCommentsAliceBook[0],
+        true,
+        "Getting Alice's updated comments for Book should not fail."
+      );
+      assertEquals(
+        (updatedCommentsAliceBook[0] as { comments: string[] }).comments,
+        ["Changed my mind, the pacing was too slow."],
+        "Alice's comment for Book should be updated."
+      );
+      console.log(
+        `  -> Alice's updated comments for Book: ${
+          (updatedCommentsAliceBook[0] as { comments: string[] }).comments
+        }. Correct.`
+      );
+    } finally {
+      await db.dropDatabase();
+      await client.close();
+    }
+  },
 });
 
 Deno.test("Action: recordSwipe - requirements and effects", async () => {
@@ -253,7 +263,7 @@ Deno.test("Action: recordSwipe - requirements and effects", async () => {
     assertEquals(
       "error" in result1,
       false,
-      "recordSwipe should succeed for a new swipe.",
+      "recordSwipe should succeed for a new swipe."
     );
     const stats1 = await swipeSystem._getSwipeStats({
       ownerUserId: userAlice,
@@ -263,12 +273,12 @@ Deno.test("Action: recordSwipe - requirements and effects", async () => {
     assertEquals(
       (stats1[0] as { total: number; approval: number }).total,
       1,
-      "Total should be 1 after recording.",
+      "Total should be 1 after recording."
     );
     assertEquals(
       (stats1[0] as { total: number; approval: number }).approval,
       1,
-      "Approval should be 1 ('Buy').",
+      "Approval should be 1 ('Buy')."
     );
     const comments1 = await swipeSystem._getSwipeComments({
       ownerUserId: userAlice,
@@ -277,20 +287,20 @@ Deno.test("Action: recordSwipe - requirements and effects", async () => {
     assertNotEquals(
       "error" in comments1[0],
       true,
-      "Comments should be retrievable.",
+      "Comments should be retrievable."
     );
     assertEquals(
       (comments1[0] as { comments: string[] }).comments,
       ["Good stuff."],
-      "Comment should be recorded.",
+      "Comment should be recorded."
     );
     console.log(
-      `  -> Swipe recorded. Stats: total=1, approval=1. Comment: 'Good stuff.'`,
+      `  -> Swipe recorded. Stats: total=1, approval=1. Comment: 'Good stuff.'`
     );
 
     // Require: no swipe exists with matching (ownerUserId, itemId)
     console.log(
-      `Test 2: Failing to record a swipe if one already exists for (Alice, Book).`,
+      `Test 2: Failing to record a swipe if one already exists for (Alice, Book).`
     );
     const result2 = await swipeSystem.recordSwipe({
       ownerUserId: userAlice,
@@ -300,14 +310,16 @@ Deno.test("Action: recordSwipe - requirements and effects", async () => {
     assertEquals(
       "error" in result2,
       true,
-      "recordSwipe should fail if swipe already exists.",
+      "recordSwipe should fail if swipe already exists."
     );
     assertEquals(
       (result2 as { error: string }).error,
       "A swipe already exists for this user and item.",
-      "Error message should indicate existing swipe.",
+      "Error message should indicate existing swipe."
     );
-    console.log(`  -> Failed as expected: ${(result2 as { error: string }).error}`);
+    console.log(
+      `  -> Failed as expected: ${(result2 as { error: string }).error}`
+    );
 
     // Effect: Record without comment (optional field)
     console.log(`Test 3: Recording a swipe without a comment.`);
@@ -319,7 +331,7 @@ Deno.test("Action: recordSwipe - requirements and effects", async () => {
     assertEquals(
       "error" in result3,
       false,
-      "recordSwipe should succeed without a comment.",
+      "recordSwipe should succeed without a comment."
     );
     const comments3 = await swipeSystem._getSwipeComments({
       ownerUserId: userBob,
@@ -328,15 +340,15 @@ Deno.test("Action: recordSwipe - requirements and effects", async () => {
     assertEquals(
       "error" in comments3[0],
       true,
-      "Getting comments should fail as no comment was recorded.",
+      "Getting comments should fail as no comment was recorded."
     );
     assertEquals(
       (comments3[0] as { error: string }).error,
       "No comments found for the given user and item.",
-      "Error message should indicate no comments found.",
+      "Error message should indicate no comments found."
     );
     console.log(
-      `  -> Swipe recorded without comment. Comments query failed as expected.`,
+      `  -> Swipe recorded without comment. Comments query failed as expected.`
     );
   } finally {
     await db.dropDatabase();
@@ -358,12 +370,12 @@ Deno.test("Action: updateDecision - requirements and effects", async () => {
       comment: "Original comment.",
     });
     console.log(
-      `Setup: Alice recorded 'Buy' for Book with 'Original comment.'.`,
+      `Setup: Alice recorded 'Buy' for Book with 'Original comment.'.`
     );
 
     // Require: swipe exists with matching (ownerUserId, itemId)
     console.log(
-      `Test 1: Failing to update a swipe that does not exist for (Bob, Book).`,
+      `Test 1: Failing to update a swipe that does not exist for (Bob, Book).`
     );
     const result1 = await swipeSystem.updateDecision({
       ownerUserId: userBob,
@@ -374,18 +386,20 @@ Deno.test("Action: updateDecision - requirements and effects", async () => {
     assertEquals(
       "error" in result1,
       true,
-      "updateDecision should fail if swipe does not exist.",
+      "updateDecision should fail if swipe does not exist."
     );
     assertEquals(
       (result1 as { error: string }).error,
       "No existing swipe found for this user and item to update.",
-      "Error message should indicate no existing swipe.",
+      "Error message should indicate no existing swipe."
     );
-    console.log(`  -> Failed as expected: ${(result1 as { error: string }).error}`);
+    console.log(
+      `  -> Failed as expected: ${(result1 as { error: string }).error}`
+    );
 
     // Effect: update decision and comment
     console.log(
-      `Test 2: Successfully updating Alice's swipe for Book to 'Don't Buy' with a new comment.`,
+      `Test 2: Successfully updating Alice's swipe for Book to 'Don't Buy' with a new comment.`
     );
     const result2 = await swipeSystem.updateDecision({
       ownerUserId: userAlice,
@@ -396,7 +410,7 @@ Deno.test("Action: updateDecision - requirements and effects", async () => {
     assertEquals(
       "error" in result2,
       false,
-      "updateDecision should succeed for an existing swipe.",
+      "updateDecision should succeed for an existing swipe."
     );
     const stats2 = await swipeSystem._getSwipeStats({
       ownerUserId: userAlice,
@@ -405,7 +419,7 @@ Deno.test("Action: updateDecision - requirements and effects", async () => {
     assertEquals(
       (stats2[0] as { total: number; approval: number }).approval,
       0,
-      "Decision should be updated to 'Don't Buy' (approval 0).",
+      "Decision should be updated to 'Don't Buy' (approval 0)."
     );
     const comments2 = await swipeSystem._getSwipeComments({
       ownerUserId: userAlice,
@@ -414,16 +428,16 @@ Deno.test("Action: updateDecision - requirements and effects", async () => {
     assertEquals(
       (comments2[0] as { comments: string[] }).comments,
       ["Updated comment here."],
-      "Comment should be updated.",
+      "Comment should be updated."
     );
     console.log(
-      `  -> Swipe updated. Stats: approval=0. Comment: 'Updated comment here.'`,
+      `  -> Swipe updated. Stats: approval=0. Comment: 'Updated comment here.'`
     );
 
     // Effect: update decision only, and remove existing comment (newComment is undefined/omitted)
     // The implementation unsets the comment field if newComment is undefined.
     console.log(
-      `Test 3: Successfully updating Alice's swipe for Book to 'Buy', and removing the comment (newComment omitted).`,
+      `Test 3: Successfully updating Alice's swipe for Book to 'Buy', and removing the comment (newComment omitted).`
     );
     const result3 = await swipeSystem.updateDecision({
       ownerUserId: userAlice,
@@ -434,7 +448,7 @@ Deno.test("Action: updateDecision - requirements and effects", async () => {
     assertEquals(
       "error" in result3,
       false,
-      "updateDecision should succeed for decision update and comment removal.",
+      "updateDecision should succeed for decision update and comment removal."
     );
     const stats3 = await swipeSystem._getSwipeStats({
       ownerUserId: userAlice,
@@ -443,7 +457,7 @@ Deno.test("Action: updateDecision - requirements and effects", async () => {
     assertEquals(
       (stats3[0] as { total: number; approval: number }).approval,
       1,
-      "Decision should be updated to 'Buy' (approval 1).",
+      "Decision should be updated to 'Buy' (approval 1)."
     );
     const comments3 = await swipeSystem._getSwipeComments({
       ownerUserId: userAlice,
@@ -452,20 +466,20 @@ Deno.test("Action: updateDecision - requirements and effects", async () => {
     assertEquals(
       "error" in comments3[0],
       true,
-      "Getting comments should fail as comment was removed.",
+      "Getting comments should fail as comment was removed."
     );
     assertEquals(
       (comments3[0] as { error: string }).error,
       "No comments found for the given user and item.",
-      "Error message should indicate no comments found.",
+      "Error message should indicate no comments found."
     );
     console.log(
-      `  -> Swipe updated decision and comment removed. Stats: approval=1. No comment.`,
+      `  -> Swipe updated decision and comment removed. Stats: approval=1. No comment.`
     );
 
     // Effect: update decision and re-add a comment (after it was previously removed)
     console.log(
-      `Test 4: Successfully updating Alice's swipe for Book to 'Don't Buy' and re-adding a comment.`,
+      `Test 4: Successfully updating Alice's swipe for Book to 'Don't Buy' and re-adding a comment.`
     );
     const result4 = await swipeSystem.updateDecision({
       ownerUserId: userAlice,
@@ -476,7 +490,7 @@ Deno.test("Action: updateDecision - requirements and effects", async () => {
     assertEquals(
       "error" in result4,
       false,
-      "updateDecision should succeed for decision update and comment re-addition.",
+      "updateDecision should succeed for decision update and comment re-addition."
     );
     const stats4 = await swipeSystem._getSwipeStats({
       ownerUserId: userAlice,
@@ -485,7 +499,7 @@ Deno.test("Action: updateDecision - requirements and effects", async () => {
     assertEquals(
       (stats4[0] as { total: number; approval: number }).approval,
       0,
-      "Decision should be updated to 'Don't Buy' (approval 0).",
+      "Decision should be updated to 'Don't Buy' (approval 0)."
     );
     const comments4 = await swipeSystem._getSwipeComments({
       ownerUserId: userAlice,
@@ -494,15 +508,15 @@ Deno.test("Action: updateDecision - requirements and effects", async () => {
     assertEquals(
       "error" in comments4[0],
       false,
-      "Getting comments should now succeed.",
+      "Getting comments should now succeed."
     );
     assertEquals(
       (comments4[0] as { comments: string[] }).comments,
       ["Re-added comment."],
-      "Comment should be re-added.",
+      "Comment should be re-added."
     );
     console.log(
-      `  -> Swipe updated decision and comment re-added. Stats: approval=0. Comment: 'Re-added comment.'`,
+      `  -> Swipe updated decision and comment re-added. Stats: approval=0. Comment: 'Re-added comment.'`
     );
   } finally {
     await db.dropDatabase();
@@ -518,7 +532,7 @@ Deno.test("Query: _getSwipeStats - requirements and effects", async () => {
   try {
     // Require: exists at least one swipe
     console.log(
-      `Test 1: Failing to get stats for (Alice, Book) when no swipe exists.`,
+      `Test 1: Failing to get stats for (Alice, Book) when no swipe exists.`
     );
     const result1 = await swipeSystem._getSwipeStats({
       ownerUserId: userAlice,
@@ -527,15 +541,15 @@ Deno.test("Query: _getSwipeStats - requirements and effects", async () => {
     assertEquals(
       "error" in result1[0],
       true,
-      "_getSwipeStats should fail if no swipe exists.",
+      "_getSwipeStats should fail if no swipe exists."
     );
     assertEquals(
       (result1[0] as { error: string }).error,
       "No swipes found for the given user and item.",
-      "Error message should indicate no swipes.",
+      "Error message should indicate no swipes."
     );
     console.log(
-      `  -> Failed as expected: ${(result1[0] as { error: string }).error}`,
+      `  -> Failed as expected: ${(result1[0] as { error: string }).error}`
     );
 
     // Setup: record swipes with different decisions
@@ -555,7 +569,7 @@ Deno.test("Query: _getSwipeStats - requirements and effects", async () => {
       decision: "Don't Buy",
     });
     console.log(
-      `Setup: Alice 'Buy' for Book; Bob 'Don't Buy' for Movie; Alice 'Don't Buy' for Movie.`,
+      `Setup: Alice 'Buy' for Book; Bob 'Don't Buy' for Movie; Alice 'Don't Buy' for Movie.`
     );
 
     // Effect: return total and approval for 'Buy' for a specific user-item pair
@@ -567,14 +581,14 @@ Deno.test("Query: _getSwipeStats - requirements and effects", async () => {
     assertNotEquals("error" in statsAliceBook[0], true);
     assertEquals(
       (statsAliceBook[0] as { total: number; approval: number }).total,
-      1,
+      1
     );
     assertEquals(
       (statsAliceBook[0] as { total: number; approval: number }).approval,
-      1,
+      1
     );
     console.log(
-      `  -> Alice's stats for Book: Total=1, Approval=1. Correctly reflects 'Buy'.`,
+      `  -> Alice's stats for Book: Total=1, Approval=1. Correctly reflects 'Buy'.`
     );
 
     // Effect: return total and approval for 'Don't Buy' for a specific user-item pair
@@ -586,14 +600,14 @@ Deno.test("Query: _getSwipeStats - requirements and effects", async () => {
     assertNotEquals("error" in statsBobMovie[0], true);
     assertEquals(
       (statsBobMovie[0] as { total: number; approval: number }).total,
-      1,
+      1
     );
     assertEquals(
       (statsBobMovie[0] as { total: number; approval: number }).approval,
-      0,
+      0
     );
     console.log(
-      `  -> Bob's stats for Movie: Total=1, Approval=0. Correctly reflects 'Don't Buy'.`,
+      `  -> Bob's stats for Movie: Total=1, Approval=0. Correctly reflects 'Don't Buy'.`
     );
 
     // Test for another user-item pair, Alice on Movie
@@ -605,14 +619,14 @@ Deno.test("Query: _getSwipeStats - requirements and effects", async () => {
     assertNotEquals("error" in statsAliceMovie[0], true);
     assertEquals(
       (statsAliceMovie[0] as { total: number; approval: number }).total,
-      1,
+      1
     );
     assertEquals(
       (statsAliceMovie[0] as { total: number; approval: number }).approval,
-      0,
+      0
     );
     console.log(
-      `  -> Alice's stats for Movie: Total=1, Approval=0. Correctly reflects 'Don't Buy'.`,
+      `  -> Alice's stats for Movie: Total=1, Approval=0. Correctly reflects 'Don't Buy'.`
     );
   } finally {
     await db.dropDatabase();
@@ -628,7 +642,7 @@ Deno.test("Query: _getSwipeComments - requirements and effects", async () => {
   try {
     // Require: exists at least one swipe with matching (ownerUserId, itemId) and comment is not None
     console.log(
-      `Test 1: Failing to get comments for (Alice, Book) when no swipe exists.`,
+      `Test 1: Failing to get comments for (Alice, Book) when no swipe exists.`
     );
     const result1 = await swipeSystem._getSwipeComments({
       ownerUserId: userAlice,
@@ -637,15 +651,15 @@ Deno.test("Query: _getSwipeComments - requirements and effects", async () => {
     assertEquals(
       "error" in result1[0],
       true,
-      "_getSwipeComments should fail if no swipe exists.",
+      "_getSwipeComments should fail if no swipe exists."
     );
     assertEquals(
       (result1[0] as { error: string }).error,
       "No comments found for the given user and item.",
-      "Error message should indicate no comments.",
+      "Error message should indicate no comments."
     );
     console.log(
-      `  -> Failed as expected: ${(result1[0] as { error: string }).error}`,
+      `  -> Failed as expected: ${(result1[0] as { error: string }).error}`
     );
 
     // Setup: record swipes with and without comments
@@ -661,7 +675,7 @@ Deno.test("Query: _getSwipeComments - requirements and effects", async () => {
       decision: "Don't Buy",
     }); // No comment
     console.log(
-      `Setup: Alice 'Buy' for Book (comment); Bob 'Don't Buy' for Movie (no comment).`,
+      `Setup: Alice 'Buy' for Book (comment); Bob 'Don't Buy' for Movie (no comment).`
     );
 
     // Effect: return all comments (singular here due to uniqueness constraint for user-item)
@@ -674,15 +688,15 @@ Deno.test("Query: _getSwipeComments - requirements and effects", async () => {
     assertEquals(
       (commentsAliceBook[0] as { comments: string[] }).comments,
       ["A book comment."],
-      "Should return Alice's comment.",
+      "Should return Alice's comment."
     );
     console.log(
-      `  -> Alice's comments for Book: ['A book comment.']. Correct.`,
+      `  -> Alice's comments for Book: ['A book comment.']. Correct.`
     );
 
     // Require: comment is not None (test for swipe without comment)
     console.log(
-      `Test 3: Failing to get comments for Bob on Movie (no comment recorded).`,
+      `Test 3: Failing to get comments for Bob on Movie (no comment recorded).`
     );
     const commentsBobMovie = await swipeSystem._getSwipeComments({
       ownerUserId: userBob,
@@ -691,17 +705,17 @@ Deno.test("Query: _getSwipeComments - requirements and effects", async () => {
     assertEquals(
       "error" in commentsBobMovie[0],
       true,
-      "_getSwipeComments should fail if swipe has no comment.",
+      "_getSwipeComments should fail if swipe has no comment."
     );
     assertEquals(
       (commentsBobMovie[0] as { error: string }).error,
       "No comments found for the given user and item.",
-      "Error message should indicate no comments.",
+      "Error message should indicate no comments."
     );
     console.log(
       `  -> Failed as expected: ${
         (commentsBobMovie[0] as { error: string }).error
-      }`,
+      }`
     );
   } finally {
     await db.dropDatabase();
