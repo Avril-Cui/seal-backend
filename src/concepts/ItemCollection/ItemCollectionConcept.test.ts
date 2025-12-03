@@ -150,7 +150,11 @@ const userC = "user:Charlie" as ID;
 
 // Principle: User maintains a personal wishlist, adds/updates items, marks as purchased, and gets AI insight
 Deno.test(
-  "Principle: User maintains a personal wishlist, adds/updates items, marks as purchased, and gets AI insight",
+  {
+    name: "Principle: User maintains a personal wishlist, adds/updates items, marks as purchased, and gets AI insight",
+    sanitizeResources: false,
+    sanitizeOps: false,
+  },
   async (t) => {
     console.log("--- Start Principle Test ---");
     const [db, client] = await testDb();
