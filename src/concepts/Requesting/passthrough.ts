@@ -47,8 +47,7 @@ export const inclusions: Record<string, string> = {
   // ============================================
   // ItemCollection - Public community view only
   // ============================================
-  "/api/ItemCollection/_getTenRandomItems":
-    "public - community view of random items",
+  // Note: _getTenRandomItems is excluded to add owner names via sync
   "/api/ItemCollection/fetchAmazonDetails":
     "public - just fetches product info, no auth needed",
 
@@ -85,6 +84,11 @@ export const exclusions: Array<string> = [
   "/api/Sessioning/create", // Only called by login/signup sync
   "/api/Sessioning/delete", // Logout - requires valid session
   "/api/Sessioning/_getUser", // Internal use only
+
+  // ============================================
+  // ItemCollection - Enriched via syncs
+  // ============================================
+  "/api/ItemCollection/_getTenRandomItems", // Enriched with owner names via sync
 
   // ============================================
   // LikertSurvey - Admin only

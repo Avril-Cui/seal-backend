@@ -6,15 +6,16 @@
 import { ItemCollection, Requesting, Sessioning } from "@concepts";
 import { actions, Sync } from "@engine";
 
-export const AddItemFromExtensionRequest: Sync = ({ request, session, user, title, description, mainImage, price, reason, isNeed, isFutureApprove }) => ({
+export const AddItemFromExtensionRequest: Sync = ({ request, session, user, owner, itemName, description, photo, price, reason, isNeed, isFutureApprove }) => ({
   when: actions([
     Requesting.request,
     {
       path: "/ItemCollection/addItemFromExtension",
       session,
-      title,
+      owner,
+      itemName,
       description,
-      mainImage,
+      photo,
       price,
       reason,
       isNeed,
@@ -29,10 +30,10 @@ export const AddItemFromExtensionRequest: Sync = ({ request, session, user, titl
   then: actions([
     ItemCollection.addItemFromExtension,
     {
-      owner: user,
-      itemName: title,
+      owner,
+      itemName,
       description,
-      photo: mainImage,
+      photo,
       price,
       reason,
       isNeed,
