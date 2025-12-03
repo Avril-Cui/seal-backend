@@ -549,12 +549,14 @@ export const SetPurchasedRequest: Sync = ({
   request,
   session,
   user,
-  itemId,
-  purchased,
+  item,
+  quantity,
+  purchaseTime,
+  actualPrice,
 }) => ({
   when: actions([
     Requesting.request,
-    { path: "/ItemCollection/setPurchased", session, itemId, purchased },
+    { path: "/ItemCollection/setPurchased", session, item, quantity, purchaseTime, actualPrice },
     { request },
   ]),
   where: async (frames) => {
@@ -563,7 +565,7 @@ export const SetPurchasedRequest: Sync = ({
   },
   then: actions([
     ItemCollection.setPurchased,
-    { owner: user, itemId, purchased },
+    { owner: user, item, quantity, purchaseTime, actualPrice },
   ]),
 });
 

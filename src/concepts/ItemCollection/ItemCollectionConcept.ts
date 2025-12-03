@@ -276,7 +276,7 @@ export default class ItemCollectionConcept {
   }
 
   /**
-   * addItemFromExtension (owner: User, itemName: String, description: String, photo: String, 
+   * addItemFromExtension (owner: User, itemName: String, description: String, photo: String,
    *                       price: String, reason: String, isNeed: String, isFutureApprove: String): (item: Item)
    *
    * **effect**
@@ -642,7 +642,9 @@ export default class ItemCollectionConcept {
     }
     if (reason !== undefined) updateFields.reason = reason;
     if (isNeed !== undefined) updateFields.isNeed = isNeed;
-    if (isFutureApprove !== undefined) updateFields.isFutureApprove = isFutureApprove;
+    if (isFutureApprove !== undefined) {
+      updateFields.isFutureApprove = isFutureApprove;
+    }
 
     await this.items.updateOne({ _id: itemId, owner }, {
       $set: updateFields,
@@ -716,7 +718,9 @@ export default class ItemCollectionConcept {
     // Build update object
     const updateFields: Partial<ItemDoc> = {
       wasPurchased: true,
-      PurchasedTime: purchaseTime !== undefined ? purchaseTime : new Date().getTime(),
+      PurchasedTime: purchaseTime !== undefined
+        ? purchaseTime
+        : new Date().getTime(),
       quantity: quantity,
     };
 
@@ -748,7 +752,11 @@ export default class ItemCollectionConcept {
   }: {
     owner: User;
     item: ItemID;
-  }): Promise<{ llm_response: string; structured: object | null; cached: boolean } | { error: string }> {
+  }): Promise<
+    { llm_response: string; structured: object | null; cached: boolean } | {
+      error: string;
+    }
+  > {
     const wishlist = await this.wishlists.findOne({ _id: owner });
 
     if (!wishlist) {
@@ -771,7 +779,9 @@ export default class ItemCollectionConcept {
     const inputHash = this.generateInputHash(itemDoc);
 
     // Check for cached AI insight
-    if (itemDoc.cachedAIInsight && itemDoc.cachedAIInsight.inputHash === inputHash) {
+    if (
+      itemDoc.cachedAIInsight && itemDoc.cachedAIInsight.inputHash === inputHash
+    ) {
       console.log(`Using cached AI insight for item ${itemId}`);
       return {
         llm_response: JSON.stringify(itemDoc.cachedAIInsight),
@@ -788,7 +798,8 @@ export default class ItemCollectionConcept {
     }
 
     // Build a fact-based prompt for the LLM with JSON output
-    const prompt = `You are a friendly AI shopping advisor speaking directly to the user. Analyze this purchase and return JSON.
+    const prompt =
+      `You are a friendly AI shopping advisor speaking directly to the user. Analyze this purchase and return JSON.
 
 PRODUCT:
 - Full Name: "${itemDoc.itemName}"
@@ -800,22 +811,68 @@ USER'S REFLECTIONS:
 - Need or want?: "${itemDoc.isNeed}"
 - Future-self approval?: "${itemDoc.isFutureApprove}"
 
+CRITICAL: Understanding Impulse Score (1-10)
+
+IMPULSE SCORE GUIDELINES:
+- **1-4 (REASONABLE/SOMEWHAT REASONABLE)**: Well-considered purchases, whether needs or wants
+  - **Urgent necessities**: User has run out of something essential (toilet paper, food, medicine, etc.)
+  - **Well-planned wants**: User has saved up, researched, or thought about the purchase for a long time
+  - **Thoughtful purchases**: Gifts for occasions, planned upgrades, considered decisions
+  - **Reasonable reasoning**: User's reason shows planning, consideration, or valid justification
+  - **Price-appropriate**: Purchase is within reasonable budget and context
+  - User marked it as a "need" (isNeed = "yes") with valid reasoning, OR it's a well-planned "want"
+
+- **5-6 (UNCERTAIN)**: Borderline cases, moderate deliberation
+  - Some thought given but not clearly well-planned or clearly impulsive
+  - Mixed signals between need and want, or between planned and spontaneous
+
+- **7-10 (SOMEWHAT IMPULSIVE/IMPULSIVE)**: Truly impulsive purchases
+  - Buying on a whim without prior consideration or planning
+  - Emotional decision without practical justification or research
+  - User's reason is vague or purely emotional ("I want it", "looks cool", "seems nice") with no context
+  - No indication of planning, saving, research, or thoughtful consideration
+  - Unplanned splurge or emotional purchase
+
+IMPORTANT DISTINCTION - Examples of NOT IMPULSIVE (Score 1-4):
+- **Urgent necessities**: Running out of toilet paper and buying more = Score 1-4 (REASONABLE)
+- **Well-planned wants**: Buying something you've saved up for over months/years, thought about extensively = Score 1-4 (REASONABLE)
+- **Thoughtful gifts**: Buying a gift for someone's birthday/occasion that you planned ahead for = Score 1-4 (REASONABLE)
+- **Reasonable upgrades**: Replacing a broken item with a better version you've researched = Score 1-4 (REASONABLE)
+- **Price-appropriate wants**: Buying something within your budget that you've considered, even if not urgent = Score 1-4 (REASONABLE)
+
+Examples of IS IMPULSIVE (Score 7-10):
+- **Random whims**: Buying a random gadget that you likely won't use after a few days because "it looks cool" = Score 7-10 (IMPULSIVE)
+- **Emotional purchases**: Buying something expensive on a whim after a bad day, no prior consideration = Score 7-10 (IMPULSIVE)
+- **Unplanned splurges**: Buying something you just saw and want immediately, no research or planning = Score 7-10 (IMPULSIVE)
+- **Vague reasoning**: User's reason is just "I want it" or "looks nice" with no context or planning = Score 7-10 (IMPULSIVE)
+
+SCORING RULES - Consider ALL factors:
+1. **Urgent needs**: If user's reason indicates urgent need (e.g., "I ran out", "I need this now", "out of X") AND the item is an essential (toilet paper, food, medicine, basic household items), assign score 1-4
+2. **Well-planned purchases**: If user's reason shows planning, saving, research, or long-term consideration (e.g., "saved up for this", "been thinking about this for months", "researched this product"), assign score 1-4 even if it's a "want"
+3. **Gifts and occasions**: If user's reason indicates it's a gift or for a specific occasion they planned for, assign score 1-4
+4. **Price consideration**: If the price is reasonable relative to the item and user's situation, and there's thoughtful reasoning, consider score 1-4
+5. **isNeed field**: If user marked isNeed as "yes" AND has a valid reason, assign score 1-4. But remember: a "want" can also be reasonable if well-planned!
+6. **Truly impulsive**: Only mark as IMPULSIVE (7-10) if there's NO planning, NO consideration, vague/emotional reasoning ("I want it", "looks cool", "seems nice"), AND it's clearly an unplanned whim
+7. **Key insight**: A purchase doesn't have to be a basic necessity to be reasonable - well-thought-out wants, planned purchases, and considered decisions are also reasonable (score 1-4)
+
 Respond with ONLY valid JSON (no markdown, no code blocks):
 {
   "productName": "<if the product name is very long, summarize it to 3-5 words, e.g. 'Battat Toy Camper Van'. Otherwise use the short name as-is>",
-  "impulseScore": <number 1-10, where 1=very deliberate, 10=highly impulsive>,
+  "impulseScore": <number 1-10, following the guidelines above - be consistent: if insight/advice suggest it's reasonable, use 1-4; if truly impulsive, use 7-10>,
   "verdict": "<BUY or WAIT or SKIP>",
   "keyInsight": "<one sentence addressing the user as 'you', analyzing their specific reasoning for wanting this product>",
-  "fact": "<a specific numerical statistic with source, e.g. 'According to a 2023 Slickdeals survey, 73% of Americans make impulse purchases they later regret' or 'A Credit Karma study found the average American spends $314/month on impulse buys'>",
+  "fact": "<a specific, relevant statistic about THIS PRODUCT TYPE or THIS SITUATION with source. Make it contextual to the item and user's situation. Examples: For toilet paper: 'The average American household uses 100 rolls of toilet paper per year' or 'Consumer Reports found that bulk-buying toilet paper can save up to 30% compared to single-pack purchases'. For electronics: 'According to a 2024 study, the average smartphone is replaced every 2.5 years' or 'Tech products typically lose 50% of their value within the first year'. For food: 'The USDA estimates the average American household wastes $1,500 worth of food annually' or 'Bulk food purchases can reduce per-unit costs by 20-40%'. Make it SPECIFIC to this product category, price point, or purchase pattern - NOT a generic impulse buying statistic unless truly relevant>",
   "advice": "<actionable advice using 'you', specific to this $${itemDoc.price} purchase>"
 }
 
 RULES:
 1. Use second person ("you", "your") throughout - speak directly to the user
 2. Summarize long product names to be concise (3-5 words max)
-3. The fact MUST include a specific percentage or dollar amount AND cite the source (study name, year, or organization)
+3. The fact MUST be SPECIFIC to this product type, price point, or situation - NOT a generic impulse purchase statistic. Include a specific percentage, dollar amount, or numerical data AND cite the source (study name, year, or organization). Examples of good facts: product category statistics, price comparison data, usage patterns, consumer behavior for this specific item type, cost-saving opportunities for this product, etc.
 4. Reference the actual product and the user's stated reasoning
-5. Return ONLY the JSON object, nothing else`;
+5. **CRITICAL**: Ensure impulseScore matches your insight and advice - if you say it's reasonable/urgent need, use 1-4; if truly impulsive, use 7-10
+6. **AVOID**: Generic impulse purchase statistics like "73% of Americans regret impulse purchases" unless the purchase is actually impulsive. For reasonable needs, provide facts about the product category, pricing, usage, or value instead.
+7. Return ONLY the JSON object, nothing else`;
 
     const llmResponse = await this.geminiLLM.executeLLM(prompt);
 
@@ -844,8 +901,9 @@ RULES:
         impulseScore: parsed.impulseScore || 5,
         verdict: parsed.verdict || "WAIT",
         keyInsight: parsed.keyInsight || "Unable to analyze",
-        fact: parsed.fact || "Studies show most impulse purchases are regretted",
-        advice: parsed.advice || "Consider waiting 24 hours before purchasing"
+        fact: parsed.fact ||
+          "Studies show most impulse purchases are regretted",
+        advice: parsed.advice || "Consider waiting 24 hours before purchasing",
       };
 
       // Cache the AI insight in the database
@@ -856,18 +914,18 @@ RULES:
       };
       await this.items.updateOne(
         { _id: itemId },
-        { $set: { cachedAIInsight: cachedInsight } }
+        { $set: { cachedAIInsight: cachedInsight } },
       );
       console.log(`Cached AI insight for item ${itemId}`);
 
-      return { 
+      return {
         llm_response: cleanResponse,
         structured,
         cached: false,
       };
     } catch (e) {
       // Fallback if JSON parsing fails
-      return { 
+      return {
         llm_response: llmResponse as string,
         structured: null,
         cached: false,
@@ -879,7 +937,8 @@ RULES:
    * Generate a hash of item fields to detect changes for AI insight caching
    */
   private generateInputHash(item: ItemDoc): string {
-    const inputString = `${item.itemName}|${item.description}|${item.price}|${item.reason}|${item.isNeed}|${item.isFutureApprove}`;
+    const inputString =
+      `${item.itemName}|${item.description}|${item.price}|${item.reason}|${item.isNeed}|${item.isFutureApprove}`;
     // Simple hash function
     let hash = 0;
     for (let i = 0; i < inputString.length; i++) {
@@ -1036,7 +1095,7 @@ RULES:
       .find({
         _id: { $in: wishlist.itemIdSet },
         owner,
-        wasPurchased: true
+        wasPurchased: true,
       })
       .toArray();
 
