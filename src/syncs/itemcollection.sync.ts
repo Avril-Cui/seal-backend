@@ -69,7 +69,7 @@ export const AddItemResponse: Sync = ({ request, item }) => {
   return {
     when: actions(
       [Requesting.request, { path: "/ItemCollection/addItem" }, { request }],
-      [ItemCollection.addItem, {}, { item }]
+      [ItemCollection.addItem, {}, { item }],
     ),
     then: actions([Requesting.respond, { request, item }]),
   };
@@ -78,7 +78,7 @@ export const AddItemResponse: Sync = ({ request, item }) => {
 export const AddItemError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/addItem" }, { request }],
-    [ItemCollection.addItem, {}, { error }]
+    [ItemCollection.addItem, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -112,7 +112,7 @@ export const AddAmazonItemResponse: Sync = ({ request, item }) => ({
       { path: "/ItemCollection/addAmazonItem" },
       { request },
     ],
-    [ItemCollection.addAmazonItem, {}, { item }]
+    [ItemCollection.addAmazonItem, {}, { item }],
   ),
   then: actions([Requesting.respond, { request, item }]),
 });
@@ -124,7 +124,7 @@ export const AddAmazonItemError: Sync = ({ request, error }) => ({
       { path: "/ItemCollection/addAmazonItem" },
       { request },
     ],
-    [ItemCollection.addAmazonItem, {}, { error }]
+    [ItemCollection.addAmazonItem, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -154,7 +154,7 @@ export const RemoveItemRequest: Sync = ({
 export const RemoveItemResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/removeItem" }, { request }],
-    [ItemCollection.removeItem, {}, {}]
+    [ItemCollection.removeItem, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -162,7 +162,7 @@ export const RemoveItemResponse: Sync = ({ request }) => ({
 export const RemoveItemError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/removeItem" }, { request }],
-    [ItemCollection.removeItem, {}, { error }]
+    [ItemCollection.removeItem, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -223,7 +223,7 @@ export const UpdateItemRequest: Sync = ({
 export const UpdateItemResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateItem" }, { request }],
-    [ItemCollection.updateItem, {}, {}]
+    [ItemCollection.updateItem, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -231,7 +231,7 @@ export const UpdateItemResponse: Sync = ({ request }) => ({
 export const UpdateItemError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateItem" }, { request }],
-    [ItemCollection.updateItem, {}, { error }]
+    [ItemCollection.updateItem, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -269,7 +269,7 @@ export const UpdateItemNameResponse: Sync = ({ request }) => ({
       { path: "/ItemCollection/updateItemName" },
       { request },
     ],
-    [ItemCollection.updateItemName, {}, {}]
+    [ItemCollection.updateItemName, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -281,7 +281,7 @@ export const UpdateItemNameError: Sync = ({ request, error }) => ({
       { path: "/ItemCollection/updateItemName" },
       { request },
     ],
-    [ItemCollection.updateItemName, {}, { error }]
+    [ItemCollection.updateItemName, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -319,7 +319,7 @@ export const UpdateDescriptionResponse: Sync = ({ request }) => ({
       { path: "/ItemCollection/updateDescription" },
       { request },
     ],
-    [ItemCollection.updateDescription, {}, {}]
+    [ItemCollection.updateDescription, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -331,7 +331,7 @@ export const UpdateDescriptionError: Sync = ({ request, error }) => ({
       { path: "/ItemCollection/updateDescription" },
       { request },
     ],
-    [ItemCollection.updateDescription, {}, { error }]
+    [ItemCollection.updateDescription, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -362,7 +362,7 @@ export const UpdatePhotoRequest: Sync = ({
 export const UpdatePhotoResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updatePhoto" }, { request }],
-    [ItemCollection.updatePhoto, {}, {}]
+    [ItemCollection.updatePhoto, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -370,7 +370,7 @@ export const UpdatePhotoResponse: Sync = ({ request }) => ({
 export const UpdatePhotoError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updatePhoto" }, { request }],
-    [ItemCollection.updatePhoto, {}, { error }]
+    [ItemCollection.updatePhoto, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -401,7 +401,7 @@ export const UpdatePriceRequest: Sync = ({
 export const UpdatePriceResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updatePrice" }, { request }],
-    [ItemCollection.updatePrice, {}, {}]
+    [ItemCollection.updatePrice, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -409,7 +409,7 @@ export const UpdatePriceResponse: Sync = ({ request }) => ({
 export const UpdatePriceError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updatePrice" }, { request }],
-    [ItemCollection.updatePrice, {}, { error }]
+    [ItemCollection.updatePrice, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -440,7 +440,7 @@ export const UpdateReasonRequest: Sync = ({
 export const UpdateReasonResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateReason" }, { request }],
-    [ItemCollection.updateReason, {}, {}]
+    [ItemCollection.updateReason, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -448,7 +448,7 @@ export const UpdateReasonResponse: Sync = ({ request }) => ({
 export const UpdateReasonError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateReason" }, { request }],
-    [ItemCollection.updateReason, {}, { error }]
+    [ItemCollection.updateReason, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -479,7 +479,7 @@ export const UpdateIsNeedRequest: Sync = ({
 export const UpdateIsNeedResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateIsNeed" }, { request }],
-    [ItemCollection.updateIsNeed, {}, {}]
+    [ItemCollection.updateIsNeed, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -487,7 +487,7 @@ export const UpdateIsNeedResponse: Sync = ({ request }) => ({
 export const UpdateIsNeedError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateIsNeed" }, { request }],
-    [ItemCollection.updateIsNeed, {}, { error }]
+    [ItemCollection.updateIsNeed, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -530,7 +530,7 @@ export const UpdateIsFutureApproveResponse: Sync = ({ request }) => ({
       { path: "/ItemCollection/updateIsFutureApprove" },
       { request },
     ],
-    [ItemCollection.updateIsFutureApprove, {}, {}]
+    [ItemCollection.updateIsFutureApprove, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -542,7 +542,7 @@ export const UpdateIsFutureApproveError: Sync = ({ request, error }) => ({
       { path: "/ItemCollection/updateIsFutureApprove" },
       { request },
     ],
-    [ItemCollection.updateIsFutureApprove, {}, { error }]
+    [ItemCollection.updateIsFutureApprove, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -585,7 +585,7 @@ export const SetPurchasedRequest: Sync = ({
 export const SetPurchasedResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/setPurchased" }, { request }],
-    [ItemCollection.setPurchased, {}, {}]
+    [ItemCollection.setPurchased, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -593,7 +593,49 @@ export const SetPurchasedResponse: Sync = ({ request }) => ({
 export const SetPurchasedError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/setPurchased" }, { request }],
-    [ItemCollection.setPurchased, {}, { error }]
+    [ItemCollection.setPurchased, {}, { error }],
+  ),
+  then: actions([Requesting.respond, { request, error }]),
+});
+
+// ============================================
+// UNSET PURCHASED (Action)
+// ============================================
+
+export const UnsetPurchasedRequest: Sync = ({
+  request,
+  session,
+  user,
+  item,
+}) => ({
+  when: actions([
+    Requesting.request,
+    { path: "/ItemCollection/unsetPurchased", session, item },
+    { request },
+  ]),
+  where: async (frames) => {
+    frames = await frames.query(Sessioning._getUser, { session }, { user });
+    return frames.filter(($) => $[user] !== undefined);
+  },
+  then: actions([ItemCollection.unsetPurchased, { owner: user, item }]),
+});
+
+export const UnsetPurchasedResponse: Sync = ({ request }) => ({
+  when: actions(
+    [Requesting.request, { path: "/ItemCollection/unsetPurchased" }, {
+      request,
+    }],
+    [ItemCollection.unsetPurchased, {}, {}],
+  ),
+  then: actions([Requesting.respond, { request, success: true }]),
+});
+
+export const UnsetPurchasedError: Sync = ({ request, error }) => ({
+  when: actions(
+    [Requesting.request, { path: "/ItemCollection/unsetPurchased" }, {
+      request,
+    }],
+    [ItemCollection.unsetPurchased, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -628,7 +670,7 @@ export const GetAIInsightResponse: Sync = ({
 }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/getAIInsight" }, { request }],
-    [ItemCollection.getAIInsight, {}, { llm_response, structured, cached }]
+    [ItemCollection.getAIInsight, {}, { llm_response, structured, cached }],
   ),
   then: actions([
     Requesting.respond,
@@ -639,7 +681,7 @@ export const GetAIInsightResponse: Sync = ({
 export const GetAIInsightError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/getAIInsight" }, { request }],
-    [ItemCollection.getAIInsight, {}, { error }]
+    [ItemCollection.getAIInsight, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -675,7 +717,7 @@ export const GetAIWishListInsightResponse: Sync = ({
       { path: "/ItemCollection/getAIWishListInsight" },
       { request },
     ],
-    [ItemCollection.getAIWishListInsight, {}, { llm_response }]
+    [ItemCollection.getAIWishListInsight, {}, { llm_response }],
   ),
   then: actions([Requesting.respond, { request, llm_response }]),
 });
@@ -687,7 +729,7 @@ export const GetAIWishListInsightError: Sync = ({ request, error }) => ({
       { path: "/ItemCollection/getAIWishListInsight" },
       { request },
     ],
-    [ItemCollection.getAIWishListInsight, {}, { error }]
+    [ItemCollection.getAIWishListInsight, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -719,7 +761,7 @@ export const GetUserWishListRequest: Sync = ({
     frames = await frames.query(
       ItemCollection._getUserWishList,
       { owner: user },
-      { item }
+      { item },
     );
     if (frames.length === 0 || frames[0][item] === undefined) {
       return new Frames({ ...originalFrame, [items]: [] });
@@ -757,7 +799,7 @@ export const GetWishListItemsRequest: Sync = ({
     frames = await frames.query(
       ItemCollection._getWishListItems,
       { owner: user },
-      { item }
+      { item },
     );
     if (frames.length === 0 || frames[0][item] === undefined) {
       // Return empty array if no items or error
@@ -796,7 +838,7 @@ export const GetPurchasedItemsRequest: Sync = ({
     frames = await frames.query(
       ItemCollection._getPurchasedItems,
       { owner: user },
-      { item }
+      { item },
     );
     if (frames.length === 0 || frames[0][item] === undefined) {
       // Return empty array if no items or error
@@ -835,7 +877,7 @@ export const GetItemDetailsRequest: Sync = ({
     frames = await frames.query(
       ItemCollection._getItemDetails,
       { owner: user, itemId },
-      { item }
+      { item },
     );
     if (frames.length === 0) {
       return new Frames({ ...originalFrame, queryError: "Item not found" });

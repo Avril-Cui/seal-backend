@@ -105,7 +105,7 @@ export default class ItemCollectionConcept {
   constructor(
     private readonly db: Db,
     amazonAPI: AmazonAPIClient,
-    geminiLLM: GeminiLLMClient
+    geminiLLM: GeminiLLMClient,
   ) {
     this.wishlists = this.db.collection(PREFIX + "wishlists");
     this.items = this.db.collection(PREFIX + "items");
@@ -214,7 +214,7 @@ export default class ItemCollectionConcept {
           console.log("[ItemCollection.addItem] Updating existing wishlist...");
           await this.wishlists.updateOne(
             { _id: owner },
-            { $push: { itemIdSet: newItemId } }
+            { $push: { itemIdSet: newItemId } },
           );
         }
       } else {
@@ -293,7 +293,7 @@ export default class ItemCollectionConcept {
       if (!existingWishlist.itemIdSet.includes(newItemId)) {
         await this.wishlists.updateOne(
           { _id: owner },
-          { $push: { itemIdSet: newItemId } }
+          { $push: { itemIdSet: newItemId } },
         );
       }
     } else {
@@ -370,7 +370,7 @@ export default class ItemCollectionConcept {
       if (!existingWishlist.itemIdSet.includes(newItemId)) {
         await this.wishlists.updateOne(
           { _id: owner },
-          { $push: { itemIdSet: newItemId } }
+          { $push: { itemIdSet: newItemId } },
         );
       }
     } else {
@@ -413,7 +413,7 @@ export default class ItemCollectionConcept {
 
     await this.wishlists.updateOne(
       { _id: owner },
-      { $pull: { itemIdSet: itemId } }
+      { $pull: { itemIdSet: itemId } },
     );
 
     // The spec only mentions removing from the itemIdSet, not deleting the item itself.
@@ -432,7 +432,7 @@ export default class ItemCollectionConcept {
     owner: User,
     itemId: ItemID,
     field: K,
-    value: ItemDoc[K]
+    value: ItemDoc[K],
   ): Promise<Empty | { error: string }> {
     const wishlist = await this.wishlists.findOne({ _id: owner });
 
@@ -456,7 +456,7 @@ export default class ItemCollectionConcept {
       { _id: itemId, owner },
       {
         $set: { [field]: value },
-      }
+      },
     );
     return {};
   }
@@ -620,7 +620,7 @@ export default class ItemCollectionConcept {
       owner,
       itemId,
       "isFutureApprove",
-      isFutureApprove
+      isFutureApprove,
     );
   }
 
@@ -694,7 +694,7 @@ export default class ItemCollectionConcept {
       { _id: itemId, owner },
       {
         $set: updateFields,
-      }
+      },
     );
     return {};
   }
@@ -765,8 +765,9 @@ export default class ItemCollectionConcept {
     // Build update object
     const updateFields: Partial<ItemDoc> = {
       wasPurchased: true,
-      PurchasedTime:
-        purchaseTime !== undefined ? purchaseTime : new Date().getTime(),
+      PurchasedTime: purchaseTime !== undefined
+        ? purchaseTime
+        : new Date().getTime(),
       quantity: quantity,
     };
 
@@ -775,6 +776,59 @@ export default class ItemCollectionConcept {
     }
 
     await this.items.updateOne({ _id: itemId, owner }, { $set: updateFields });
+    return {};
+  }
+
+  /**
+   * unsetPurchased (owner: User, item: ItemID)
+   *
+   * **requires**
+   *   exists a wishlist $w$ with this user;
+   *   item $i$.itemId exists in $w$'s itemIdSet;
+   *   $i$.wasPurchased is True;
+   *
+   * **effect**
+   *   set $i$.wasPurchased as False;
+   *   optionally clear purchase-related fields (PurchasedTime, actualPrice, quantity);
+   */
+  async unsetPurchased({
+    owner,
+    item: itemId,
+  }: {
+    owner: User;
+    item: ItemID;
+  }): Promise<Empty | { error: string }> {
+    const wishlist = await this.wishlists.findOne({ _id: owner });
+
+    if (!wishlist) {
+      return { error: `No wishlist found for owner: ${owner}` };
+    }
+    if (!wishlist.itemIdSet.includes(itemId)) {
+      return {
+        error: `Item ${itemId} not found in wishlist for owner: ${owner}`,
+      };
+    }
+
+    const itemDoc = await this.items.findOne({ _id: itemId, owner }); // Check owner consistency
+    if (!itemDoc) {
+      return {
+        error: `Item details for ${itemId} not found or not owned by ${owner}.`,
+      };
+    }
+    if (!itemDoc.wasPurchased) {
+      return {
+        error: `Item ${itemId} is not currently marked as purchased.`,
+      };
+    }
+
+    // Unset purchase-related fields
+    await this.items.updateOne(
+      { _id: itemId, owner },
+      {
+        $set: { wasPurchased: false },
+        $unset: { PurchasedTime: "", actualPrice: "", quantity: "" },
+      },
+    );
     return {};
   }
 
@@ -798,8 +852,8 @@ export default class ItemCollectionConcept {
   }): Promise<
     | { llm_response: string; structured: object | null; cached: boolean }
     | {
-        error: string;
-      }
+      error: string;
+    }
   > {
     const wishlist = await this.wishlists.findOne({ _id: owner });
 
@@ -843,7 +897,8 @@ export default class ItemCollectionConcept {
     }
 
     // Build a fact-based prompt for the LLM with JSON output
-    const prompt = `You are a friendly AI shopping advisor speaking directly to the user. Analyze this purchase and return JSON.
+    const prompt =
+      `You are a friendly AI shopping advisor speaking directly to the user. Analyze this purchase and return JSON.
 
 PRODUCT:
 - Full Name: "${itemDoc.itemName}"
@@ -945,8 +1000,8 @@ RULES:
         impulseScore: parsed.impulseScore || 5,
         verdict: parsed.verdict || "WAIT",
         keyInsight: parsed.keyInsight || "Unable to analyze",
-        fact:
-          parsed.fact || "Studies show most impulse purchases are regretted",
+        fact: parsed.fact ||
+          "Studies show most impulse purchases are regretted",
         advice: parsed.advice || "Consider waiting 24 hours before purchasing",
       };
 
@@ -958,7 +1013,7 @@ RULES:
       };
       await this.items.updateOne(
         { _id: itemId },
-        { $set: { cachedAIInsight: cachedInsight } }
+        { $set: { cachedAIInsight: cachedInsight } },
       );
       console.log(`Cached AI insight for item ${itemId}`);
 
@@ -981,7 +1036,8 @@ RULES:
    * Generate a hash of item fields to detect changes for AI insight caching
    */
   private generateInputHash(item: ItemDoc): string {
-    const inputString = `${item.itemName}|${item.description}|${item.price}|${item.reason}|${item.isNeed}|${item.isFutureApprove}`;
+    const inputString =
+      `${item.itemName}|${item.description}|${item.price}|${item.reason}|${item.isNeed}|${item.isFutureApprove}`;
     // Simple hash function
     let hash = 0;
     for (let i = 0; i < inputString.length; i++) {
@@ -1018,7 +1074,7 @@ RULES:
     // Build hash string from item IDs and key attributes
     const hashParts = items.map(
       (item) =>
-        `${item._id}|${item.price}|${item.reason}|${item.isNeed}|${item.isFutureApprove}`
+        `${item._id}|${item.price}|${item.reason}|${item.isNeed}|${item.isFutureApprove}`,
     );
     const itemsString = hashParts.join("||");
 
@@ -1041,7 +1097,8 @@ RULES:
    * @returns {string} Configured prompt
    */
   private buildInsightPrompt(items: ItemDoc[]): string {
-    let prompt = `You are a shopping behavior analyst. Analyze the following wishlist and provide insights about the user's shopping patterns.
+    let prompt =
+      `You are a shopping behavior analyst. Analyze the following wishlist and provide insights about the user's shopping patterns.
 
 WISHLIST ITEMS (${items.length} total):
 `;
@@ -1147,7 +1204,7 @@ Respond with ONLY the JSON object, no markdown formatting, no code blocks, no ad
       wishlist.cachedWishlistInsights.wishlistHash === wishlistHash
     ) {
       console.log(
-        `Using cached wishlist insights for owner ${owner} (hash: ${wishlistHash})`
+        `Using cached wishlist insights for owner ${owner} (hash: ${wishlistHash})`,
       );
       // Return cached insights in the expected JSON format
       const cached = wishlist.cachedWishlistInsights;
@@ -1160,7 +1217,7 @@ Respond with ONLY the JSON object, no markdown formatting, no code blocks, no ad
 
     // Cache miss or invalid - generate new insights
     console.log(
-      `Generating new wishlist insights for owner ${owner} (hash: ${wishlistHash})`
+      `Generating new wishlist insights for owner ${owner} (hash: ${wishlistHash})`,
     );
 
     // Fetch all items in the wishlist
@@ -1213,7 +1270,7 @@ Respond with ONLY the JSON object, no markdown formatting, no code blocks, no ad
     // Send the context prompt to Gemini LLM with structured output
     const llmResponse = await this.geminiLLM.executeLLMWithSchema(
       context_prompt,
-      jsonSchema
+      jsonSchema,
     );
 
     if (typeof llmResponse === "object" && "error" in llmResponse) {
@@ -1238,7 +1295,7 @@ Respond with ONLY the JSON object, no markdown formatting, no code blocks, no ad
 
         await this.wishlists.updateOne(
           { _id: owner },
-          { $set: { cachedWishlistInsights: cachedInsights } }
+          { $set: { cachedWishlistInsights: cachedInsights } },
         );
         console.log(`Cached wishlist insights for owner ${owner}`);
       }
@@ -1260,11 +1317,11 @@ Respond with ONLY the JSON object, no markdown formatting, no code blocks, no ad
    */
   async fetchAmazonDetails({ url }: { url: string }): Promise<
     | {
-        itemName: string;
-        description: string;
-        photo: string;
-        price: number;
-      }
+      itemName: string;
+      description: string;
+      photo: string;
+      price: number;
+    }
     | { error: string }
   > {
     const amazonDetails = await this.amazonAPI.fetchItemDetails(url);

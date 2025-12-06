@@ -112,6 +112,7 @@ export const exclusions: Array<string> = [
   "/api/ItemCollection/updateIsFutureApprove",
   "/api/ItemCollection/updateItem",
   "/api/ItemCollection/setPurchased",
+  "/api/ItemCollection/unsetPurchased",
   "/api/ItemCollection/getAIInsight",
   "/api/ItemCollection/getAIWishListInsight",
   "/api/ItemCollection/_getUserWishList",
