@@ -408,7 +408,7 @@ export const UpdatePriceRequest: Sync = ({
 export const UpdatePriceResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updatePrice" }, { request }],
-    [ItemCollection.updatePrice, {}, {}],,
+    [ItemCollection.updatePrice, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -416,7 +416,7 @@ export const UpdatePriceResponse: Sync = ({ request }) => ({
 export const UpdatePriceError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updatePrice" }, { request }],
-    [ItemCollection.updatePrice, {}, { error }],,
+    [ItemCollection.updatePrice, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -447,7 +447,7 @@ export const UpdateReasonRequest: Sync = ({
 export const UpdateReasonResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateReason" }, { request }],
-    [ItemCollection.updateReason, {}, {}],,
+    [ItemCollection.updateReason, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -455,7 +455,7 @@ export const UpdateReasonResponse: Sync = ({ request }) => ({
 export const UpdateReasonError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateReason" }, { request }],
-    [ItemCollection.updateReason, {}, { error }],,
+    [ItemCollection.updateReason, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -486,7 +486,7 @@ export const UpdateIsNeedRequest: Sync = ({
 export const UpdateIsNeedResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateIsNeed" }, { request }],
-    [ItemCollection.updateIsNeed, {}, {}],,
+    [ItemCollection.updateIsNeed, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -494,7 +494,7 @@ export const UpdateIsNeedResponse: Sync = ({ request }) => ({
 export const UpdateIsNeedError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateIsNeed" }, { request }],
-    [ItemCollection.updateIsNeed, {}, { error }],,
+    [ItemCollection.updateIsNeed, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -537,7 +537,7 @@ export const UpdateIsFutureApproveResponse: Sync = ({ request }) => ({
       { path: "/ItemCollection/updateIsFutureApprove" },
       { request },
     ],
-    [ItemCollection.updateIsFutureApprove, {}, {}],,
+    [ItemCollection.updateIsFutureApprove, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -549,7 +549,7 @@ export const UpdateIsFutureApproveError: Sync = ({ request, error }) => ({
       { path: "/ItemCollection/updateIsFutureApprove" },
       { request },
     ],
-    [ItemCollection.updateIsFutureApprove, {}, { error }],,
+    [ItemCollection.updateIsFutureApprove, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -592,7 +592,7 @@ export const SetPurchasedRequest: Sync = ({
 export const SetPurchasedResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/setPurchased" }, { request }],
-    [ItemCollection.setPurchased, {}, {}],,
+    [ItemCollection.setPurchased, {}, {}],
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -600,7 +600,7 @@ export const SetPurchasedResponse: Sync = ({ request }) => ({
 export const SetPurchasedError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/setPurchased" }, { request }],
-    [ItemCollection.setPurchased, {}, { error }],,
+    [ItemCollection.setPurchased, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -677,7 +677,7 @@ export const GetAIInsightResponse: Sync = ({
 }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/getAIInsight" }, { request }],
-    [ItemCollection.getAIInsight, {}, { llm_response, structured, cached }],,
+    [ItemCollection.getAIInsight, {}, { llm_response, structured, cached }],
   ),
   then: actions([
     Requesting.respond,
@@ -688,7 +688,7 @@ export const GetAIInsightResponse: Sync = ({
 export const GetAIInsightError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/getAIInsight" }, { request }],
-    [ItemCollection.getAIInsight, {}, { error }],,
+    [ItemCollection.getAIInsight, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -724,7 +724,7 @@ export const GetAIWishListInsightResponse: Sync = ({
       { path: "/ItemCollection/getAIWishListInsight" },
       { request },
     ],
-    [ItemCollection.getAIWishListInsight, {}, { llm_response }],,
+    [ItemCollection.getAIWishListInsight, {}, { llm_response }],
   ),
   then: actions([Requesting.respond, { request, llm_response }]),
 });
@@ -736,7 +736,7 @@ export const GetAIWishListInsightError: Sync = ({ request, error }) => ({
       { path: "/ItemCollection/getAIWishListInsight" },
       { request },
     ],
-    [ItemCollection.getAIWishListInsight, {}, { error }],,
+    [ItemCollection.getAIWishListInsight, {}, { error }],
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
