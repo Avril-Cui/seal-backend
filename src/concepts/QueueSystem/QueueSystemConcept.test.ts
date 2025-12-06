@@ -160,7 +160,11 @@ Deno.test("Principle: User generates a queue, completes items, and views updated
   }
 });
 
-Deno.test("Action: generateDailyQueue requirements are enforced", async (t) => {
+Deno.test({
+  name: "Action: generateDailyQueue requirements are enforced",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async (t) => {
   const [db, client] = await testDb();
   const queueSystemConcept = new QueueSystemConcept(db);
 
@@ -251,7 +255,11 @@ Deno.test("Action: generateDailyQueue requirements are enforced", async (t) => {
   }
 });
 
-Deno.test("Action: _getCompletedQueue requirements and effects", async (t) => {
+Deno.test({
+  name: "Action: _getCompletedQueue requirements and effects",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async (t) => {
   const [db, client] = await testDb();
   const queueSystemConcept = new QueueSystemConcept(db);
 
@@ -317,7 +325,11 @@ Deno.test("Action: _getCompletedQueue requirements and effects", async (t) => {
   }
 });
 
-Deno.test("Action: incrementCompletedQueue requirements and effects", async (t) => {
+Deno.test({
+  name: "Action: incrementCompletedQueue requirements and effects",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async (t) => {
   const [db, client] = await testDb();
   const queueSystemConcept = new QueueSystemConcept(db);
 

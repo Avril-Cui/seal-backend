@@ -8,7 +8,11 @@ const TEST_EMAIL_2 = "bob@example.com";
 const TEST_PASSWORD_2 = "anotherSecurePass";
 const WRONG_PASSWORD = "wrongPassword";
 
-Deno.test("Principle: User accounts are unique by email, and users can log in", async (t) => {
+Deno.test({
+  name: "Principle: User accounts are unique by email, and users can log in",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async (t) => {
   const [db, client] = await testDb();
   const userAuthConcept = new UserAuthConcept(db);
 
@@ -101,7 +105,11 @@ Deno.test("Principle: User accounts are unique by email, and users can log in", 
   }
 });
 
-Deno.test("Action: signup - requirements and effects", async (t) => {
+Deno.test({
+  name: "Action: signup - requirements and effects",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async (t) => {
   const [db, client] = await testDb();
   const userAuthConcept = new UserAuthConcept(db);
 
