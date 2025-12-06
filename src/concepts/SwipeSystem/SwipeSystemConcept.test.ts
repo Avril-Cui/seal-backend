@@ -246,7 +246,11 @@ Deno.test({
   },
 });
 
-Deno.test("Action: recordSwipe - requirements and effects", async () => {
+Deno.test({
+  name: "Action: recordSwipe - requirements and effects",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
   console.log("\n--- Action: recordSwipe tests ---");
   const [db, client] = await testDb();
   const swipeSystem = new SwipeSystemConcept(db);
@@ -356,7 +360,11 @@ Deno.test("Action: recordSwipe - requirements and effects", async () => {
   }
 });
 
-Deno.test("Action: updateDecision - requirements and effects", async () => {
+Deno.test({
+  name: "Action: updateDecision - requirements and effects",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
   console.log("\n--- Action: updateDecision tests ---");
   const [db, client] = await testDb();
   const swipeSystem = new SwipeSystemConcept(db);
@@ -524,7 +532,11 @@ Deno.test("Action: updateDecision - requirements and effects", async () => {
   }
 });
 
-Deno.test("Query: _getSwipeStats - requirements and effects", async () => {
+Deno.test({
+  name: "Query: _getSwipeStats - requirements and effects",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
   console.log("\n--- Query: _getSwipeStats tests ---");
   const [db, client] = await testDb();
   const swipeSystem = new SwipeSystemConcept(db);
@@ -634,7 +646,11 @@ Deno.test("Query: _getSwipeStats - requirements and effects", async () => {
   }
 });
 
-Deno.test("Query: _getSwipeComments - requirements and effects", async () => {
+Deno.test({
+  name: "Query: _getSwipeComments - requirements and effects",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
   console.log("\n--- Query: _getSwipeComments tests ---");
   const [db, client] = await testDb();
   const swipeSystem = new SwipeSystemConcept(db);

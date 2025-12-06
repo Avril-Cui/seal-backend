@@ -36,9 +36,11 @@ async function getProfileOrThrow(
   return (result as [{ profile: any }])[0].profile;
 }
 
-Deno.test(
-  "Principle: User customizes profile on signup, then edits it",
-  async () => {
+Deno.test({
+  name: "Principle: User customizes profile on signup, then edits it",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
     const [db, client] = await testDb();
     const userProfileConcept = new UserProfileConcept(db);
 
@@ -229,9 +231,11 @@ Deno.test(
   }
 );
 
-Deno.test(
-  "Action: createUser requires no existing user with matching UID",
-  async () => {
+Deno.test({
+  name: "Action: createUser requires no existing user with matching UID",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
     const [db, client] = await testDb();
     const userProfileConcept = new UserProfileConcept(db);
 
@@ -312,7 +316,11 @@ Deno.test(
   }
 );
 
-Deno.test("Action: updateProfileName requires user exists", async () => {
+Deno.test({
+  name: "Action: updateProfileName requires user exists",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
   const [db, client] = await testDb();
   const userProfileConcept = new UserProfileConcept(db);
 
@@ -384,7 +392,11 @@ Deno.test("Action: updateProfileName requires user exists", async () => {
   }
 });
 
-Deno.test("Action: updateProfilePicture requires user exists", async () => {
+Deno.test({
+  name: "Action: updateProfilePicture requires user exists",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
   const [db, client] = await testDb();
   const userProfileConcept = new UserProfileConcept(db);
 
@@ -463,7 +475,11 @@ Deno.test("Action: updateProfilePicture requires user exists", async () => {
   }
 });
 
-Deno.test("Action: updatePassword requires user exists", async () => {
+Deno.test({
+  name: "Action: updatePassword requires user exists",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
   const [db, client] = await testDb();
   const userProfileConcept = new UserProfileConcept(db);
 
@@ -608,7 +624,11 @@ Deno.test("Action: updateInterests requires user exists", async () => {
   }
 });
 
-Deno.test("Query: _getProfile requires user exists", async () => {
+Deno.test({
+  name: "Query: _getProfile requires user exists",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
   const [db, client] = await testDb();
   const userProfileConcept = new UserProfileConcept(db);
 

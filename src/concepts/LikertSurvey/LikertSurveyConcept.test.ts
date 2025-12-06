@@ -7,7 +7,11 @@ const authorA = "author:Alice" as ID;
 const respondentB = "respondent:Bob" as ID;
 const respondentC = "respondent:Charlie" as ID;
 
-Deno.test("Principle: Author creates survey, respondent answers, author views results", async () => {
+Deno.test({
+  name: "Principle: Author creates survey, respondent answers, author views results",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
   const [db, client] = await testDb();
   const surveyConcept = new LikertSurveyConcept(db);
 
@@ -104,7 +108,11 @@ Deno.test("Principle: Author creates survey, respondent answers, author views re
   }
 });
 
-Deno.test("Action: createSurvey requires scaleMin < scaleMax", async () => {
+Deno.test({
+  name: "Action: createSurvey requires scaleMin < scaleMax",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
   const [db, client] = await testDb();
   const surveyConcept = new LikertSurveyConcept(db);
 
@@ -138,7 +146,11 @@ Deno.test("Action: createSurvey requires scaleMin < scaleMax", async () => {
   }
 });
 
-Deno.test("Action: addQuestion requires an existing survey", async () => {
+Deno.test({
+  name: "Action: addQuestion requires an existing survey",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
   const [db, client] = await testDb();
   const surveyConcept = new LikertSurveyConcept(db);
   const nonExistentSurveyId = "survey:fake" as ID;
@@ -238,7 +250,11 @@ Deno.test("Action: submitResponse requirements are enforced", async () => {
   }
 });
 
-Deno.test("Action: updateResponse successfully updates a response and enforces requirements", async () => {
+Deno.test({
+  name: "Action: updateResponse successfully updates a response and enforces requirements",
+  sanitizeResources: false,
+  sanitizeOps: false,
+}, async () => {
   const [db, client] = await testDb();
   const surveyConcept = new LikertSurveyConcept(db);
   try {

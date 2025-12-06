@@ -5,7 +5,14 @@
  * NOTE: Methods starting with "_" are queries and must use frames.query() in where clause
  */
 
-import { ItemCollection, Requesting, Sessioning, UserProfile } from "@concepts";
+import {
+  ItemCollection,
+  QueueSystem,
+  Requesting,
+  Sessioning,
+  SwipeSystem,
+  UserProfile,
+} from "@concepts";
 import { actions, Frames, Sync } from "@engine";
 
 // ============================================
@@ -401,7 +408,7 @@ export const UpdatePriceRequest: Sync = ({
 export const UpdatePriceResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updatePrice" }, { request }],
-    [ItemCollection.updatePrice, {}, {}],
+    [ItemCollection.updatePrice, {}, {}],,
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -409,7 +416,7 @@ export const UpdatePriceResponse: Sync = ({ request }) => ({
 export const UpdatePriceError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updatePrice" }, { request }],
-    [ItemCollection.updatePrice, {}, { error }],
+    [ItemCollection.updatePrice, {}, { error }],,
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -440,7 +447,7 @@ export const UpdateReasonRequest: Sync = ({
 export const UpdateReasonResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateReason" }, { request }],
-    [ItemCollection.updateReason, {}, {}],
+    [ItemCollection.updateReason, {}, {}],,
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -448,7 +455,7 @@ export const UpdateReasonResponse: Sync = ({ request }) => ({
 export const UpdateReasonError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateReason" }, { request }],
-    [ItemCollection.updateReason, {}, { error }],
+    [ItemCollection.updateReason, {}, { error }],,
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -479,7 +486,7 @@ export const UpdateIsNeedRequest: Sync = ({
 export const UpdateIsNeedResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateIsNeed" }, { request }],
-    [ItemCollection.updateIsNeed, {}, {}],
+    [ItemCollection.updateIsNeed, {}, {}],,
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -487,7 +494,7 @@ export const UpdateIsNeedResponse: Sync = ({ request }) => ({
 export const UpdateIsNeedError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/updateIsNeed" }, { request }],
-    [ItemCollection.updateIsNeed, {}, { error }],
+    [ItemCollection.updateIsNeed, {}, { error }],,
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -530,7 +537,7 @@ export const UpdateIsFutureApproveResponse: Sync = ({ request }) => ({
       { path: "/ItemCollection/updateIsFutureApprove" },
       { request },
     ],
-    [ItemCollection.updateIsFutureApprove, {}, {}],
+    [ItemCollection.updateIsFutureApprove, {}, {}],,
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -542,7 +549,7 @@ export const UpdateIsFutureApproveError: Sync = ({ request, error }) => ({
       { path: "/ItemCollection/updateIsFutureApprove" },
       { request },
     ],
-    [ItemCollection.updateIsFutureApprove, {}, { error }],
+    [ItemCollection.updateIsFutureApprove, {}, { error }],,
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -585,7 +592,7 @@ export const SetPurchasedRequest: Sync = ({
 export const SetPurchasedResponse: Sync = ({ request }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/setPurchased" }, { request }],
-    [ItemCollection.setPurchased, {}, {}],
+    [ItemCollection.setPurchased, {}, {}],,
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
@@ -593,7 +600,7 @@ export const SetPurchasedResponse: Sync = ({ request }) => ({
 export const SetPurchasedError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/setPurchased" }, { request }],
-    [ItemCollection.setPurchased, {}, { error }],
+    [ItemCollection.setPurchased, {}, { error }],,
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -670,7 +677,7 @@ export const GetAIInsightResponse: Sync = ({
 }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/getAIInsight" }, { request }],
-    [ItemCollection.getAIInsight, {}, { llm_response, structured, cached }],
+    [ItemCollection.getAIInsight, {}, { llm_response, structured, cached }],,
   ),
   then: actions([
     Requesting.respond,
@@ -681,7 +688,7 @@ export const GetAIInsightResponse: Sync = ({
 export const GetAIInsightError: Sync = ({ request, error }) => ({
   when: actions(
     [Requesting.request, { path: "/ItemCollection/getAIInsight" }, { request }],
-    [ItemCollection.getAIInsight, {}, { error }],
+    [ItemCollection.getAIInsight, {}, { error }],,
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -717,7 +724,7 @@ export const GetAIWishListInsightResponse: Sync = ({
       { path: "/ItemCollection/getAIWishListInsight" },
       { request },
     ],
-    [ItemCollection.getAIWishListInsight, {}, { llm_response }],
+    [ItemCollection.getAIWishListInsight, {}, { llm_response }],,
   ),
   then: actions([Requesting.respond, { request, llm_response }]),
 });
@@ -729,7 +736,7 @@ export const GetAIWishListInsightError: Sync = ({ request, error }) => ({
       { path: "/ItemCollection/getAIWishListInsight" },
       { request },
     ],
-    [ItemCollection.getAIWishListInsight, {}, { error }],
+    [ItemCollection.getAIWishListInsight, {}, { error }],,
   ),
   then: actions([Requesting.respond, { request, error }]),
 });
@@ -744,6 +751,7 @@ export const GetUserWishListRequest: Sync = ({
   user,
   item,
   items,
+  hasCompletedQueue,
 }) => ({
   when: actions([
     Requesting.request,
@@ -757,19 +765,133 @@ export const GetUserWishListRequest: Sync = ({
     if (frames.length === 0) {
       return new Frames({ ...originalFrame, authError: true });
     }
+    const currentUser = frames[0][user];
+
+    // Check if user has completed 10 swipes
+    const queueResult = await QueueSystem._getCompletedQueue({
+      owner: currentUser,
+    });
+    const hasCompletedQueueValue = !("error" in queueResult[0]) &&
+      queueResult[0].completedQueue >= 10;
+
+    console.log(
+      `[GetUserWishListRequest] User ${currentUser} hasCompletedQueue: ${hasCompletedQueueValue}`,
+    );
+    if ("error" in queueResult[0]) {
+      console.log(
+        `[GetUserWishListRequest] Queue check error: ${queueResult[0].error}`,
+      );
+    } else {
+      console.log(
+        `[GetUserWishListRequest] Completed queue count: ${
+          queueResult[0].completedQueue
+        }`,
+      );
+    }
+
     // Then call the query - returns array of { item: ... }
     frames = await frames.query(
       ItemCollection._getUserWishList,
-      { owner: user },
+      { owner: currentUser },
       { item },
     );
     if (frames.length === 0 || frames[0][item] === undefined) {
-      return new Frames({ ...originalFrame, [items]: [] });
+      return new Frames({
+        ...originalFrame,
+        [items]: [],
+        [hasCompletedQueue]: hasCompletedQueueValue,
+      });
     }
     // Collect all items into a single array
-    return frames.collectAs([item], items);
+    const itemsArray = frames.collectAs([item], items);
+
+    // Extract the items array from the collected frame
+    // collectAs returns frames with [items] containing the array of { item: itemDoc } records
+    const collectedItems = itemsArray.length > 0 && itemsArray[0][items]
+      ? (itemsArray[0][items] as unknown[])
+      : [];
+
+    // Unwrap items from collectAs format: [{ item: itemDoc }, ...] -> [itemDoc, ...]
+    const itemsList = collectedItems
+      .map((record: any) => record.item || record)
+      .filter((item: any) => item != null);
+
+    console.log(
+      `[GetUserWishListRequest] Found ${itemsList.length} items for user ${currentUser}`,
+    );
+
+    // If user has completed queue, fetch community stats for each item
+    if (hasCompletedQueueValue) {
+      console.log(
+        `[GetUserWishListRequest] Fetching community stats for ${itemsList.length} items`,
+      );
+      const itemsWithStats = await Promise.all(
+        itemsList.map(async (itemDoc: any) => {
+          if (!itemDoc || !itemDoc._id) return itemDoc;
+
+          try {
+            // Fetch community stats for this item (excluding current user)
+            const statsResult = await SwipeSystem._getCommunitySwipeStats({
+              itemId: itemDoc._id,
+              excludeUserId: currentUser,
+            });
+
+            console.log(
+              `[GetUserWishListRequest] Stats for item ${itemDoc._id}:`,
+              statsResult[0],
+            );
+
+            if (!("error" in statsResult[0])) {
+              const stats = statsResult[0];
+              // Attach community stats to the item
+              const itemWithStats = {
+                ...itemDoc,
+                communityStats: {
+                  total: stats.total || 0,
+                  approval: stats.approval || 0,
+                },
+              };
+              console.log(
+                `[GetUserWishListRequest] Attached stats to item ${itemDoc._id}:`,
+                itemWithStats.communityStats,
+              );
+              return itemWithStats;
+            } else {
+              console.log(
+                `[GetUserWishListRequest] No stats for item ${itemDoc._id}: ${
+                  statsResult[0].error
+                }`,
+              );
+            }
+          } catch (error) {
+            console.warn(
+              `[GetUserWishListRequest] Failed to fetch community stats for item ${itemDoc._id}:`,
+              error,
+            );
+          }
+
+          return itemDoc;
+        }),
+      );
+
+      // Return single frame with items array and hasCompletedQueue flag
+      const resultFrame = {
+        ...originalFrame,
+        [items]: itemsWithStats.filter((item) => item != null), // Filter out null/undefined items
+        [hasCompletedQueue]: hasCompletedQueueValue,
+      };
+      return new Frames(resultFrame);
+    }
+
+    // Return single frame with items array and hasCompletedQueue flag
+    const resultFrame = {
+      ...originalFrame,
+      [items]: itemsList.filter((item) => item != null), // Filter out null/undefined items
+      [hasCompletedQueue]: hasCompletedQueueValue,
+    };
+    return new Frames(resultFrame);
   },
-  then: actions([Requesting.respond, { request, items }]),
+  then: actions([Requesting.respond, { request, items, hasCompletedQueue }]),
 });
 
 // ============================================
