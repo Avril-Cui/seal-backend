@@ -26,6 +26,16 @@ interface Swipe {
 }
 
 /**
+ * Aggregated statistics for items owned by a user
+ * Tracks total "Buy" swipes and total swipes received on all items owned by this user
+ */
+interface ItemOwnerStats {
+  _id: UserId; // The item owner's user ID
+  totalBuySwipes: number; // Total "Buy" swipes received on all items owned by this user
+  totalSwipes: number; // Total swipes received on all items owned by this user
+}
+
+/**
  * concept: SwipeSystem
  *
  * purpose:
@@ -33,9 +43,11 @@ interface Swipe {
  */
 export default class SwipeSystemConcept {
   private swipes: Collection<Swipe>;
+  private itemOwnerStats: Collection<ItemOwnerStats>;
 
   constructor(private readonly db: Db) {
     this.swipes = this.db.collection(PREFIX + "swipes");
+    this.itemOwnerStats = this.db.collection(PREFIX + "itemOwnerStats");
   }
 
   /**
@@ -84,6 +96,7 @@ export default class SwipeSystemConcept {
    * **effect**
    *     update this swipe's decision to newDecision
    *     update this swipe's comment to newComment;
+   *     return the old decision (if any) for stats tracking
    */
   async updateDecision(
     { ownerUserId, itemId, newDecision, newComment }: {
@@ -92,8 +105,19 @@ export default class SwipeSystemConcept {
       newDecision: Flag;
       newComment?: string;
     },
-  ): Promise<Empty | { error: string }> {
+  ): Promise<Empty | { error: string } | { oldDecision?: Flag }> {
     const filter = { userId: ownerUserId, itemId: itemId };
+
+    // Get the old swipe to retrieve the old decision
+    const oldSwipe = await this.swipes.findOne(filter);
+    if (!oldSwipe) {
+      return {
+        error: "No existing swipe found for this user and item to update.",
+      };
+    }
+
+    const oldDecision = oldSwipe.decision;
+
     const updatePayload: { $set: Partial<Swipe>; $unset?: { comment: "" } } = {
       $set: { decision: newDecision },
     };
@@ -102,15 +126,9 @@ export default class SwipeSystemConcept {
     } else {
       updatePayload.$unset = { comment: "" }; // If newComment is explicitly undefined, unset the field
     }
-    const updateResult = await this.swipes.updateOne(filter, updatePayload);
+    await this.swipes.updateOne(filter, updatePayload);
 
-    if (updateResult.matchedCount === 0) {
-      return {
-        error: "No existing swipe found for this user and item to update.",
-      };
-    }
-
-    return {};
+    return { oldDecision };
   }
 
   /**
@@ -233,9 +251,103 @@ export default class SwipeSystemConcept {
       return { buyCount: 0, dontBuyCount: 0 };
     }
 
-    const buyCount = allSwipes.filter((swipe) => swipe.decision === "Buy").length;
-    const dontBuyCount = allSwipes.filter((swipe) => swipe.decision === "Don't Buy").length;
+    const buyCount =
+      allSwipes.filter((swipe) => swipe.decision === "Buy").length;
+    const dontBuyCount =
+      allSwipes.filter((swipe) => swipe.decision === "Don't Buy").length;
 
     return { buyCount, dontBuyCount };
+  }
+
+  /**
+   * _incrementItemOwnerStats (itemOwnerId: UserId, decision: Flag): Empty
+   *
+   * **effect**
+   *     increment the aggregated stats for the item owner based on the swipe decision
+   *     creates stats document if it doesn't exist
+   */
+  async _incrementItemOwnerStats(
+    { itemOwnerId, decision }: { itemOwnerId: UserId; decision: Flag },
+  ): Promise<Empty> {
+    await this.itemOwnerStats.updateOne(
+      { _id: itemOwnerId },
+      {
+        $inc: {
+          totalSwipes: 1,
+          totalBuySwipes: decision === "Buy" ? 1 : 0,
+        },
+      },
+      { upsert: true },
+    );
+    return {};
+  }
+
+  /**
+   * _updateItemOwnerStatsOnDecisionChange (itemOwnerId: UserId, oldDecision: Flag | undefined, newDecision: Flag): Empty
+   *
+   * **effect**
+   *     update the aggregated stats when a swipe decision changes
+   *     decrements old decision count and increments new decision count
+   */
+  async _updateItemOwnerStatsOnDecisionChange(
+    { itemOwnerId, oldDecision, newDecision }: {
+      itemOwnerId: UserId;
+      oldDecision: Flag | undefined;
+      newDecision: Flag;
+    },
+  ): Promise<Empty> {
+    // If oldDecision exists, we need to decrement it and increment newDecision
+    // If oldDecision doesn't exist, we just increment newDecision (this is a new decision on an existing swipe)
+    const update: { $inc: { totalBuySwipes: number } } = {
+      $inc: {
+        totalBuySwipes: 0,
+      },
+    };
+
+    if (oldDecision === "Buy" && newDecision === "Don't Buy") {
+      // Was Buy, now Don't Buy: decrement buy count
+      update.$inc.totalBuySwipes = -1;
+    } else if (oldDecision === "Don't Buy" && newDecision === "Buy") {
+      // Was Don't Buy, now Buy: increment buy count
+      update.$inc.totalBuySwipes = 1;
+    } else if (oldDecision === undefined && newDecision === "Buy") {
+      // No previous decision, now Buy: increment buy count
+      update.$inc.totalBuySwipes = 1;
+    } else if (oldDecision === undefined && newDecision === "Don't Buy") {
+      // No previous decision, now Don't Buy: no change to buy count
+      update.$inc.totalBuySwipes = 0;
+    }
+    // If oldDecision === newDecision, no change needed (but we still ensure stats exist)
+
+    await this.itemOwnerStats.updateOne(
+      { _id: itemOwnerId },
+      update,
+      { upsert: true },
+    );
+    return {};
+  }
+
+  /**
+   * _getItemOwnerRejectionRate (itemOwnerId: UserId): (rejectionRate: Number)
+   *
+   * **effect**
+   *     get aggregated stats for items owned by this user
+   *     return rejectionRate = Math.round((totalBuySwipes / totalSwipes) * 100) if totalSwipes > 0, else 0
+   *     Note: This is actually an acceptance rate (percentage of "Buy" swipes), but named rejectionRate per user request
+   */
+  async _getItemOwnerRejectionRate(
+    { itemOwnerId }: { itemOwnerId: UserId },
+  ): Promise<{ rejectionRate: number } | { error: string }> {
+    const stats = await this.itemOwnerStats.findOne({ _id: itemOwnerId });
+
+    if (!stats || stats.totalSwipes === 0) {
+      return { rejectionRate: 0 };
+    }
+
+    const rejectionRate = Math.round(
+      (stats.totalBuySwipes / stats.totalSwipes) * 100,
+    );
+
+    return { rejectionRate };
   }
 }

@@ -142,6 +142,7 @@ export const exclusions: Array<string> = [
   "/api/SwipeSystem/_getSwipeStats",
   "/api/SwipeSystem/_getUserSwipeCount",
   "/api/SwipeSystem/_getUserSwipeStatistics",
+  "/api/SwipeSystem/_getItemOwnerRejectionRate",
 
   // ============================================
   // UserProfile - All user-specific actions
