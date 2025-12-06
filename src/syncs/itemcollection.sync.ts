@@ -652,21 +652,17 @@ export const GetAIWishListInsightRequest: Sync = ({
   request,
   session,
   user,
-  context_prompt,
 }) => ({
   when: actions([
     Requesting.request,
-    { path: "/ItemCollection/getAIWishListInsight", session, context_prompt },
+    { path: "/ItemCollection/getAIWishListInsight", session },
     { request },
   ]),
   where: async (frames) => {
     frames = await frames.query(Sessioning._getUser, { session }, { user });
     return frames.filter(($) => $[user] !== undefined);
   },
-  then: actions([
-    ItemCollection.getAIWishListInsight,
-    { owner: user, context_prompt },
-  ]),
+  then: actions([ItemCollection.getAIWishListInsight, { owner: user }]),
 });
 
 export const GetAIWishListInsightResponse: Sync = ({

@@ -122,6 +122,8 @@ export const exclusions: Array<string> = [
   // Internal/private methods
   "/api/ItemCollection/_updateItemAttribute",
   "/api/ItemCollection/generateInputHash",
+  "/api/ItemCollection/generateWishlistHash", // Private helper method
+  "/api/ItemCollection/buildInsightPrompt", // Private helper method
 
   // ============================================
   // QueueSystem - All user-specific actions
@@ -138,6 +140,7 @@ export const exclusions: Array<string> = [
   "/api/SwipeSystem/updateDecision",
   "/api/SwipeSystem/_getSwipeStats",
   "/api/SwipeSystem/_getUserSwipeCount",
+  "/api/SwipeSystem/_getUserSwipeStatistics",
 
   // ============================================
   // UserProfile - All user-specific actions

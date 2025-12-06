@@ -42,6 +42,16 @@ export interface CachedAIInsight {
   inputHash: string; // hash of item fields to detect changes
 }
 
+/**
+ * Cached Wishlist Insights structure for persistent storage
+ */
+export interface CachedWishlistInsights {
+  trendAlert: string;
+  improvementSuggestions: string[];
+  cachedAt: number; // timestamp when cached
+  wishlistHash: string; // hash of wishlist items to detect changes
+}
+
 export interface ItemDoc {
   // ADDED 'export'
   _id: ItemID; // This is the unique itemId
@@ -70,6 +80,7 @@ export interface WishListDoc {
   // ADDED 'export'
   _id: User; // The owner ID is the _id of the wishlist document
   itemIdSet: ItemID[]; // Renamed from itemIds
+  cachedWishlistInsights?: CachedWishlistInsights; // Cached AI insights for the wishlist
 }
 
 export default class ItemCollectionConcept {
@@ -982,21 +993,144 @@ RULES:
   }
 
   /**
-   * async getAIWishListInsight (owner: User, context_prompt: String): (llm_response: String)
+   * Generate a hash of wishlist items to detect changes for AI insight caching
+   * Hash is based on item IDs in the set and their key attributes (price, reason, isNeed, isFutureApprove)
+   * Includes itemIdSet to detect when items are added/removed
+   */
+  private async generateWishlistHash(owner: User): Promise<string> {
+    const wishlist = await this.wishlists.findOne({ _id: owner });
+    if (!wishlist || wishlist.itemIdSet.length === 0) {
+      return "";
+    }
+
+    // Include itemIdSet in hash to detect when items are added/removed
+    const sortedItemIds = [...wishlist.itemIdSet].sort();
+    const itemIdSetString = sortedItemIds.join(",");
+
+    // Fetch all items in the wishlist
+    const items = await this.items
+      .find({ _id: { $in: wishlist.itemIdSet }, owner })
+      .toArray();
+
+    // Sort items by ID for consistent hashing
+    items.sort((a, b) => a._id.localeCompare(b._id));
+
+    // Build hash string from item IDs and key attributes
+    const hashParts = items.map(
+      (item) =>
+        `${item._id}|${item.price}|${item.reason}|${item.isNeed}|${item.isFutureApprove}`
+    );
+    const itemsString = hashParts.join("||");
+
+    // Combine itemIdSet and item attributes for hash
+    const inputString = `${itemIdSetString}||${itemsString}`;
+
+    // Simple hash function
+    let hash = 0;
+    for (let i = 0; i < inputString.length; i++) {
+      const char = inputString.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash.toString(16);
+  }
+
+  /**
+   * Build prompt template for wishlist insights
+   * @param items - Array of item documents
+   * @returns {string} Configured prompt
+   */
+  private buildInsightPrompt(items: ItemDoc[]): string {
+    let prompt = `You are a shopping behavior analyst. Analyze the following wishlist and provide insights about the user's shopping patterns.
+
+WISHLIST ITEMS (${items.length} total):
+`;
+
+    items.forEach((item, index) => {
+      prompt += `
+${index + 1}. ${item.itemName}
+   - Price: $${item.price}
+   - User's reason: ${item.reason}
+   - Is this a need? ${item.isNeed}
+   - Will future self approve? ${item.isFutureApprove}
+`;
+    });
+
+    prompt += `
+Based on this wishlist analysis, please provide TWO separate insights in a specific JSON format.
+
+You must respond with ONLY a valid JSON object in this exact format (no additional text, no markdown, no code blocks):
+
+{
+  "trendAlert": "A concise observation about their shopping patterns or trends (1-2 sentences, max 150 characters)",
+  "improvementSuggestions": [
+    "First actionable suggestion",
+    "Second actionable suggestion",
+    "Third actionable suggestion",
+    "Fourth actionable suggestion"
+  ]
+}
+
+ANALYSIS GUIDELINES:
+
+1. **For ANY number of items (even 1-2 items):**
+   - Analyze the available data deeply and provide meaningful insights
+   - Look at price points, reasoning patterns, need vs want classification, future-self approval
+   - Identify specific patterns in the user's reflection responses
+   - Provide actionable advice based on what you observe, even if limited
+
+2. **trendAlert (approximately 30 words):**
+   - Identify specific patterns you notice (e.g., price ranges, need vs want ratio, purchase justifications, reasoning quality)
+   - If only 1-2 items: Focus on analyzing those items deeply - their price, reasoning, need/want classification, and what it might indicate about shopping habits
+   - If 3+ items: Look for broader patterns across items
+   - Be specific and informative - mention actual observations from the data
+   - If data is limited, acknowledge it but still provide insights: "Based on your current items, I notice [specific observation]. As you add more items, we'll uncover deeper patterns."
+   - Use a playful pig mascot tone subtly (e.g., "Oink oink!" at the beginning, or pig-related phrases), but stay professional
+
+3. **improvementSuggestions (exactly 4 items):**
+   - Provide specific, actionable tips based on the actual data available
+   - If limited data: Give general but still helpful advice, and include one suggestion about adding more items for better insights
+   - If more data: Provide personalized suggestions based on observed patterns
+   - Make each suggestion concrete and actionable
+   - Address specific aspects you noticed in their wishlist (price, reasoning, need/want balance, etc.)
+
+4. **General tone:**
+   - Keep all text concise and friendly
+   - Use "you" to address the user directly
+   - Be supportive, not judgmental
+   - Be informative and helpful, even with limited data
+   - When data is limited, acknowledge it naturally but still provide value
+
+EXAMPLES:
+
+If 1 item: Analyze that item deeply - its price point, the quality of reasoning, need vs want classification, and what it suggests about shopping approach. Provide insights about that specific item and general tips.
+
+If 2 items: Compare and contrast the two items - look for similarities or differences in price, reasoning, need/want classification. Provide insights about what these two items reveal.
+
+If 3+ items: Look for broader patterns - price ranges, need vs want ratios, reasoning patterns, etc.
+
+Respond with ONLY the JSON object, no markdown formatting, no code blocks, no additional explanation.`;
+
+    return prompt;
+  }
+
+  /**
+   * async getAIWishListInsight (owner: User): (llm_response: String)
    *
    * **requires**
    *   exists a wishlist $w$ with this user;
    *
    * **effect**
-   *   send context_prompt to geminiLLM;
+   *   check if cached insights exist and wishlist hasn't changed;
+   *   if cache is valid, return cached insights;
+   *   otherwise, fetch wishlist items, build prompt, send to geminiLLM;
+   *   cache the new insights;
    *   return the llm_response;
    */
   async getAIWishListInsight({
     owner,
-    context_prompt,
   }: {
     owner: User;
-    context_prompt: string;
   }): Promise<{ llm_response: string } | { error: string }> {
     const wishlist = await this.wishlists.findOne({ _id: owner });
 
@@ -1004,13 +1138,116 @@ RULES:
       return { error: `No wishlist found for owner: ${owner}` };
     }
 
-    // Send the context prompt to Gemini LLM
-    const llmResponse = await this.geminiLLM.executeLLM(context_prompt);
+    // Generate hash of current wishlist items
+    const wishlistHash = await this.generateWishlistHash(owner);
+
+    // Check for cached insights
+    if (
+      wishlist.cachedWishlistInsights &&
+      wishlist.cachedWishlistInsights.wishlistHash === wishlistHash
+    ) {
+      console.log(
+        `Using cached wishlist insights for owner ${owner} (hash: ${wishlistHash})`
+      );
+      // Return cached insights in the expected JSON format
+      const cached = wishlist.cachedWishlistInsights;
+      const cachedResponse = JSON.stringify({
+        trendAlert: cached.trendAlert,
+        improvementSuggestions: cached.improvementSuggestions,
+      });
+      return { llm_response: cachedResponse };
+    }
+
+    // Cache miss or invalid - generate new insights
+    console.log(
+      `Generating new wishlist insights for owner ${owner} (hash: ${wishlistHash})`
+    );
+
+    // Fetch all items in the wishlist
+    const items = await this.items
+      .find({ _id: { $in: wishlist.itemIdSet }, owner })
+      .toArray();
+
+    if (items.length === 0) {
+      // Return default message for empty wishlist
+      const defaultResponse = JSON.stringify({
+        trendAlert:
+          "Oink oink! Your pause cart is empty. Start adding items you're considering buying to get personalized insights!",
+        improvementSuggestions: [
+          "Add items to your pause cart that you're thinking about purchasing",
+          "Take time to reflect on each item using our guided questions",
+          "Use the AI insight feature to get personalized shopping advice",
+          "Check back here after adding items to see your shopping patterns",
+        ],
+      });
+      return { llm_response: defaultResponse };
+    }
+
+    // Build prompt from items
+    const context_prompt = this.buildInsightPrompt(items);
+
+    // Define JSON schema for structured output
+    const jsonSchema = {
+      type: "object",
+      properties: {
+        trendAlert: {
+          type: "string",
+          description:
+            "A concise observation about shopping patterns or trends (1-2 sentences, max 150 characters)",
+        },
+        improvementSuggestions: {
+          type: "array",
+          items: {
+            type: "string",
+            description:
+              "An actionable suggestion to improve purchasing decisions",
+          },
+          minItems: 4,
+          maxItems: 4,
+          description: "Exactly 4 specific, actionable tips",
+        },
+      },
+      required: ["trendAlert", "improvementSuggestions"],
+    };
+
+    // Send the context prompt to Gemini LLM with structured output
+    const llmResponse = await this.geminiLLM.executeLLMWithSchema(
+      context_prompt,
+      jsonSchema
+    );
 
     if (typeof llmResponse === "object" && "error" in llmResponse) {
       return { error: `LLM API error: ${llmResponse.error}` };
     }
 
+    // Parse and cache the response (should be valid JSON now)
+    let parsed: {
+      trendAlert: string;
+      improvementSuggestions: string[];
+    };
+    try {
+      parsed = JSON.parse(llmResponse as string);
+      if (parsed.trendAlert && parsed.improvementSuggestions) {
+        // Cache the insights
+        const cachedInsights: CachedWishlistInsights = {
+          trendAlert: parsed.trendAlert,
+          improvementSuggestions: parsed.improvementSuggestions,
+          cachedAt: Date.now(),
+          wishlistHash,
+        };
+
+        await this.wishlists.updateOne(
+          { _id: owner },
+          { $set: { cachedWishlistInsights: cachedInsights } }
+        );
+        console.log(`Cached wishlist insights for owner ${owner}`);
+      }
+    } catch (parseError) {
+      // This should rarely happen with structured output, but handle gracefully
+      console.warn("Failed to parse AI response for caching:", parseError);
+    }
+
+    // Return the JSON response (already valid JSON from structured output)
     return { llm_response: llmResponse as string };
   }
 

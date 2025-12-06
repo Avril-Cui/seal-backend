@@ -10,6 +10,10 @@ export interface GeminiLLMClientConfig {
 
 export interface GeminiLLMClient {
   executeLLM(prompt: string): Promise<string | { error: string }>; // Modified to return error object
+  executeLLMWithSchema(
+    prompt: string,
+    jsonSchema: Record<string, any>
+  ): Promise<string | { error: string }>; // Execute with structured output
   clearCache(): void;
 }
 
@@ -128,15 +132,93 @@ export class GeminiLLM implements GeminiLLMClient {
     }
     if (errorMessage.includes("timeout")) {
       return new Error(
-        `Timeout Error: Request exceeded ${this.timeoutMs}ms timeout.`,
+        `Timeout Error: Request exceeded ${this.timeoutMs}ms timeout.`
       );
     }
     if (
-      errorMessage.includes("network") || errorMessage.includes("ECONNRESET")
+      errorMessage.includes("network") ||
+      errorMessage.includes("ECONNRESET")
     ) {
       return new Error("Network Error: Failed to connect to Gemini API.");
     }
     return new Error(`LLM Error: ${errorMessage}`);
+  }
+
+  async executeLLMWithSchema(
+    prompt: string,
+    jsonSchema: Record<string, any>
+  ): Promise<string | { error: string }> {
+    // Create a cache key that includes the schema
+    const cacheKey = `${prompt}::${JSON.stringify(jsonSchema)}`;
+    const cachedResponse = this.requestCache.get(cacheKey);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+      try {
+        if (attempt > 0) {
+          const backoffMs = this.initialBackoffMs * Math.pow(2, attempt - 1);
+          await this.sleep(backoffMs);
+        }
+
+        const result = await this.executeWithTimeoutAndSchema(
+          prompt,
+          jsonSchema
+        );
+        this.requestCache.set(cacheKey, result);
+        return result;
+      } catch (error) {
+        lastError = error as Error;
+
+        if (this.isRetryableError(error)) {
+          continue;
+        } else {
+          return { error: this.enhanceErrorMessage(error).message };
+        }
+      }
+    }
+    return {
+      error: `❌ LLM request failed after ${
+        this.maxRetries + 1
+      } attempts. Last error: ${lastError?.message || "Unknown error"}`,
+    };
+  }
+
+  private async executeWithTimeoutAndSchema(
+    prompt: string,
+    jsonSchema: Record<string, any>
+  ): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error(`Request timed out after ${this.timeoutMs}ms`));
+      }, this.timeoutMs);
+
+      try {
+        const genAI = new GoogleGenerativeAI(this.apiKey);
+        const model = genAI.getGenerativeModel({
+          model: "gemini-2.5-flash-lite",
+          generationConfig: {
+            maxOutputTokens: 1000,
+            temperature: 0.1,
+            responseMimeType: "application/json",
+            responseSchema: jsonSchema as any, // Type assertion for SDK compatibility
+          },
+        });
+
+        const result = await model.generateContent(prompt);
+        const response = result.response;
+        const text = response.text();
+
+        clearTimeout(timeoutId);
+        resolve(text);
+      } catch (error) {
+        clearTimeout(timeoutId);
+        reject(error);
+      }
+    });
   }
 
   clearCache(): void {
