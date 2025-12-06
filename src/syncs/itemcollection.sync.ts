@@ -61,13 +61,19 @@ export const AddItemRequest: Sync = ({
   ]),
 });
 
-export const AddItemResponse: Sync = ({ request, item }) => ({
-  when: actions(
-    [Requesting.request, { path: "/ItemCollection/addItem" }, { request }],
-    [ItemCollection.addItem, {}, { item }]
-  ),
-  then: actions([Requesting.respond, { request, item }]),
-});
+export const AddItemResponse: Sync = ({ request, item }) => {
+  console.log("[AddItemResponse] Sync function called with:", {
+    request,
+    item,
+  });
+  return {
+    when: actions(
+      [Requesting.request, { path: "/ItemCollection/addItem" }, { request }],
+      [ItemCollection.addItem, {}, { item }]
+    ),
+    then: actions([Requesting.respond, { request, item }]),
+  };
+};
 
 export const AddItemError: Sync = ({ request, error }) => ({
   when: actions(
@@ -556,7 +562,14 @@ export const SetPurchasedRequest: Sync = ({
 }) => ({
   when: actions([
     Requesting.request,
-    { path: "/ItemCollection/setPurchased", session, item, quantity, purchaseTime, actualPrice },
+    {
+      path: "/ItemCollection/setPurchased",
+      session,
+      item,
+      quantity,
+      purchaseTime,
+      actualPrice,
+    },
     { request },
   ]),
   where: async (frames) => {
@@ -917,7 +930,7 @@ export const GetTenRandomItemsRequest: Sync = ({
     // Return just the item IDs, frontend will fetch details separately
     return new Frames({
       ...originalFrame,
-      [itemIdSet]: itemIds
+      [itemIdSet]: itemIds,
     });
   },
   then: actions([Requesting.respond, { request, itemIdSet }]),

@@ -42,7 +42,8 @@ export interface CachedAIInsight {
   inputHash: string; // hash of item fields to detect changes
 }
 
-export interface ItemDoc { // ADDED 'export'
+export interface ItemDoc {
+  // ADDED 'export'
   _id: ItemID; // This is the unique itemId
   owner: User; // The owner of this specific item entry
   itemName: string;
@@ -65,7 +66,8 @@ export interface ItemDoc { // ADDED 'export'
  *     an owner User
  *     an itemIdSet set of Strings  // this contains unique ids identifying items
  */
-export interface WishListDoc { // ADDED 'export'
+export interface WishListDoc {
+  // ADDED 'export'
   _id: User; // The owner ID is the _id of the wishlist document
   itemIdSet: ItemID[]; // Renamed from itemIds
 }
@@ -92,7 +94,7 @@ export default class ItemCollectionConcept {
   constructor(
     private readonly db: Db,
     amazonAPI: AmazonAPIClient,
-    geminiLLM: GeminiLLMClient,
+    geminiLLM: GeminiLLMClient
   ) {
     this.wishlists = this.db.collection(PREFIX + "wishlists");
     this.items = this.db.collection(PREFIX + "items");
@@ -116,7 +118,8 @@ export default class ItemCollectionConcept {
     owner: User;
   }): Promise<[{ itemIdSet: ItemID[] }] | [{ error: string }]> {
     // Find items not owned by the given owner
-    const otherItems = await this.items.find({ owner: { $ne: owner } })
+    const otherItems = await this.items
+      .find({ owner: { $ne: owner } })
       .toArray();
 
     if (otherItems.length < 10) {
@@ -166,44 +169,62 @@ export default class ItemCollectionConcept {
     isFutureApprove: string;
     amazonUrl?: string;
   }): Promise<{ item: ItemDoc } | { error: string }> {
-    const newItemId = freshID();
-    const newItem: ItemDoc = {
-      _id: newItemId,
+    console.log("[ItemCollection.addItem] Starting addItem with:", {
       owner,
       itemName,
-      description,
-      photo,
-      price,
-      reason,
-      isNeed,
-      isFutureApprove,
-      wasPurchased: false,
-      amazonUrl: amazonUrl || undefined,
-    };
+    });
+    try {
+      const newItemId = freshID();
+      const newItem: ItemDoc = {
+        _id: newItemId,
+        owner,
+        itemName,
+        description,
+        photo,
+        price,
+        reason,
+        isNeed,
+        isFutureApprove,
+        wasPurchased: false,
+        amazonUrl: amazonUrl || undefined,
+      };
 
-    // Insert new item into the items collection
-    await this.items.insertOne(newItem);
+      console.log("[ItemCollection.addItem] Inserting item into database...");
+      // Insert new item into the items collection
+      await this.items.insertOne(newItem);
+      console.log("[ItemCollection.addItem] Item inserted successfully");
 
-    // Find or create the wishlist for the owner and add the item
-    const existingWishlist = await this.wishlists.findOne({ _id: owner });
+      // Find or create the wishlist for the owner and add the item
+      const existingWishlist = await this.wishlists.findOne({ _id: owner });
 
-    if (existingWishlist) {
-      // Add to existing wishlist, avoiding duplicates
-      if (!existingWishlist.itemIdSet.includes(newItemId)) {
-        await this.wishlists.updateOne(
-          { _id: owner },
-          { $push: { itemIdSet: newItemId } },
-        );
+      if (existingWishlist) {
+        // Add to existing wishlist, avoiding duplicates
+        if (!existingWishlist.itemIdSet.includes(newItemId)) {
+          console.log("[ItemCollection.addItem] Updating existing wishlist...");
+          await this.wishlists.updateOne(
+            { _id: owner },
+            { $push: { itemIdSet: newItemId } }
+          );
+        }
+      } else {
+        // Create a new wishlist for the owner
+        console.log("[ItemCollection.addItem] Creating new wishlist...");
+        await this.wishlists.insertOne({
+          _id: owner,
+          itemIdSet: [newItemId],
+        });
       }
-    } else {
-      // Create a new wishlist for the owner
-      await this.wishlists.insertOne({
-        _id: owner,
-        itemIdSet: [newItemId],
-      });
-    }
 
-    return { item: newItem };
+      console.log("[ItemCollection.addItem] Returning item:", newItem._id);
+      return { item: newItem };
+    } catch (error) {
+      console.error("[ItemCollection.addItem] Error:", error);
+      return {
+        error: `Failed to add item: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      };
+    }
   }
 
   /**
@@ -261,7 +282,7 @@ export default class ItemCollectionConcept {
       if (!existingWishlist.itemIdSet.includes(newItemId)) {
         await this.wishlists.updateOne(
           { _id: owner },
-          { $push: { itemIdSet: newItemId } },
+          { $push: { itemIdSet: newItemId } }
         );
       }
     } else {
@@ -277,12 +298,12 @@ export default class ItemCollectionConcept {
 
   /**
    * addItemFromExtension (owner: User, itemName: String, description: String, photo: String,
-   *                       price: String, reason: String, isNeed: String, isFutureApprove: String): (item: Item)
+   *                       price: String, reason: String, isNeed: String, isFutureApprove: String, amazonUrl: String): (item: Item)
    *
    * **effect**
    *   parse price string to number;
    *   generate a new unique itemId;
-   *   create a new item with (owner, itemId, itemName, description, photo, price, reason, isNeed, isFutureApprove, wasPurchased=False);
+   *   create a new item with (owner, itemId, itemName, description, photo, price, reason, isNeed, isFutureApprove, wasPurchased=False, amazonUrl);
    *   add item to the itemIdSet under the wishlist with owner matching this user;
    *   return the added item;
    */
@@ -295,6 +316,7 @@ export default class ItemCollectionConcept {
     reason,
     isNeed,
     isFutureApprove,
+    amazonUrl,
   }: {
     owner: User;
     itemName: string;
@@ -304,10 +326,17 @@ export default class ItemCollectionConcept {
     reason: string;
     isNeed: string;
     isFutureApprove: string;
+    amazonUrl?: string;
   }): Promise<{ item: ItemDoc } | { error: string }> {
     const numericPrice = parseFloat(String(price).replace(/[^0-9.]/g, "")) || 0;
 
     const newItemId = freshID();
+    // Store amazonUrl - ensure it's a valid string or don't include it
+    const storedAmazonUrl =
+      amazonUrl && typeof amazonUrl === "string" && amazonUrl.trim()
+        ? amazonUrl.trim()
+        : undefined;
+
     const newItem: ItemDoc = {
       _id: newItemId,
       owner,
@@ -319,6 +348,7 @@ export default class ItemCollectionConcept {
       isNeed,
       isFutureApprove,
       wasPurchased: false,
+      ...(storedAmazonUrl ? { amazonUrl: storedAmazonUrl } : {}), // Only include if we have a valid URL
     };
 
     await this.items.insertOne(newItem);
@@ -329,7 +359,7 @@ export default class ItemCollectionConcept {
       if (!existingWishlist.itemIdSet.includes(newItemId)) {
         await this.wishlists.updateOne(
           { _id: owner },
-          { $push: { itemIdSet: newItemId } },
+          { $push: { itemIdSet: newItemId } }
         );
       }
     } else {
@@ -372,7 +402,7 @@ export default class ItemCollectionConcept {
 
     await this.wishlists.updateOne(
       { _id: owner },
-      { $pull: { itemIdSet: itemId } },
+      { $pull: { itemIdSet: itemId } }
     );
 
     // The spec only mentions removing from the itemIdSet, not deleting the item itself.
@@ -391,7 +421,7 @@ export default class ItemCollectionConcept {
     owner: User,
     itemId: ItemID,
     field: K,
-    value: ItemDoc[K],
+    value: ItemDoc[K]
   ): Promise<Empty | { error: string }> {
     const wishlist = await this.wishlists.findOne({ _id: owner });
 
@@ -411,9 +441,12 @@ export default class ItemCollectionConcept {
       };
     }
 
-    await this.items.updateOne({ _id: itemId, owner }, {
-      $set: { [field]: value },
-    });
+    await this.items.updateOne(
+      { _id: itemId, owner },
+      {
+        $set: { [field]: value },
+      }
+    );
     return {};
   }
 
@@ -576,7 +609,7 @@ export default class ItemCollectionConcept {
       owner,
       itemId,
       "isFutureApprove",
-      isFutureApprove,
+      isFutureApprove
     );
   }
 
@@ -646,9 +679,12 @@ export default class ItemCollectionConcept {
       updateFields.isFutureApprove = isFutureApprove;
     }
 
-    await this.items.updateOne({ _id: itemId, owner }, {
-      $set: updateFields,
-    });
+    await this.items.updateOne(
+      { _id: itemId, owner },
+      {
+        $set: updateFields,
+      }
+    );
     return {};
   }
 
@@ -718,9 +754,8 @@ export default class ItemCollectionConcept {
     // Build update object
     const updateFields: Partial<ItemDoc> = {
       wasPurchased: true,
-      PurchasedTime: purchaseTime !== undefined
-        ? purchaseTime
-        : new Date().getTime(),
+      PurchasedTime:
+        purchaseTime !== undefined ? purchaseTime : new Date().getTime(),
       quantity: quantity,
     };
 
@@ -728,10 +763,7 @@ export default class ItemCollectionConcept {
       updateFields.actualPrice = actualPrice;
     }
 
-    await this.items.updateOne(
-      { _id: itemId, owner },
-      { $set: updateFields },
-    );
+    await this.items.updateOne({ _id: itemId, owner }, { $set: updateFields });
     return {};
   }
 
@@ -753,9 +785,10 @@ export default class ItemCollectionConcept {
     owner: User;
     item: ItemID;
   }): Promise<
-    { llm_response: string; structured: object | null; cached: boolean } | {
-      error: string;
-    }
+    | { llm_response: string; structured: object | null; cached: boolean }
+    | {
+        error: string;
+      }
   > {
     const wishlist = await this.wishlists.findOne({ _id: owner });
 
@@ -780,7 +813,8 @@ export default class ItemCollectionConcept {
 
     // Check for cached AI insight
     if (
-      itemDoc.cachedAIInsight && itemDoc.cachedAIInsight.inputHash === inputHash
+      itemDoc.cachedAIInsight &&
+      itemDoc.cachedAIInsight.inputHash === inputHash
     ) {
       console.log(`Using cached AI insight for item ${itemId}`);
       return {
@@ -798,8 +832,7 @@ export default class ItemCollectionConcept {
     }
 
     // Build a fact-based prompt for the LLM with JSON output
-    const prompt =
-      `You are a friendly AI shopping advisor speaking directly to the user. Analyze this purchase and return JSON.
+    const prompt = `You are a friendly AI shopping advisor speaking directly to the user. Analyze this purchase and return JSON.
 
 PRODUCT:
 - Full Name: "${itemDoc.itemName}"
@@ -901,8 +934,8 @@ RULES:
         impulseScore: parsed.impulseScore || 5,
         verdict: parsed.verdict || "WAIT",
         keyInsight: parsed.keyInsight || "Unable to analyze",
-        fact: parsed.fact ||
-          "Studies show most impulse purchases are regretted",
+        fact:
+          parsed.fact || "Studies show most impulse purchases are regretted",
         advice: parsed.advice || "Consider waiting 24 hours before purchasing",
       };
 
@@ -914,7 +947,7 @@ RULES:
       };
       await this.items.updateOne(
         { _id: itemId },
-        { $set: { cachedAIInsight: cachedInsight } },
+        { $set: { cachedAIInsight: cachedInsight } }
       );
       console.log(`Cached AI insight for item ${itemId}`);
 
@@ -937,13 +970,12 @@ RULES:
    * Generate a hash of item fields to detect changes for AI insight caching
    */
   private generateInputHash(item: ItemDoc): string {
-    const inputString =
-      `${item.itemName}|${item.description}|${item.price}|${item.reason}|${item.isNeed}|${item.isFutureApprove}`;
+    const inputString = `${item.itemName}|${item.description}|${item.price}|${item.reason}|${item.isNeed}|${item.isFutureApprove}`;
     // Simple hash function
     let hash = 0;
     for (let i = 0; i < inputString.length; i++) {
       const char = inputString.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
     return hash.toString(16);
@@ -989,17 +1021,13 @@ RULES:
    *   fetch item's itemName, description, photo, and price with amazonAPI;
    *   return the fetched details WITHOUT adding to database;
    */
-  async fetchAmazonDetails({
-    url,
-  }: {
-    url: string;
-  }): Promise<
+  async fetchAmazonDetails({ url }: { url: string }): Promise<
     | {
-      itemName: string;
-      description: string;
-      photo: string;
-      price: number;
-    }
+        itemName: string;
+        description: string;
+        photo: string;
+        price: number;
+      }
     | { error: string }
   > {
     const amazonDetails = await this.amazonAPI.fetchItemDetails(url);

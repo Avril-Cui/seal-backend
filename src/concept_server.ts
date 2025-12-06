@@ -4,7 +4,7 @@ import { getDb } from "@utils/database.ts";
 import { walk } from "jsr:@std/fs";
 import { parseArgs } from "jsr:@std/cli/parse-args";
 import { toFileUrl } from "jsr:@std/path/to-file-url";
-import { MockAmazonAPIClient } from "@services/amazonAPI.ts";
+import { CustomAmazonAPIClient } from "@services/amazonAPI.ts";
 import { GeminiLLM } from "@services/geminiLLM.ts";
 
 // Parse command-line arguments for port and base URL
@@ -28,7 +28,7 @@ async function main() {
   const app = new Hono();
 
   // Initialize shared service instances
-  const amazonAPI = new MockAmazonAPIClient();
+  const amazonAPI = new CustomAmazonAPIClient();
   const geminiLLM = new GeminiLLM({
     apiKey: Deno.env.get("GEMINI_API_KEY") || "mock-api-key",
   });

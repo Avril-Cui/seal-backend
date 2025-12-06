@@ -17,10 +17,10 @@ import { Collection } from "npm:mongodb"; // Import Collection type for manual d
 
 // region: Mocks for external services
 /**
- * Mock implementation of AmazonAPIClient for testing purposes.
+ * Custom implementation of AmazonAPIClient for testing purposes.
  * It provides canned responses for specific URLs and can be configured to fail.
  */
-class MockAmazonAPIClient implements AmazonAPIClient {
+class CustomAmazonAPIClient implements AmazonAPIClient {
   private itemDetails: Record<
     string,
     { itemName: string; description: string; photo: string; price: number }
@@ -158,7 +158,7 @@ Deno.test(
   async (t) => {
     console.log("--- Start Principle Test ---");
     const [db, client] = await testDb();
-    const amazonAPI = new MockAmazonAPIClient();
+    const amazonAPI = new CustomAmazonAPIClient();
     const geminiLLM = new MockGeminiLLMClient();
     const itemCollectionConcept = new ItemCollectionConcept(
       db,
@@ -422,7 +422,7 @@ Deno.test(
 Deno.test("Action: addItem - requirements and effects", async (t) => {
   console.log("\n--- Action Test: addItem ---");
   const [db, client] = await testDb();
-  const amazonAPI = new MockAmazonAPIClient();
+  const amazonAPI = new CustomAmazonAPIClient();
   const geminiLLM = new MockGeminiLLMClient();
   const itemCollectionConcept = new ItemCollectionConcept(
     db,
@@ -602,7 +602,7 @@ Deno.test("Action: addItem - requirements and effects", async (t) => {
 Deno.test("Action: removeItem - requirements and effects", async (t) => {
   console.log("\n--- Action Test: removeItem ---");
   const [db, client] = await testDb();
-  const amazonAPI = new MockAmazonAPIClient();
+  const amazonAPI = new CustomAmazonAPIClient();
   const geminiLLM = new MockGeminiLLMClient();
   const itemCollectionConcept = new ItemCollectionConcept(
     db,
@@ -764,7 +764,7 @@ Deno.test("Action: removeItem - requirements and effects", async (t) => {
 Deno.test("Action: update* methods - requirements and effects", async (t) => {
   console.log("\n--- Action Test: update* methods ---");
   const [db, client] = await testDb();
-  const amazonAPI = new MockAmazonAPIClient();
+  const amazonAPI = new CustomAmazonAPIClient();
   const geminiLLM = new MockGeminiLLMClient();
   const itemCollectionConcept = new ItemCollectionConcept(
     db,
@@ -1113,7 +1113,7 @@ Deno.test("Action: update* methods - requirements and effects", async (t) => {
 Deno.test("Action: setPurchased - requirements and effects", async (t) => {
   console.log("\n--- Action Test: setPurchased ---");
   const [db, client] = await testDb();
-  const amazonAPI = new MockAmazonAPIClient();
+  const amazonAPI = new CustomAmazonAPIClient();
   const geminiLLM = new MockGeminiLLMClient();
   const itemCollectionConcept = new ItemCollectionConcept(
     db,
@@ -1284,7 +1284,7 @@ Deno.test("Action: setPurchased - requirements and effects", async (t) => {
 Deno.test("Action: getAIInsight - requirements and effects", async (t) => {
   console.log("\n--- Action Test: getAIInsight ---");
   const [db, client] = await testDb();
-  const amazonAPI = new MockAmazonAPIClient();
+  const amazonAPI = new CustomAmazonAPIClient();
   const geminiLLM = new MockGeminiLLMClient();
   const itemCollectionConcept = new ItemCollectionConcept(
     db,
@@ -1438,7 +1438,7 @@ Deno.test("Action: getAIInsight - requirements and effects", async (t) => {
 Deno.test("Query: _getWishListItems - requirements and effects", async (t) => {
   console.log("\n--- Query Test: _getWishListItems ---");
   const [db, client] = await testDb();
-  const amazonAPI = new MockAmazonAPIClient();
+  const amazonAPI = new CustomAmazonAPIClient();
   const geminiLLM = new MockGeminiLLMClient();
   const itemCollectionConcept = new ItemCollectionConcept(
     db,
@@ -1571,7 +1571,7 @@ Deno.test("Query: _getWishListItems - requirements and effects", async (t) => {
 Deno.test("Query: _getItemDetails - requirements and effects", async (t) => {
   console.log("\n--- Query Test: _getItemDetails ---");
   const [db, client] = await testDb();
-  const amazonAPI = new MockAmazonAPIClient();
+  const amazonAPI = new CustomAmazonAPIClient();
   const geminiLLM = new MockGeminiLLMClient();
   const itemCollectionConcept = new ItemCollectionConcept(
     db,
@@ -1666,7 +1666,7 @@ Deno.test(
   async (t) => {
     console.log("\n--- Internal Query Test: _getTenRandomItems ---");
     const [db, client] = await testDb();
-    const amazonAPI = new MockAmazonAPIClient();
+    const amazonAPI = new CustomAmazonAPIClient();
     const geminiLLM = new MockGeminiLLMClient();
     const itemCollectionConcept = new ItemCollectionConcept(
       db,
@@ -1760,7 +1760,8 @@ Deno.test(
                 : "N/A"
             }`
           );
-          const itemIdSet = (result as unknown as [{ itemIdSet: ID[] }])[0].itemIdSet;
+          const itemIdSet = (result as unknown as [{ itemIdSet: ID[] }])[0]
+            .itemIdSet;
           assertExists(itemIdSet, "Should return an itemIdSet.");
           assertEquals(
             itemIdSet.length,

@@ -86,7 +86,7 @@ export const Engine = new SyncConcept();\n`;
   const dbImport = `import { ${dbImportFunc} } from "@utils/database.ts";\n`;
 
   // Special imports for concepts that need additional dependencies
-  const specialImports = `import { MockAmazonAPIClient } from "@services/amazonAPI.ts";
+  const specialImports = `import { CustomAmazonAPIClient } from "@services/amazonAPI.ts";
 import { GeminiLLM } from "@services/geminiLLM.ts";\n`;
 
   const conceptClassImports = concepts
@@ -105,7 +105,7 @@ import { GeminiLLM } from "@services/geminiLLM.ts";\n`;
 export const [db, client] = await ${dbImportFunc}();
 
 // Initialize shared service instances for ItemCollection
-const amazonAPI = new MockAmazonAPIClient();
+const amazonAPI = new CustomAmazonAPIClient();
 const geminiLLM = new GeminiLLM({
   apiKey: Deno.env.get("GEMINI_API_KEY") || "mock-api-key",
 });
