@@ -215,11 +215,8 @@ export class SyncConcept {
       let matchedValue = value;
       if (typeof value === "symbol") {
         matchedValue = frame[value];
-        if (matchedValue === undefined) {
-          throw new Error(
-            `Missing binding: ${String(value)} in frame: ${frame}`,
-          );
-        }
+        // Allow undefined for optional fields (symbols can be undefined)
+        // The action itself will handle validation of required vs optional parameters
       }
       return [key, matchedValue];
     });
@@ -245,8 +242,10 @@ export class SyncConcept {
     ) return;
     for (const [key, value] of Object.entries(when.input)) {
       const recordValue = record.input[key];
-      if (recordValue === undefined) return;
+      // If pattern value is a symbol (variable binding), allow undefined (optional fields)
+      // Otherwise, if recordValue is undefined, the match fails
       if (typeof value === "symbol") {
+        // Allow undefined for optional fields bound to symbols
         const bound = frame[value];
         if (bound === undefined) {
           newFrame = { ...newFrame, [value]: recordValue };
@@ -254,11 +253,19 @@ export class SyncConcept {
           if (bound !== recordValue) return;
         }
       } else {
+        // For literal values, undefined means the field is missing - fail the match
+        if (recordValue === undefined) return;
         if (recordValue !== value) return;
       }
     }
     if (when.output === undefined) {
       throw new Error(`When pattern: ${when} is missing output pattern.`);
+    }
+    // Explicit check: if when.output is empty {}, ensure record.output exists and is also empty
+    if (Object.keys(when.output).length === 0) {
+      if (record.output === undefined || Object.keys(record.output).length !== 0) {
+        return;
+      }
     }
     for (const [key, value] of Object.entries(when.output)) {
       if (record.output === undefined) return;
