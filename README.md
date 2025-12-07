@@ -9,10 +9,9 @@ Team SEAL: Fuqi Cui, Lauren Yoo, Elaine Jiang, Stanley Zhao
     - [Updated concept design](/assignments/AS2/updated_functional_design.md)
     - [Alpha Updated Development Plan](/assignments/AS4%20-%20Alpha/Alpha%20Checkpoint%20Updates.md)
     - #### Demo Alpha [![Watch the video](https://img.youtube.com/vi/8QrR26eFPms/hqdefault.jpg)](https://www.youtube.com/watch?v=8QrR26eFPms)
-
 5. Beta Checkpoint:
    - [Beta Updated Development Plan](/assignments/AS5%20-%20Beta/Beta%20Checkpoint%20Updates.md)
-   - #### Demo Beta [![Watch the video](ReplaceMe.jpg)](Replace me.com)
+   - #### Demo Beta [![Watch the video](https://img.youtube.com/vi/V81xnXmcCdQ/hqdefault.jpg)](https://www.youtube.com/watch?v=V81xnXmcCdQ)
 
 # How to run this backend code base?
 
