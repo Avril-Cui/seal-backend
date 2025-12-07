@@ -143,6 +143,8 @@ export const exclusions: Array<string> = [
   "/api/SwipeSystem/_getUserSwipeCount",
   "/api/SwipeSystem/_getUserSwipeStatistics",
   "/api/SwipeSystem/_getItemOwnerRejectionRate",
+  "/api/SwipeSystem/_incrementItemOwnerStats", // Internal method called from syncs
+  "/api/SwipeSystem/_updateItemOwnerStatsOnDecisionChange", // Internal method called from syncs
 
   // ============================================
   // UserProfile - All user-specific actions
