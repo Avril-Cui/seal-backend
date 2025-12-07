@@ -7,6 +7,8 @@ Adding items to PauseCart via the ‘Add item’ button on the main page via cop
 
 During the debrief, the user summarized the app as basically “something to save the things you want to buy” and initially thought the purpose was to “buy stuff”, perhaps our punny name for our app could be more clear or we could have a slogan to  clarify its purpose. It generally didn’t seem clear that the app was for specifically stopping ‘impulsive purchasing”, suggesting the app could be better integrated into the natural flow of buying something. This issue could have been aided if at the beginning of the study we clarified the app’s purpose and somewhat role-played the participant as an ‘impulsive buyer’, but at the same time this feedback from someone with no background about what the app does at all is immensely helpful. 
 
+The numbers on the Stats pages was also quite confusing such as the "Rejection Rate" and what exactly "Amount Saved Meant". This likely follows from the confusion of the app's purpose, features overall.
+
 **Flaws/Opportunities for Growth:**
 
 - Confusion on how to use the app and chrome extension and its general purpose.  
