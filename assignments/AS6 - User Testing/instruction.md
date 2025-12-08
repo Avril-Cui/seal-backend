@@ -8,7 +8,7 @@
 
 ---
 
-# ⭐ Facilitator Script (Read at the Start)
+# Facilitator Script (Read at the Start)
 
 ### 1. Welcome + Consent (1 min)
 “Thanks for helping! I’ll ask you to perform a few tasks on the app we created.  
@@ -27,7 +27,7 @@ I’ll stay quiet unless you get completely stuck.”
 
 ---
 
-# 📝 During the Session: What to Observe
+# During the Session: What to Observe
 
 ## General Observations
 - Where they hesitate or scan the screen
@@ -45,7 +45,7 @@ I’ll stay quiet unless you get completely stuck.”
 
 ---
 
-# 🧪 Task List
+# Task List
 
 Below is the task list in table format.
 
@@ -62,7 +62,7 @@ Below is the task list in table format.
 
 ---
 
-# 🎤 Debrief Script (10–15 min)
+# Debrief Script (10–15 min)
 
 ## General Questions
 - “How did the experience feel overall?”
