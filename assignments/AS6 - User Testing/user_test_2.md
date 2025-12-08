@@ -13,6 +13,8 @@ The third issue is that she didn't discover the swipe gesture we implemented (i.
 
 The fourth issue is that the Stats page was mostly intuitive, but ambiguous terminology created friction. She understood most of the stats correctly, however she thought rejection rate meant the percentage of items she rejected from her own cart (which we defined as the percentage of items other users rejected under her cart).
 
+One of the clear strengths of our app is that, once the initial learning curve is overcome, users find the core workflows highly intuitive, smooth, and thoughtfully designed. The participant repeatedly described the experience as “straightforward,” and successfully completed key interactions like adding items, editing reflections, removing items, navigating to AI insight, and interpreting most Stats without assistance. She also liked the clean, minimalist visual design, which made the interface feel modern and clean. Importantly, she engaged meaningfully with the reflection questions and used other users’ reasoning to inform her SwipeSense decisions, demonstrating that the app’s behavioral design elements are working as intended.
+
 The user found the app intuitive after a short adjustment period and liked its visual clarity and simplicity. However, her early confusion around naming, navigation, the extension, and interpreting community-related features suggests that initial onboarding, terminology, and in-context guidance need to be strengthened for first-time users to easily grasp the platform’s purpose and functionality. So overall, the user liked the product, but thinks it would be better to have more instructions in the website.
 
 # Flaws / Opportunities for Growth
