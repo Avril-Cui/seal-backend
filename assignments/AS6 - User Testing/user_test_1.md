@@ -11,6 +11,8 @@ During the debrief, the user summarized the app as basically “something to sav
 
 The numbers on the Stats pages was also quite confusing such as the "Rejection Rate" and what exactly "Amount Saved Meant". This likely follows from the confusion of the app's purpose, features overall.
 
+However, she does like the idea of our product, and thinks the features make sense after we give her more context. She thinks this can be effective if the user knows what they are doing.
+
 # Flaws/Opportunities for Growth
 
 1. Confusion on how to use the app and chrome extension and its general purpose.  
