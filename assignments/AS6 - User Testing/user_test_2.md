@@ -1,8 +1,8 @@
-# User 2 Test Summary
 Before conducting this session, we deployed the app with realistic, prepopulated data for swipe and mocked an account that has items added and community feedback provided.
 
 For User Test 2, we adjusted our protocol based on insights from Test 1: we explicitly described the app’s purpose in the beginning, and asked the participant to role-play as an impulsive buyer. This context-setting significantly improved comprehension of the reflection questions and the Stats page.
 
+# User 2 Test Summary
 The participant overall reported that the experience felt “straightforward,” and she found the UI visually appealing and easy to understand. However, several areas still produced confusion, particularly around feature discoverability, naming clarity (i.e., our nav bar headers like SwipeSense), and interpretation of system-generated metrics (i.e., they misinterpreted some stats meaning, which is mentioned more in depth in later sections below).
 
 The major issue our user in this testing found confused is that she couldn't understand the purpose of each feature when she first landed the page. Initially, she was confused about what “PauseCart” meant (she asked, “Wait, where is add? How do I do that?”). She could not locate the add-item button at first, and accidentally opened SwipeSense instead and said she “didn’t know what SwipeSense was." Once she found the Add Item button, she successfully copy–pasted an Amazon link and used auto-fetch. Reflection questions were also described as “making sense,” and the second item was added with much more confidence.
