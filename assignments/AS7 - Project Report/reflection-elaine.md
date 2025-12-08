@@ -1,2 +1,24 @@
-# Reflection
+# Reflection - Elaine Jiang
 _A reflection on your experiences in the final project, focusing on what you learned from the experience, divided into a subsection for each team member._
+
+# Problem-framing Learnings:
+- Ideating a good problem is hard. That's why most start-ups/products fail. I think we had a good, real problem i.e., impulsive purchasing. But I think our standalone software solution is not the sole answer to something like this which is rooted in more behavorial issues and personal learning like financial literacy, and even something as deep as financial trauma -- I think Dr. Jackson alluded to this as one of the common pitfalls final projects had during the beginning of the semester. I get this is just a class project, but I feel like barely resolved surface-level issues of the problem. We could have choosen a more niche topic or really narrowed on a small demographic of impulsive buyers. Solution-wise, I personally I thought we should have had more intentional user friction and focused on the chrome extension (for example, make the button super big cover the add to -- it's comical and impractical but hey there's some user friction at least. Alot of the user friction right now feels self-initiated). 
+- User testing/data collection-based design is important. I personally felt we missed the mark on this one, but moreso because the class itself deemphasized it. For both the personal project and team project I was quite disappointed by the lack of user testing and initial user data collection and that they were reduced to bullet points in a file for a single assignment and felt somewhat of afterthought for the team project. I understand that the defocus was meant to help reduce the load on students, and there is only so much time in a semester. But also I find that this is massive problem in industry: lack of a tight closed loop between developers and customers/consumers, no the customer-obsession mindset, no working backwards from the customers and their grievances. Developers create solution to problems that don't exist or create solutions that don't really solve the problem. They focus on getting the code right, but the business needs change, so code will need to change, understanding business needs is so undervalued to being a great engineer. I do understand that this class more focused on the technical aspect of software design, especially since the the brunt work of implementing these solutions is done by LLMs ( a more of a focus on'[Design Values](https://61040-fa25.github.io/faq)'!) Maybe I'm asking too much. I took another class ([ML for Healthcare](https://mlhcmit.github.io/)) last spring where we were given a host of existing projects/problems that clincians in the Boston area were actually working to choose from as the final group project assignment. It felt more impactful because we were working on actual problems and that we could actually focus on the "developing a solution/designing software" than half-baked market research for scoping a problem and then also developing a solution to our half-baked understanding of the problem. 
+
+# Technical Learnings:
+- I need to get better at committing and doing incremental work. Especially in the age of 'agentic coding' where if you prompt 'badly' your codebase will be in control of you instead of the other way around.  
+- Modularity/Independency between concepts is important. 
+- I learned about sessioning like for realsies for web apps.  
+- I still don't really understand Sessioning. 
+- Chrome extensions are actually pretty easy to make.
+
+
+# Teamwork Learnings: 
+- Working in a team is fun! It's always been. Scheduling between team members is not, especially between busy MIT students during finals season. 
+- As much as it's nice to work with people you know, sometimes I wished groups were randomized or created based on interest or even levels of investment in the project itself. I think we all somewhat clashed/were indifferent about problem topic initially leading to different levels of investment throughout implementing the project. 
+
+# Personal Takeaways:
+- At the end of the day, the world really just cares about is what output you produce -- the push for LLM-coding by industry, classes, etc. Personal learning is left on the wayside and you will become complacent if you let outcomes define your definition of success (e.g., grades, git commits, salaries etc.) and forget that 'hey I actually like to learn hard things." 
+- Yes, LLMs are just functions, tools. You have to learn them or you will fall behind. That will never remove my distaste for LLM-coding besides the basic boilerplate code generation.
+- I think I initially brought up alot of the concerns our peers had about app in the our initial problem scoping discussion -- an impulsive buyer won't just stop and do the questions/go through ByeBuy they will just buy the item. I  sometimes I just really need to push for my opinions more. 
+- The best way to learn, really learn to build things that solve real problems is outside of the classroom.
