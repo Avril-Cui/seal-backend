@@ -1,6 +1,6 @@
-# User 1 Test Summary
 Before the testing, we populated a diverse range of data for SwipeSense to give our user a realistic impression of what it would be like when they are actually using our app for swiping. We also created a sample account with existing items in the shopping chart and community feedback, so the user can mock using the app after other users provided them with community feedback.
 
+# User 1 Test Summary
 The user was most confused about the swiping feature because once you register, you go through interests and then you immediately get to the swipe feature with no explanation of what it is or how to use it. When they came to the task of swiping on the queue, the user was basing their decision of ‘skip it’ vs. ‘worth it’ based on whether they knew the user (e.g., they said “I don’t know Bob, so I guess I’ll skip it”) or if they themselves personally needed/wanted the item (e.g., ”I could use a coffee maker”). It didn’t seem clear that these were items other participants had in their wishlist. They also didn’t read the reasoning, want/need, future-approval at all.
 
 Using the chrome extension was the second most confusing feature. The user had difficulty finding it on the page as it sits in the corner and is white/black/hard to distinguish from a crowded Amazon product page. They also had to refresh the page on PauseCart to see the new item updated, which was confusing at first when they didn’t see it on PauseCart. However, after they tried the chrome extension, they think it's "convenient and cool."
