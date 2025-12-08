@@ -13,7 +13,10 @@ Team SEAL: Fuqi Cui, Lauren Yoo, Elaine Jiang, Stanley Zhao
    - [Beta Updated Development Plan](/assignments/AS5%20-%20Beta/Beta%20Checkpoint%20Updates.md)
    - #### Demo Beta [![Watch the video](https://img.youtube.com/vi/V81xnXmcCdQ/hqdefault.jpg)](https://www.youtube.com/watch?v=V81xnXmcCdQ)
 6. User Testing
+   - [User Testing Tasks and Instructions](/assignments/AS6%20-%20User%20Testing/instruction.md)
    - [User 1 Test Summary](/assignments/AS6%20-%20User%20Testing/user_test_1.md)
+   - [User 2 Test Summary](/assignments/AS6%20-%20User%20Testing/user_test_2.md)
+
 
 # How to run this backend code base?
 
