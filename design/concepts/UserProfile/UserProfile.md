@@ -15,7 +15,6 @@ state:
       a uid String  // this is an unique id
       a name String
       an email String
-      a password String
       a profilePicture String
       a reward Number
       a fieldOfInterests set of FieldsOfInterests
@@ -24,16 +23,15 @@ state:
         a field String
 
 actions:
-    createUser (uid: String, name: String, email: String, password: String, profilePicture: String, fieldOfInterests: set of FieldsOfInterests): (user: User)
+    createUser (uid: String, name: String, email: String, profilePicture: String, fieldOfInterests: set of FieldsOfInterests): (user: User)
       requires
         no user exists with matching uid;
       effect
-        create a new user with (uid, name, email, password, profilePicture, reward = 0, fieldOfInterests);
+        create a new user with (uid, name, email, profilePicture, reward = 0, fieldOfInterests);
         return user;
 
     updateProfileName (user: User, newName: String)
     updateProfilePicture (user: User, newProfilePicture: String)
-    updatePassword (user: User, newPassword: String)
       requires
         user exists;
       effect

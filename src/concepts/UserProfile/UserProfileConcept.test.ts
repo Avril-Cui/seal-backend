@@ -61,7 +61,6 @@ Deno.test({
         uid: testUserA_UID,
         name: "Alice Smith",
         email: "alice@example.com",
-        password: "securepassword123",
         profilePicture: "alice.jpg",
         fieldOfInterests: initialInterests,
       });
@@ -174,23 +173,7 @@ Deno.test({
         "  Profile picture update verified via _getProfile: `updateProfilePicture` effects confirmed."
       );
 
-      console.log("\nTrace Step 4: User Alice updates her password.");
-      const newPassword = "superstrongpassword789";
-      const updatePasswordResult = await userProfileConcept.updatePassword({
-        user: testUserA_UID, // Use uid, not document _id
-        newPassword: newPassword,
-      });
-      assertEquals(
-        "error" in updatePasswordResult,
-        false,
-        "updatePassword should succeed for an existing user."
-      );
-      // Password is not returned by _getProfile due to security, so we confirm action success.
-      console.log(
-        "  Alice's password successfully updated (effect confirmed by action returning no error)."
-      );
-
-      console.log("\nTrace Step 5: User Alice updates her fields of interest.");
+      console.log("\nTrace Step 4: User Alice updates her fields of interest.");
       const updatedInterests = ["Coding", "Fitness", "Gaming", "Reading"];
       const updateInterestsResult = await userProfileConcept.updateInterests({
         user: testUserA_UID, // Use uid, not document _id
@@ -252,7 +235,6 @@ Deno.test({
         uid: testUserB_UID,
         name: "Bob Johnson",
         email: "bob@example.com",
-        password: "pass",
         profilePicture: "bob.jpg",
         fieldOfInterests: ["Sports"],
       });
@@ -272,7 +254,6 @@ Deno.test({
         uid: testUserB_UID, // Duplicate UID
         name: "Bobby Tables",
         email: "bobby@example.com",
-        password: "pass",
         profilePicture: "bobby.jpg",
         fieldOfInterests: ["Hacking"],
       });
@@ -334,7 +315,6 @@ Deno.test({
       uid: testUserC_UID,
       name: "Charlie",
       email: "charlie@example.com",
-      password: "pass",
       profilePicture: "charlie.jpg",
       fieldOfInterests: [],
     });
@@ -411,7 +391,6 @@ Deno.test({
       uid: dianaUID,
       name: "Diana Prince",
       email: "diana@example.com",
-      password: "pass",
       profilePicture: "diana_old.jpg",
       fieldOfInterests: [],
     });
@@ -475,75 +454,6 @@ Deno.test({
   }
 });
 
-Deno.test({
-  name: "Action: updatePassword requires user exists",
-  sanitizeResources: false,
-  sanitizeOps: false,
-}, async () => {
-  const [db, client] = await testDb();
-  const userProfileConcept = new UserProfileConcept(db);
-
-  try {
-    console.log("\n--- Action Test: updatePassword requires user exists ---");
-
-    // Setup: Create a user for successful update scenario
-    const ethanUID = "user_e_uid" as ID;
-    const createResult = await userProfileConcept.createUser({
-      uid: ethanUID,
-      name: "Ethan Hunt",
-      email: "ethan@example.com",
-      password: "initial_password_ethan",
-      profilePicture: "ethan.jpg",
-      fieldOfInterests: [],
-    });
-    const { user: ethanId } = createResult as { user: ID };
-    console.log(
-      `  Existing user (ID: ${ethanId}) created for positive test case.`
-    );
-
-    // Test successful update for an existing user
-    console.log("Testing: Successful update of an existing user's password.");
-    const newPassword = "new_strong_password_ethan";
-    const successResult = await userProfileConcept.updatePassword({
-      user: ethanUID, // Use uid, not document _id
-      newPassword: newPassword,
-    });
-    assertEquals(
-      "error" in successResult,
-      false,
-      "Updating existing user's password should succeed, confirming `effects`."
-    );
-    // Password is not returned by _getProfile, so we confirm action success.
-    console.log(
-      "  Password successfully updated (effect confirmed by action returning no error)."
-    );
-
-    // Test failure for a non-existent user
-    console.log("Testing: Attempt to update password for a non-existent user.");
-    const nonExistentUserId = "user:nonexistent_f" as ID;
-    const failResult = await userProfileConcept.updatePassword({
-      user: nonExistentUserId,
-      newPassword: "bad_password",
-    });
-    assertEquals(
-      "error" in failResult,
-      true,
-      "Updating password for a non-existent user should fail, confirming `requires` condition."
-    );
-    assertEquals(
-      (failResult as unknown as { error: string }).error,
-      `User with ID '${nonExistentUserId}' not found.`,
-      "Error message should indicate user not found."
-    );
-    console.log(
-      "  Updating password for non-existent user correctly failed, requirement satisfied."
-    );
-  } finally {
-    await db.dropDatabase();
-    await client.close();
-  }
-});
-
 Deno.test("Action: updateInterests requires user exists", async () => {
   const [db, client] = await testDb();
   const userProfileConcept = new UserProfileConcept(db);
@@ -558,7 +468,6 @@ Deno.test("Action: updateInterests requires user exists", async () => {
       uid: fionaUID,
       name: "Fiona Gale",
       email: "fiona@example.com",
-      password: "pass",
       profilePicture: "fiona.jpg",
       fieldOfInterests: initialInterests,
     });
@@ -641,7 +550,6 @@ Deno.test({
       uid: georgeUID,
       name: "George",
       email: "george@example.com",
-      password: "pass",
       profilePicture: "george.jpg",
       fieldOfInterests: ["Science"],
     });

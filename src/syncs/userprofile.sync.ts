@@ -169,53 +169,6 @@ export const UpdateProfilePictureError: Sync = ({ request, error }) => ({
 });
 
 // ============================================
-// UPDATE PASSWORD (Action)
-// ============================================
-
-export const UpdatePasswordRequest: Sync = ({
-  request,
-  session,
-  user,
-  currentPassword,
-  newPassword,
-}) => ({
-  when: actions([
-    Requesting.request,
-    {
-      path: "/UserProfile/updatePassword",
-      session,
-      currentPassword,
-      newPassword,
-    },
-    { request },
-  ]),
-  where: async (frames) => {
-    frames = await frames.query(Sessioning._getUser, { session }, { user });
-    return frames.filter(($) => $[user] !== undefined);
-  },
-  then: actions([
-    UserProfile.updatePassword,
-    { owner: user, currentPassword, newPassword },
-  ]),
-});
-
-export const UpdatePasswordResponse: Sync = ({ request }) => ({
-  when: actions(
-    [Requesting.request, { path: "/UserProfile/updatePassword" }, { request }],
-    [UserProfile.updatePassword, {}, {}]
-  ),
-  then: actions([Requesting.respond, { request, success: true }]),
-});
-
-export const UpdatePasswordError: Sync = ({ request, error }) => ({
-  when: actions(
-    [Requesting.request, { path: "/UserProfile/updatePassword" }, { request }],
-    [UserProfile.updatePassword, {}, { error }]
-  ),
-  then: actions([Requesting.respond, { request, error }]),
-});
-
-// ============================================
 // UPDATE INTERESTS (Action)
 // ============================================
 

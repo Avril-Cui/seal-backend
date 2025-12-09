@@ -104,7 +104,7 @@ export const SignupSuccessSession: Sync = ({ request, user, userId }) => ({
  * When signup succeeds, also create a user profile
  * Use where clause to extract user properties
  */
-export const SignupCreateProfile: Sync = ({ request, user, uid, userEmail, userPassword }) => ({
+export const SignupCreateProfile: Sync = ({ request, user, uid, userEmail }) => ({
   when: actions(
     [Requesting.request, { path: "/UserAuth/signup" }, { request }],
     [UserAuth.signup, {}, { user }],
@@ -114,15 +114,13 @@ export const SignupCreateProfile: Sync = ({ request, user, uid, userEmail, userP
     return new Frames(...frames.map(($) => ({
       ...$,
       [uid]: $[user]._id,
-      [userEmail]: $[user].email,
-      [userPassword]: $[user].password
+      [userEmail]: $[user].email
     })));
   },
-  then: actions([UserProfile.createUser, { 
-    uid: uid, 
-    name: "", 
-    email: userEmail, 
-    password: userPassword,
+  then: actions([UserProfile.createUser, {
+    uid: uid,
+    name: "",
+    email: userEmail,
     profilePicture: "",
     fieldOfInterests: []
   }]),

@@ -10,7 +10,6 @@ const PREFIX = "UserProfile" + ".";
  * a set of Users with
  *   a name String
  *   an email String
- *   a password String
  *   a profilePicture String
  *   a reward Number
  *   a fieldOfInterests set of FieldsOfInterests (stored as IDs)
@@ -19,7 +18,6 @@ interface UserDocument {
   _id: ID; // The UserAuth._id is used directly as the document's primary key
   name: string;
   email: string;
-  password: string; // Note: In a real application, passwords should be hashed and never stored in plain text.
   profilePicture: string;
   reward: number;
   fieldOfInterests: ID[]; // Stores IDs of FieldsOfInterestsDocument
@@ -79,28 +77,26 @@ export default class UserProfileConcept {
   }
 
   /**
-   * createUser (uid: String, name: String, email: String, password: String,
+   * createUser (uid: String, name: String, email: String,
    *             profilePicture: String, fieldOfInterests: set of FieldsOfInterests): (user: User)
    *
    * **requires**
    *     no user exists with matching uid;
    *
    * **effects**
-   *     create a new user with (uid as _id, name, email, password, profilePicture, reward = 0, fieldOfInterests);
+   *     create a new user with (uid as _id, name, email, profilePicture, reward = 0, fieldOfInterests);
    *     return user;
    */
   async createUser({
     uid,
     name,
     email,
-    password,
     profilePicture,
     fieldOfInterests,
   }: {
     uid: ID; // This is the UserAuth._id
     name: string;
     email: string;
-    password: string;
     profilePicture: string;
     fieldOfInterests: string[]; // Expecting an array of interest NAMES (strings)
   }): Promise<{ user: ID } | { error: string }> {
@@ -120,7 +116,6 @@ export default class UserProfileConcept {
       _id: uid, // Use the UserAuth._id directly
       name: name,
       email: email,
-      password: password,
       profilePicture: profilePicture,
       reward: 0, // Default value as per specification
       fieldOfInterests: interestIDs,
@@ -178,34 +173,6 @@ export default class UserProfileConcept {
     const result = await this.users.updateOne(
       { _id: user },
       { $set: { profilePicture: newProfilePicture } }
-    );
-
-    if (result.matchedCount === 0) {
-      return { error: `User with ID '${user}' not found.` };
-    }
-    return {};
-  }
-
-  /**
-   * updatePassword (user: User, newPassword: String): Empty | {error: String}
-   *
-   * **requires**
-   *     user exists;
-   *
-   * **effects**
-   *     update the password attribute of this user
-   */
-  async updatePassword({
-    user,
-    newPassword,
-  }: {
-    user: ID;
-    newPassword: string;
-  }): Promise<Empty | { error: string }> {
-    // Check 'requires' condition implicitly
-    const result = await this.users.updateOne(
-      { _id: user },
-      { $set: { password: newPassword } } // Reminder: Hash passwords in a real application!
     );
 
     if (result.matchedCount === 0) {
