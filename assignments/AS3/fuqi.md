@@ -1,13 +1,13 @@
-I Like
+# I Like
 I really like the overall problem framing of your project. The scenarios you described resonate strongly with my own experiences, especially the idea of stumbling upon old photos months or years later and wanting to reshare them with the people who were part of that memory (I experience this all the time). I think you identified a very real pain point: there’s currently no easy or intuitive way to search across old memories, resurface them, or combine different media types (audio, text, images) into a single, coherent moment. I also appreciate the thought you put into the proposed features, like the timeline and profile pages. They feel well-aligned with how people naturally recall memories over time. Overall, I think your project addresses a meaningful need that I feel very related, and as someone who could imagine myself as a target user, the concept feels both relevant and compelling.
 
 
-I Wish
+# I Wish
 I wish the “shared memory” functionality allowed for more granular control than just adding collaborators. For example, if I have a large trip album like a weeklong vacation to Japan, I might only want to share certain highlights with the friend who was with me for one specific day. Having the option to share a subset of my memories rather than the entire memory set would give users more control and make sharing feel more personal and intentional.
 
 I also wish the “add memory” flow could be made as simple and frictionless as possible. Since the “memory” concept seems to be the key of your product, reducing barriers to adding content will be key. I think you can explore automatic syncing with platforms like Google Drive, Apple Photos, or other cloud storages. If the app can ingest and organize memory media automatically, users are more likely to engage consistently with your app without feeling overwhelmed by manual uploading, which I believe will significantly boost the user experience.
 
-I Wonder
+# I Wonder
 
 I wonder whether you’ve considered expanding the search functionality into something more advanced and multimodal. Since a core value of your app is helping people remember, recover, recall, and share past memories, a powerful search system could be a major differentiator. For example, you could look into lightweight RAG-based or embedding-based search frameworks that support text, images, and even short audio clips. This would let users search by keywords like “snow,” “birthday,” or “near the river,” and retrieve relevant moments automatically. It may sound complex, but there are existing packages and open-source tools that could make this feasible. I also wonder whether this enhanced search could tie into your AI features to enable even richer memory summaries or recommendations.
 

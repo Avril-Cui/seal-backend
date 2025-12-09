@@ -4,7 +4,7 @@ Team SEAL: Fuqi Cui, Lauren Yoo, Elaine Jiang, Stanley Zhao
 
 1. [Assignment 1: Problem Framing](/assignments/AS1/problem_framing.md)
 2. [Assignment 2: Functional Design](/assignments/AS2/functional_design.md)
-3. [Assignment 3 (group critique)](/assignments/AS3/Avril.md)
+3. [Assignment 3 (group critique)](/assignments/AS3/Fuqi.md)
 4. Alpha Checkpoint:
    - [Updated concept design](/assignments/AS2/updated_functional_design.md)
    - [Alpha Updated Development Plan](/assignments/AS4%20-%20Alpha/Alpha%20Checkpoint%20Updates.md)
@@ -17,7 +17,7 @@ Team SEAL: Fuqi Cui, Lauren Yoo, Elaine Jiang, Stanley Zhao
    - [User 1 Test Summary](/assignments/AS6%20-%20User%20Testing/user_test_1.md)
    - [User 2 Test Summary](/assignments/AS6%20-%20User%20Testing/user_test_2.md)
 7. Project report
-   - [Avril Reflection](/assignments/AS7%20-%20Project%20Report/reflection-avril.md)
+   - [Fuqi Reflection](/assignments/AS7%20-%20Project%20Report/reflection-fuqi.md)
    - [Elaine Reflection](/assignments/AS7%20-%20Project%20Report/reflection-elaine.md)
    - [Lauren Reflection](/assignments/AS7%20-%20Project%20Report/reflection-lauren.md)
    - [Stanley Reflection](/assignments/AS7%20-%20Project%20Report/reflection-stanley.md)
