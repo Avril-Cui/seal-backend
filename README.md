@@ -16,6 +16,12 @@ Team SEAL: Fuqi Cui, Lauren Yoo, Elaine Jiang, Stanley Zhao
    - [User Testing Tasks and Instructions](/assignments/AS6%20-%20User%20Testing/instruction.md)
    - [User 1 Test Summary](/assignments/AS6%20-%20User%20Testing/user_test_1.md)
    - [User 2 Test Summary](/assignments/AS6%20-%20User%20Testing/user_test_2.md)
+7. Project report
+   - [Avril Reflection](/assignments/AS7%20-%20Project%20Report/reflection-avril.md)
+   - [Elaine Reflection](/assignments/AS7%20-%20Project%20Report/reflection-elaine.md)
+   - [Lauren Reflection](/assignments/AS7%20-%20Project%20Report/reflection-lauren.md)
+   - [Stanley Reflection](/assignments/AS7%20-%20Project%20Report/reflection-stanley.md)
+   - [Design Summary](/assignments/AS7%20-%20Project%20Report/design-summary.md)
 
 
 # How to run this backend code base?
