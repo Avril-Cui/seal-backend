@@ -248,9 +248,11 @@ export default class UserProfileConcept {
     }
 
     // Fetch the actual names for the fieldOfInterests IDs
+    // Handle case where fieldOfInterests might be undefined, null, or empty
+    const fieldOfInterestsIds = userDoc.fieldOfInterests || [];
     const interestDocs = await this.fieldsOfInterests
       .find({
-        _id: { $in: userDoc.fieldOfInterests },
+        _id: { $in: fieldOfInterestsIds },
       })
       .toArray();
     const interestNames = interestDocs.map((doc) => doc.field);

@@ -184,16 +184,39 @@ export const UpdateInterestsRequest: Sync = ({
     { request },
   ]),
   where: async (frames) => {
+    const originalFrame = frames[0];
     frames = await frames.query(Sessioning._getUser, { session }, { user });
-    return frames.filter(($) => $[user] !== undefined);
+    if (frames.length === 0) {
+      // Session invalid - return error frame
+      return new Frames({
+        ...originalFrame,
+        error: "Invalid or expired session",
+      });
+    }
+    const filtered = frames.filter(($) => $[user] !== undefined);
+    if (filtered.length === 0) {
+      // User not found in session
+      return new Frames({
+        ...originalFrame,
+        error: "User not found in session",
+      });
+    }
+    return filtered;
   },
-  then: actions([UserProfile.updateInterests, { owner: user, interests }]),
+  then: actions([
+    UserProfile.updateInterests,
+    { user: user, newFieldsOfInterests: interests },
+  ]),
 });
 
-export const UpdateInterestsResponse: Sync = ({ request }) => ({
+export const UpdateInterestsResponse: Sync = ({
+  request,
+  user,
+  interests,
+}) => ({
   when: actions(
     [Requesting.request, { path: "/UserProfile/updateInterests" }, { request }],
-    [UserProfile.updateInterests, {}, {}]
+    [UserProfile.updateInterests, { user, newFieldsOfInterests: interests }, {}]
   ),
   then: actions([Requesting.respond, { request, success: true }]),
 });
