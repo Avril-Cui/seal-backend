@@ -320,7 +320,6 @@ async function seedUserTest() {
       uid: testUserId,
       name: TEST_USER.name,
       email: TEST_USER.email,
-      password: TEST_USER.password,
       profilePicture: "",
       fieldOfInterests: TEST_USER.fieldsOfInterests,
     });
@@ -365,7 +364,6 @@ async function seedUserTest() {
         uid: userId,
         name: communityUser.ownerName,
         email: communityUser.email,
-        password: communityUser.password,
         profilePicture: "",
         fieldOfInterests: [],
       });
