@@ -128,15 +128,73 @@ export default class ItemCollectionConcept {
   }: {
     owner: User;
   }): Promise<[{ itemIdSet: ItemID[] }] | [{ error: string }]> {
-    // Find items not owned by the given owner
+    // DIAGNOSTIC: Log ALL items in the database first
+    const allItems = await this.items.find({}).toArray();
+    console.log(`[_getTenRandomItems] 📊 DIAGNOSTIC: Total items in database: ${allItems.length}`);
+    console.log(`[_getTenRandomItems] 📊 Current user: ${owner}`);
+
+    // Count items by category
+    const itemsByUser = allItems.reduce((acc, item) => {
+      const key = item.owner === owner ? 'current_user' : 'other_users';
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    console.log(`[_getTenRandomItems] 📊 Items by ownership:`, itemsByUser);
+
+    const purchasedCount = allItems.filter(item => item.wasPurchased === true).length;
+    const unpurchasedCount = allItems.filter(item => item.wasPurchased === false || !item.wasPurchased).length;
+    console.log(`[_getTenRandomItems] 📊 Items by purchase status: purchased=${purchasedCount}, unpurchased=${unpurchasedCount}`);
+
+    // Show a few examples from each category
+    const currentUserItems = allItems.filter(item => item.owner === owner);
+    const otherUserItems = allItems.filter(item => item.owner !== owner);
+    console.log(`[_getTenRandomItems] 📊 Current user has ${currentUserItems.length} items`);
+    console.log(`[_getTenRandomItems] 📊 Other users have ${otherUserItems.length} items total`);
+
+    if (otherUserItems.length > 0) {
+      const sample = otherUserItems.slice(0, 3).map(item => ({
+        id: item._id,
+        name: item.itemName,
+        owner: item.owner,
+        purchased: item.wasPurchased
+      }));
+      console.log(`[_getTenRandomItems] 📊 Sample items from other users:`, JSON.stringify(sample, null, 2));
+    }
+
+    // Find items not owned by the given owner AND not yet purchased
+    // Only include items that are still being considered (wasPurchased is false or doesn't exist)
     const otherItems = await this.items
-      .find({ owner: { $ne: owner } })
+      .find({
+        owner: { $ne: owner },
+        $or: [
+          { wasPurchased: false },
+          { wasPurchased: { $exists: false } }
+        ]
+      })
       .toArray();
 
+    console.log(`[_getTenRandomItems] ✅ Found ${otherItems.length} unpurchased items from other users after filtering`);
+
+    // Log sample items for debugging
+    if (otherItems.length > 0) {
+      const sampleItems = otherItems.slice(0, 3).map(item => ({
+        id: item._id,
+        name: item.itemName,
+        owner: item.owner,
+        purchased: item.wasPurchased
+      }));
+      console.log(`[_getTenRandomItems] Sample filtered items:`, JSON.stringify(sampleItems, null, 2));
+    }
+
     if (otherItems.length < 10) {
-      // The spec says 'requires at least ten items', so if not, return an error.
-      // Alternatively, one could return fewer than 10 or an empty array depending on specific design choice.
-      return [{ error: "Not enough items from other owners to select ten." }];
+      // If we have fewer than 10 items, return what we have rather than erroring
+      // This allows the app to work even when there aren't many items yet
+      if (otherItems.length === 0) {
+        console.log(`[_getTenRandomItems] ⚠️ No unpurchased items from other users found`);
+        return [{ error: "No items from other owners available for queue." }];
+      }
+      console.log(`[_getTenRandomItems] ⚠️ Only ${otherItems.length} items available (less than 10), returning all`);
+      return [{ itemIdSet: otherItems.map((item) => item._id) }];
     }
 
     // Shuffle and pick 10 random items
@@ -146,6 +204,12 @@ export default class ItemCollectionConcept {
     }
 
     const randomTenItemIDs = otherItems.slice(0, 10).map((item) => item._id);
+    const selectedItems = otherItems.slice(0, 10).map(item => ({
+      id: item._id,
+      name: item.itemName,
+      owner: item.owner
+    }));
+    console.log(`[_getTenRandomItems] ✅ Returning 10 random items:`, JSON.stringify(selectedItems, null, 2));
 
     return [{ itemIdSet: randomTenItemIDs }];
   }
