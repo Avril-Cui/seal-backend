@@ -23,6 +23,7 @@ Team SEAL: Fuqi Cui, Lauren Yoo, Elaine Jiang, Stanley Zhao
    - [Stanley Reflection](/assignments/AS7%20-%20Project%20Report/reflection-stanley.md)
    - [Design Summary](/assignments/AS7%20-%20Project%20Report/design-summary.md)
       - #### Final Video [![Watch the video](https://img.youtube.com/vi/hiea2Mxxhz4/hqdefault.jpg)](https://www.youtube.com/watch?v=hiea2Mxxhz4)
+   - [Mentor Meeting Notes](/meeting-notes/)
 
 
 # How to run this backend code base?
