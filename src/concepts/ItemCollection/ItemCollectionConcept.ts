@@ -187,14 +187,10 @@ export default class ItemCollectionConcept {
     }
 
     if (otherItems.length < 10) {
-      // If we have fewer than 10 items, return what we have rather than erroring
-      // This allows the app to work even when there aren't many items yet
-      if (otherItems.length === 0) {
-        console.log(`[_getTenRandomItems] ⚠️ No unpurchased items from other users found`);
-        return [{ error: "No items from other owners available for queue." }];
-      }
-      console.log(`[_getTenRandomItems] ⚠️ Only ${otherItems.length} items available (less than 10), returning all`);
-      return [{ itemIdSet: otherItems.map((item) => item._id) }];
+      console.log(`[_getTenRandomItems] ❌ Not enough items: found ${otherItems.length}, need 10`);
+      return [{
+        error: "Not enough items from other owners to select ten.",
+      }];
     }
 
     // Shuffle and pick 10 random items
